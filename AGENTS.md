@@ -23,6 +23,18 @@ The reusable local skills are in `skills/<name>/SKILL.md`. Read the matching ski
 | Orchestrate the full TOPIC→METADATA pipeline | `production-pipeline` |
 | Voice cloning & neural speech synthesis via VoiceStudio | `voice-studio` |
 | Select optimal visual motion style across catalogs | `style-selector` |
+| Produce Vox-style documentary explainer videos | `vox-explainer` |
+| Write script from 21 hook formulas with retention beats | `yt-script` |
+| Title & thumbnail pairing linter | `yt-package` |
+| Edit decision list from transcript (dead air, filler cues) | `yt-edit` |
+| Triage comments and draft replies in voice | `yt-comment` |
+| Weekly YouTube content schedule planner | `yt-plan` |
+| Outlier video research ranked by channel multiple | `yt-viral` |
+| Audience retention curve & cliff diagnostics | `yt-retention` |
+| Extract Shorts from long-form video transcript | `yt-shorts` |
+| Description, tags, and search query optimization | `yt-seo` |
+| Video chapters generator from transcript | `yt-chapters` |
+| Channel audit ending in high-leverage single fix | `yt-audit` |
 
 Use installed HyperFrames, Lemo-Opuscar, Impeccable and Taste skills when applicable. The repository packages listed in `README.md` are not available until their installation status says verified. Never publish, upload, or use paid services solely because a skill suggests it.
 

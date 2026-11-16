@@ -81,6 +81,23 @@ def synthesize_with_voicestudio(text, out_path, voice_id=DEFAULT_PROFILE_ID):
             raise RuntimeError(f"VoiceStudio returned invalid audio: {data[:200]}")
 
 def fallback_local_tts(text, out_path):
+    edge_tts_bin = Path("/home/varad/Videos/youtube/.venv/bin/edge-tts")
+    if edge_tts_bin.exists():
+        temp_mp3 = Path(out_path).with_suffix(".temp.mp3")
+        try:
+            cmd = [str(edge_tts_bin), "--voice", "en-US-ChristopherNeural", "--rate", "+8%", "--text", text, "--write-media", str(temp_mp3)]
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # Apply broadcast EQ & mastering
+            filter_chain = "highpass=f=75,equalizer=f=120:width_type=o:width=1.0:g=2.5,equalizer=f=350:width_type=o:width=1.5:g=-2.0,equalizer=f=4500:width_type=o:width=1.2:g=3.0,acompressor=threshold=-18dB:ratio=3.5:attack=15:release=100,loudnorm=I=-14:LRA=7:TP=-1.5"
+            cmd_master = ["ffmpeg", "-y", "-i", str(temp_mp3), "-af", filter_chain, "-ar", "48000", "-ac", "2", str(out_path)]
+            subprocess.run(cmd_master, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if temp_mp3.exists():
+                temp_mp3.unlink()
+            return
+        except Exception as e:
+            print(f"[Fallback TTS] Neural Edge-TTS failed: {e}")
+            if temp_mp3.exists():
+                temp_mp3.unlink()
     cmd = ["espeak-ng", "-v", "en-us", "-s", "150", "-p", "50", "-w", str(out_path), text]
     subprocess.run(cmd, check=True)
 

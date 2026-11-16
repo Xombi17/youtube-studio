@@ -230,14 +230,16 @@
     }
 
     .video-wrapper {
+      max-width: 310px;
       width: 100%;
       background: #000;
-      border-radius: 8px;
+      border-radius: 18px;
       overflow: hidden;
       aspect-ratio: 9/16;
-      max-height: 560px;
-      margin: 16px 0;
-      border: 1px solid var(--card-border);
+      max-height: 550px;
+      margin: 16px auto;
+      border: 2px solid #233147;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -246,7 +248,8 @@
     video {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
+      display: block;
     }
 
     /* Content Tables */
@@ -428,18 +431,54 @@
       <!-- Video Player Preview -->
       <div class="video-card">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3 style="font-size:16px; font-weight:700;">🎬 Master Kinetic Short (V2 Render)</h3>
-          <span class="badge badge-ready">DYNAMIC MOTION</span>
+          <h3 style="font-size:16px; font-weight:700;">🎬 Master Short Preview</h3>
+          <span class="badge badge-ready">HYPERFRAMES // 1920×1080</span>
         </div>
         <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-          GTA VI Storage Requirements (1080×1920 • Ken Burns Zooms • High-Paced Cut)
+          GTA VI Storage Requirements (1920×1080 • Swiss Kinetic Type • 120 BPM • Beat-Synced SFX • Natural Guy Voice)
         </p>
 
+        <!-- Clean Segmented Video Switcher Bar (Outside player wrapper) -->
+        <div style="display:flex; gap:6px; margin:16px 0 12px; background:#121824; padding:6px; border-radius:10px; border:1px solid #233147; flex-wrap:wrap;">
+          <button id="btn-vox-explainer" onclick="setVideoSource('../renders/gta6-vox-30s/out/gta6_true_vox_30s.mp4', this)" style="flex:1; min-width:140px; background:#f47750; color:#fff; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; transition:all 0.2s;">
+            📰 Vox Explainer (30s)
+          </button>
+          <button id="btn-studio-storage" onclick="setVideoSource('../renders/gta6-storage-studio-ad/gta6-storage-studio-master.mp4', this)" style="flex:1; min-width:140px; background:transparent; color:#8F9BB3; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
+            ⚡ Storage (Studio Ad)
+          </button>
+          <button id="btn-studio-box" onclick="setVideoSource('../renders/gta6-studio-premium/gta6-studio-premium-master.mp4', this)" style="flex:1; min-width:140px; background:transparent; color:#8F9BB3; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
+            📦 Box Ad (ChatGPT Style)
+          </button>
+          <button id="btn-chatgpt-ref" onclick="setVideoSource('../renders/chatgpt-reference.mp4', this)" style="flex:1; min-width:130px; background:transparent; color:#8F9BB3; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
+            🎬 Original ChatGPT
+          </button>
+          <button id="btn-swiss-kinetic" onclick="setVideoSource('../renders/gta-vi-storage-requirements-ps5/gta-vi-storage-requirements-ps5-master.mp4', this)" style="flex:1; min-width:130px; background:transparent; color:#8F9BB3; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
+            🇨🇭 Swiss Kinetic 21s
+          </button>
+        </div>
+
         <div class="video-wrapper">
-          <video id="player" controls poster="../renders/gta6-storage/scenes_v2/scene1.png">
-            <source src="../exports/gta6-storage/20261116-gta6-storage-kinetic-v2.mp4" type="video/mp4">
+          <video id="player" controls playsinline>
+            <source src="../renders/gta6-vox-30s/out/gta6_true_vox_30s.mp4" type="video/mp4">
           </video>
         </div>
+
+        <script>
+          function setVideoSource(src, btn) {
+            const p = document.getElementById('player');
+            p.src = src;
+            p.load();
+            p.play();
+            btn.parentElement.querySelectorAll('button').forEach(b => {
+              b.style.background = 'transparent';
+              b.style.color = '#8F9BB3';
+              b.style.fontWeight = '600';
+            });
+            btn.style.background = '#f47750';
+            btn.style.color = '#fff';
+            btn.style.fontWeight = '700';
+          }
+        </script>
 
         <div style="display:flex; gap:10px;">
           <a href="../exports/gta6-storage/metadata.md" class="btn-action btn-secondary"
@@ -467,11 +506,11 @@
             <tr>
               <td><code>GTA-001</code></td>
               <td><strong>Storage Requirements Explained</strong></td>
-              <td>Kinetic V2</td>
-              <td>Cloned Profile</td>
-              <td><span class="badge badge-ready">READY (8.7 MB)</span></td>
+              <td>Midnight Grid (Claude 2.0)</td>
+              <td>Indian Male (Natural)</td>
+              <td><span class="badge badge-ready">READY (13.6s)</span></td>
               <td><button class="btn-action btn-secondary" style="padding:6px 12px; font-size:12px;"
-                  onclick="triggerRender('gta6-storage')">Re-Render</button></td>
+                  onclick="triggerRender('gta-vi-storage-requirements-ps5')">Re-Render</button></td>
             </tr>
             <tr>
               <td><code>GTA-002</code></td>

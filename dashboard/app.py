@@ -40,11 +40,11 @@ def run_render_task(topic_id, use_cloned_voice=True):
     ACTIVE_JOBS[topic_id] = "RUNNING"
     log(f"Starting High-Retention Kinetic render for: {topic_id} (Voice: {'Cloned' if use_cloned_voice else 'System'})...")
     try:
-        if topic_id == "gta6-storage":
-            # Run the V2 kinetic pipeline
-            cmd = ["python3", str(STUDIO_ROOT / "renders" / "gta6-storage" / "render_pipeline_v2.py")]
+        if topic_id in ["gta6-storage", "gta-vi-storage-requirements-ps5"]:
+            # Run the authentic Claude Video 2.0 multi-agent pipeline
+            cmd = ["python3", str(STUDIO_ROOT / "orchestration" / "multi_agent_studio.py"), "--topic", "GTA VI Storage Requirements PS5"]
             res = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            log("Success! Master kinetic export generated: exports/gta6-storage/20261116-gta6-storage-kinetic-v2.mp4")
+            log("Success! Master HyperFrames export generated with natural Indian narration!")
             ACTIVE_JOBS[topic_id] = "DONE"
         else:
             time.sleep(2)
