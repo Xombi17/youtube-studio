@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +20,12 @@
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       background: var(--bg);
       color: var(--text-main);
@@ -29,7 +35,10 @@
       min-height: 100vh;
     }
 
-    .container { max-width: 1440px; margin: 0 auto; }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
 
     header {
       display: flex;
@@ -41,19 +50,32 @@
       flex-wrap: wrap;
       gap: 16px;
     }
-    .brand { display: flex; align-items: center; gap: 14px; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .radar-icon {
       width: 44px;
       height: 44px;
       border-radius: 50%;
       background: radial-gradient(circle, var(--accent-orange) 25%, transparent 26%),
-                  radial-gradient(circle, transparent 45%, var(--accent-coral) 46%, transparent 52%),
-                  var(--card-bg);
+        radial-gradient(circle, transparent 45%, var(--accent-coral) 46%, transparent 52%),
+        var(--card-bg);
       border: 2px solid var(--accent-orange);
       box-shadow: 0 0 18px rgba(244, 119, 80, 0.45);
     }
-    .brand h1 { font-size: 26px; font-weight: 800; }
-    .brand span { color: var(--accent-orange); }
+
+    .brand h1 {
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .brand span {
+      color: var(--accent-orange);
+    }
 
     /* Voice Recording Studio Card */
     .voice-deck {
@@ -62,8 +84,9 @@
       border-radius: 14px;
       padding: 24px;
       margin-bottom: 28px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
     }
+
     .voice-header {
       display: flex;
       justify-content: space-between;
@@ -72,7 +95,15 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .voice-title { font-size: 19px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+
+    .voice-title {
+      font-size: 19px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .voice-controls {
       display: flex;
       gap: 12px;
@@ -95,14 +126,24 @@
       box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
       transition: all 0.2s;
     }
+
     .btn-rec.recording {
       animation: pulse-red 1s infinite;
       background: #b91c1c;
     }
+
     @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 16px rgba(239, 68, 68, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
     }
 
     .btn-action {
@@ -120,18 +161,21 @@
       transition: all 0.2s ease;
       box-shadow: 0 4px 14px rgba(244, 119, 80, 0.3);
     }
+
     .btn-action:hover {
       background: #ff8b66;
       transform: translateY(-2px);
     }
+
     .btn-secondary {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.08);
       color: var(--text-main);
       border: 1px solid var(--card-border);
       box-shadow: none;
     }
+
     .btn-secondary:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.15);
       color: var(--accent-orange);
     }
 
@@ -148,9 +192,18 @@
       overflow-y: auto;
       margin-top: 16px;
     }
-    .console-line { margin-bottom: 4px; }
-    .console-line.success { color: var(--success); }
-    .console-line.alert { color: var(--accent-orange); }
+
+    .console-line {
+      margin-bottom: 4px;
+    }
+
+    .console-line.success {
+      color: var(--success);
+    }
+
+    .console-line.alert {
+      color: var(--accent-orange);
+    }
 
     /* Layout Split */
     .layout-split {
@@ -159,8 +212,11 @@
       gap: 28px;
       margin-bottom: 32px;
     }
+
     @media (max-width: 1080px) {
-      .layout-split { grid-template-columns: 1fr; }
+      .layout-split {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* Video Player */
@@ -172,6 +228,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .video-wrapper {
       width: 100%;
       background: #000;
@@ -185,7 +242,12 @@
       align-items: center;
       justify-content: center;
     }
-    video { width: 100%; height: 100%; object-fit: contain; }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
     /* Content Tables */
     .content-box {
@@ -195,17 +257,28 @@
       padding: 24px;
       margin-bottom: 32px;
     }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
     th {
       padding: 12px 16px;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
       color: var(--text-muted);
       font-weight: 600;
       border-bottom: 1px solid var(--card-border);
       font-family: var(--font-mono);
       font-size: 12px;
     }
-    td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
 
     .badge {
       display: inline-flex;
@@ -215,8 +288,18 @@
       font-weight: 700;
       font-family: var(--font-mono);
     }
-    .badge-ready { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
-    .badge-staged { background: rgba(244, 119, 80, 0.2); color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+
+    .badge-ready {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    .badge-staged {
+      background: rgba(244, 119, 80, 0.2);
+      color: var(--accent-orange);
+      border: 1px solid var(--accent-orange);
+    }
 
     .kpi-grid {
       display: grid;
@@ -224,316 +307,319 @@
       gap: 20px;
       margin-bottom: 32px;
     }
+
     .kpi-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 20px;
     }
-    .kpi-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); }
-    .kpi-value { font-size: 32px; font-weight: 800; margin: 6px 0; color: var(--text-main); }
-    .kpi-sub { font-size: 13px; color: var(--success); }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .kpi-value {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 6px 0;
+      color: var(--text-main);
+    }
+
+    .kpi-sub {
+      font-size: 13px;
+      color: var(--success);
+    }
   </style>
 </head>
+
 <body>
 
-<div class="container">
-  <header>
-    <div class="brand">
-      <div class="radar-icon"></div>
-      <div>
-        <h1>Creator<span>Radar</span> Studio</h1>
-        <div style="font-size: 13px; color: var(--text-muted); font-family: var(--font-mono);">AI Video Studio & Voice Cloning Hub</div>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="radar-icon"></div>
+        <div>
+          <h1>Creator<span>Radar</span> Studio</h1>
+          <div style="font-size: 13px; color: var(--text-muted); font-family: var(--font-mono);">AI Video Studio & Voice
+            Cloning Hub</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span style="font-size:13px; color:var(--success); font-family:var(--font-mono);">● STUDIO ACTIVE</span>
+      </div>
+    </header>
+
+    <!-- Voice Cloning & Microphone Deck -->
+    <div class="voice-deck">
+      <div class="voice-header">
+        <div class="voice-title">
+          <span>🎙️ Your Voice Studio (Direct Microphone Capture & Cloning)</span>
+          <span id="voice-status-badge" class="badge" style="background:rgba(255,255,255,0.1); color:#fff;">Status:
+            Ready to Record</span>
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted); font-family: var(--font-mono);">VoiceStudio Engine @
+          localhost:3900</div>
+      </div>
+
+      <div class="voice-controls">
+        <button id="btn-record" class="btn-rec" onclick="toggleRecording()">
+          <span id="rec-dot">●</span> <span id="rec-label">Record Voice Sample</span>
+        </button>
+
+        <span id="rec-timer"
+          style="font-family: var(--font-mono); font-weight: 700; font-size: 16px; color: var(--accent-orange); display: none;">00:00</span>
+
+        <audio id="voice-playback" controls style="display: none; height: 42px;"></audio>
+
+        <button class="btn-action" onclick="triggerRender('gta6-storage')">
+          🚀 Re-Render GTA VI Video (Kinetic Motion + Voice)
+        </button>
+
+        <button class="btn-action btn-secondary" onclick="triggerRender('gta6-preload')">
+          ⚡ Render Preload Guide
+        </button>
+      </div>
+
+      <div style="margin-top: 14px; font-size: 13px; color: var(--text-muted);">
+        💡 <strong>Tip:</strong> Click <strong>Record Voice Sample</strong>, speak naturally for 15–30 seconds, click
+        Stop to save your profile into <code>assets/voices/creator_sample.wav</code>, then click
+        <strong>Re-Render</strong> to generate the updated video!
+      </div>
+
+      <!-- Live Console -->
+      <div class="console-box" id="console">
+        <div class="console-line success">[VOICE STUDIO] Ready. Click Record to capture your voice sample.</div>
+        <div class="console-line alert">[KINETIC V2] High-velocity motion engine loaded with dynamic Ken Burns zoom &
+          scanlines.</div>
       </div>
     </div>
-    <div style="display:flex; gap:10px; align-items:center;">
-      <span style="font-size:13px; color:var(--success); font-family:var(--font-mono);">● STUDIO ACTIVE</span>
-    </div>
-  </header>
 
-  <!-- Voice Cloning & Microphone Deck -->
-  <div class="voice-deck">
-    <div class="voice-header">
-      <div class="voice-title">
-        <span>🎙️ Your Voice Studio (Direct Microphone Capture & Cloning)</span>
-        <span id="voice-status-badge" class="badge" style="background:rgba(255,255,255,0.1); color:#fff;">Status: Ready to Record</span>
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Subscribers (Goal: 1k)</div>
+        <div class="kpi-value">11,000</div>
+        <div class="kpi-sub">✓ 1,100% Monetization Goal Met</div>
       </div>
-      <div style="font-size: 13px; color: var(--text-muted); font-family: var(--font-mono);">VoiceStudio Engine @ localhost:3900</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Video Style</div>
+        <div class="kpi-value">Kinetic V2</div>
+        <div class="kpi-sub">✓ Dynamic Zooms & High-Energy Pacing</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Voiceover Engine</div>
+        <div class="kpi-value">VoiceStudio</div>
+        <div class="kpi-sub">✓ Direct Voice Cloning Active</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Operating Cost</div>
+        <div class="kpi-value">$0.00</div>
+        <div class="kpi-sub">✓ 100% Local Processing</div>
+      </div>
     </div>
 
-    <div class="voice-controls">
-      <button id="btn-record" class="btn-rec" onclick="toggleRecording()">
-        <span id="rec-dot">●</span> <span id="rec-label">Record Voice Sample</span>
-      </button>
+    <!-- Main Split Layout -->
+    <div class="layout-split">
+      <!-- Video Player Preview -->
+      <div class="video-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:16px; font-weight:700;">🎬 Master Kinetic Short (V2 Render)</h3>
+          <span class="badge badge-ready">DYNAMIC MOTION</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          GTA VI Storage Requirements (1080×1920 • Ken Burns Zooms • High-Paced Cut)
+        </p>
 
-      <span id="rec-timer" style="font-family: var(--font-mono); font-weight: 700; font-size: 16px; color: var(--accent-orange); display: none;">00:00</span>
+        <div class="video-wrapper">
+          <video id="player" controls poster="../renders/gta6-storage/scenes_v2/scene1.png">
+            <source src="../exports/gta6-storage/20261116-gta6-storage-kinetic-v2.mp4" type="video/mp4">
+          </video>
+        </div>
 
-      <audio id="voice-playback" controls style="display: none; height: 42px;"></audio>
+        <div style="display:flex; gap:10px;">
+          <a href="../exports/gta6-storage/metadata.md" class="btn-action btn-secondary"
+            style="flex:1; justify-content:center; text-decoration:none;">Metadata</a>
+          <a href="../exports/gta6-storage/checklist.md" class="btn-action"
+            style="flex:1; justify-content:center; text-decoration:none;">Checklist</a>
+        </div>
+      </div>
 
-      <button class="btn-action" onclick="triggerRender('gta6-storage')">
-        🚀 Re-Render GTA VI Video (Kinetic Motion + Voice)
-      </button>
-
-      <button class="btn-action btn-secondary" onclick="triggerRender('gta6-preload')">
-        ⚡ Render Preload Guide
-      </button>
-    </div>
-
-    <div style="margin-top: 14px; font-size: 13px; color: var(--text-muted);">
-      💡 <strong>Tip:</strong> Click <strong>Record Voice Sample</strong>, speak naturally for 15–30 seconds, click Stop to save your profile into <code>assets/voices/creator_sample.wav</code>, then click <strong>Re-Render</strong> to generate the updated video!
-    </div>
-
-    <!-- Live Console -->
-    <div class="console-box" id="console">
-      <div class="console-line success">[VOICE STUDIO] Ready. Click Record to capture your voice sample.</div>
-      <div class="console-line alert">[KINETIC V2] High-velocity motion engine loaded with dynamic Ken Burns zoom & scanlines.</div>
+      <!-- Production Queue -->
+      <div class="content-box">
+        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">📋 Priority Content Pipeline</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Topic</th>
+              <th>Style</th>
+              <th>Voiceover</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GTA-001</code></td>
+              <td><strong>Storage Requirements Explained</strong></td>
+              <td>Kinetic V2</td>
+              <td>Cloned Profile</td>
+              <td><span class="badge badge-ready">READY (8.7 MB)</span></td>
+              <td><button class="btn-action btn-secondary" style="padding:6px 12px; font-size:12px;"
+                  onclick="triggerRender('gta6-storage')">Re-Render</button></td>
+            </tr>
+            <tr>
+              <td><code>GTA-002</code></td>
+              <td><strong>How to Preload GTA VI on PS5</strong></td>
+              <td>Kinetic V2</td>
+              <td>Cloned Profile</td>
+              <td><span class="badge badge-staged">STAGED</span></td>
+              <td><button class="btn-action" style="padding:6px 12px; font-size:12px;"
+                  onclick="triggerRender('gta6-preload')">Start Render</button></td>
+            </tr>
+            <tr>
+              <td><code>GTA-003</code></td>
+              <td><strong>Standard vs. Ultimate Edition</strong></td>
+              <td>Kinetic V2</td>
+              <td>Cloned Profile</td>
+              <td><span class="badge badge-staged">STAGED</span></td>
+              <td><button class="btn-action" style="padding:6px 12px; font-size:12px;"
+                  onclick="triggerRender('gta6-editions')">Start Render</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- KPI Grid -->
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-label">Subscribers (Goal: 1k)</div>
-      <div class="kpi-value">11,000</div>
-      <div class="kpi-sub">✓ 1,100% Monetization Goal Met</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Video Style</div>
-      <div class="kpi-value">Kinetic V2</div>
-      <div class="kpi-sub">✓ Dynamic Zooms & High-Energy Pacing</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Voiceover Engine</div>
-      <div class="kpi-value">VoiceStudio</div>
-      <div class="kpi-sub">✓ Direct Voice Cloning Active</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Operating Cost</div>
-      <div class="kpi-value">$0.00</div>
-      <div class="kpi-sub">✓ 100% Local Processing</div>
-    </div>
-  </div>
+  <script>
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let timerInterval = null;
+    let seconds = 0;
 
-  <!-- Main Split Layout -->
-  <div class="layout-split">
-    <!-- Video Player Preview -->
-    <div class="video-card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="font-size:16px; font-weight:700;">🎬 Master Short Preview</h3>
-        <span class="badge badge-ready">1080×1920 KINETIC</span>
-      </div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-        GTA VI Storage Requirements (Full Vertical • Dynamic Motion • Auto Pacing)
-      </p>
+    function log(msg, type = '') {
+      const box = document.getElementById('console');
+      const time = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = 'console-line ' + type;
+      line.textContent = `[${time}] ${msg}`;
+      box.appendChild(line);
+      box.scrollTop = box.scrollHeight;
+    }
 
-      <!-- Video Switcher Controls OUTSIDE player wrapper -->
-      <div style="display:flex; gap:6px; margin:16px 0 10px; background:#121824; padding:6px; border-radius:10px; border:1px solid #233147;">
-        <button id="btn-cut-v3" onclick="setVideoSource('../exports/gta6-storage/20261116-gta6-storage-kinetic-v3.mp4', this)" style="flex:1; background:#f47750; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:700; transition:all 0.2s;">
-          ⚡ Kinetic Master (English Narration)
-        </button>
-        <button id="btn-master-grid" onclick="setVideoSource('../renders/gta-vi-storage-requirements-ps5/gta-vi-storage-requirements-ps5-master.mp4', this)" style="flex:1; background:transparent; color:#8F9BB3; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
-          🌌 Midnight Grid
-        </button>
-        <button id="btn-lemo-3d" onclick="setVideoSource('../renders/gta6-lemo-teardown/gta6-lemo-teardown-master.mp4', this)" style="flex:1; background:transparent; color:#8F9BB3; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s;">
-          🚀 3D Teardown
-        </button>
-      </div>
+    async function toggleRecording() {
+      const btn = document.getElementById('btn-record');
+      const label = document.getElementById('rec-label');
+      const timer = document.getElementById('rec-timer');
 
-      <div class="video-wrapper" style="max-width:320px; margin:0 auto 16px; aspect-ratio:9/16; background:#000; border-radius:18px; border:2px solid #2a374d; box-shadow:0 12px 35px rgba(0,0,0,0.6); overflow:hidden; position:relative;">
-        <video id="player" controls style="width:100%; height:100%; object-fit:cover; display:block;">
-          <source src="../exports/gta6-storage/20261116-gta6-storage-kinetic-v3.mp4" type="video/mp4">
-        </video>
-      </div>
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
 
-      <script>
-        function setVideoSource(src, btn) {
-          const p = document.getElementById('player');
-          p.src = src;
-          p.play();
-          btn.parentElement.querySelectorAll('button').forEach(b => {
-            b.style.background = 'transparent';
-            b.style.color = '#8F9BB3';
-            b.style.fontWeight = '600';
-          });
-          btn.style.background = '#f47750';
-          btn.style.color = '#fff';
-          btn.style.fontWeight = '700';
+          mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const playback = document.getElementById('voice-playback');
+            playback.src = URL.createObjectURL(audioBlob);
+            playback.style.display = 'block';
+
+            log('Uploading audio to assets/voices/creator_sample.wav...', 'alert');
+            const res = await fetch('/api/upload-voice', {
+              method: 'POST',
+              body: audioBlob
+            });
+            const data = await res.json();
+            log(data.message, 'success');
+            document.getElementById('voice-status-badge').textContent = '● Profile Active: creator_sample.wav';
+            document.getElementById('voice-status-badge').style.background = 'rgba(16, 185, 129, 0.2)';
+            document.getElementById('voice-status-badge').style.color = '#10b981';
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          btn.classList.add('recording');
+          label.textContent = 'Stop Recording & Save';
+          timer.style.display = 'inline-block';
+          seconds = 0;
+          timerInterval = setInterval(() => {
+            seconds++;
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            timer.textContent = `${m}:${s}`;
+          }, 1000);
+          log('Recording started... Speak clearly into your mic.', 'alert');
+        } catch (err) {
+          log('Microphone access denied or error: ' + err.message, 'alert');
         }
-      </script>
+      } else {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        isRecording = false;
+        btn.classList.remove('recording');
+        label.textContent = 'Record New Sample';
+        clearInterval(timerInterval);
+        timer.style.display = 'none';
+        log('Recording stopped. Enrolling voice profile...', 'success');
+      }
+    }
 
-      <div style="display:flex; gap:10px;">
-        <a href="../exports/gta6-storage/metadata.md" class="btn-action btn-secondary" style="flex:1; justify-content:center; text-decoration:none;">Metadata</a>
-        <a href="../exports/gta6-storage/checklist.md" class="btn-action" style="flex:1; justify-content:center; text-decoration:none;">Checklist</a>
-      </div>
-    </div>
-
-    <!-- Production Queue -->
-    <div class="content-box">
-      <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">📋 Priority Content Pipeline</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Topic</th>
-            <th>Style</th>
-            <th>Voiceover</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>GTA-001</code></td>
-            <td><strong>Storage Requirements Explained</strong></td>
-            <td>Kinetic V2</td>
-            <td>Cloned Profile</td>
-            <td><span class="badge badge-ready">READY (8.7 MB)</span></td>
-            <td><button class="btn-action btn-secondary" style="padding:6px 12px; font-size:12px;" onclick="triggerRender('gta6-storage')">Re-Render</button></td>
-          </tr>
-          <tr>
-            <td><code>GTA-002</code></td>
-            <td><strong>How to Preload GTA VI on PS5</strong></td>
-            <td>Kinetic V2</td>
-            <td>Cloned Profile</td>
-            <td><span class="badge badge-staged">STAGED</span></td>
-            <td><button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="triggerRender('gta6-preload')">Start Render</button></td>
-          </tr>
-          <tr>
-            <td><code>GTA-003</code></td>
-            <td><strong>Standard vs. Ultimate Edition</strong></td>
-            <td>Kinetic V2</td>
-            <td>Cloned Profile</td>
-            <td><span class="badge badge-staged">STAGED</span></td>
-            <td><button class="btn-action" style="padding:6px 12px; font-size:12px;" onclick="triggerRender('gta6-editions')">Start Render</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<script>
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let isRecording = false;
-  let timerInterval = null;
-  let seconds = 0;
-
-  function log(msg, type='') {
-    const box = document.getElementById('console');
-    const time = new Date().toLocaleTimeString();
-    const line = document.createElement('div');
-    line.className = 'console-line ' + type;
-    line.textContent = `[${time}] ${msg}`;
-    box.appendChild(line);
-    box.scrollTop = box.scrollHeight;
-  }
-
-  async function toggleRecording() {
-    const btn = document.getElementById('btn-record');
-    const label = document.getElementById('rec-label');
-    const timer = document.getElementById('rec-timer');
-
-    if (!isRecording) {
+    async function triggerRender(topic) {
+      log(`Triggering kinetic render for ${topic}...`, 'alert');
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = e => {
-          if (e.data.size > 0) audioChunks.push(e.data);
-        };
-
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          const playback = document.getElementById('voice-playback');
-          playback.src = URL.createObjectURL(audioBlob);
-          playback.style.display = 'block';
-
-          log('Uploading audio to assets/voices/creator_sample.wav...', 'alert');
-          const res = await fetch('/api/upload-voice', {
-            method: 'POST',
-            body: audioBlob
-          });
-          const data = await res.json();
-          log(data.message, 'success');
-          document.getElementById('voice-status-badge').textContent = '● Profile Active: creator_sample.wav';
-          document.getElementById('voice-status-badge').style.background = 'rgba(16, 185, 129, 0.2)';
-          document.getElementById('voice-status-badge').style.color = '#10b981';
-        };
-
-        mediaRecorder.start();
-        isRecording = true;
-        btn.classList.add('recording');
-        label.textContent = 'Stop Recording & Save';
-        timer.style.display = 'inline-block';
-        seconds = 0;
-        timerInterval = setInterval(() => {
-          seconds++;
-          const m = String(Math.floor(seconds/60)).padStart(2, '0');
-          const s = String(seconds%60).padStart(2, '0');
-          timer.textContent = `${m}:${s}`;
-        }, 1000);
-        log('Recording started... Speak clearly into your mic.', 'alert');
-      } catch (err) {
-        log('Microphone access denied or error: ' + err.message, 'alert');
-      }
-    } else {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(t => t.stop());
-      isRecording = false;
-      btn.classList.remove('recording');
-      label.textContent = 'Record New Sample';
-      clearInterval(timerInterval);
-      timer.style.display = 'none';
-      log('Recording stopped. Enrolling voice profile...', 'success');
-    }
-  }
-
-  async function triggerRender(topic) {
-    log(`Triggering kinetic render for ${topic}...`, 'alert');
-    try {
-      const res = await fetch('/api/render', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({topic})
-      });
-      const data = await res.json();
-      log(`Pipeline started: ${data.topic}`, 'success');
-    } catch(e) {
-      log('Render request dispatched.', 'alert');
-    }
-  }
-
-  async function pollStatus() {
-    try {
-      const res = await fetch('/api/status');
-      if (res.ok) {
+        const res = await fetch('/api/render', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic })
+        });
         const data = await res.json();
-        const box = document.getElementById('console');
-        if (data.logs && data.logs.length) {
-          box.innerHTML = '';
-          data.logs.forEach(l => {
-            const d = document.createElement('div');
-            d.className = 'console-line';
-            d.textContent = l;
-            box.appendChild(d);
-          });
-          box.scrollTop = box.scrollHeight;
-        }
-        if (data.has_voice_sample) {
-          const badge = document.getElementById('voice-status-badge');
-          badge.textContent = '● Profile Active: creator_sample.wav';
-          badge.style.background = 'rgba(16, 185, 129, 0.2)';
-          badge.style.color = '#10b981';
-        }
+        log(`Pipeline started: ${data.topic}`, 'success');
+      } catch (e) {
+        log('Render request dispatched.', 'alert');
       }
-    } catch(e) {}
-  }
+    }
 
-  setInterval(pollStatus, 4000);
-  pollStatus();
-</script>
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const data = await res.json();
+          const box = document.getElementById('console');
+          if (data.logs && data.logs.length) {
+            box.innerHTML = '';
+            data.logs.forEach(l => {
+              const d = document.createElement('div');
+              d.className = 'console-line';
+              d.textContent = l;
+              box.appendChild(d);
+            });
+            box.scrollTop = box.scrollHeight;
+          }
+          if (data.has_voice_sample) {
+            const badge = document.getElementById('voice-status-badge');
+            badge.textContent = '● Profile Active: creator_sample.wav';
+            badge.style.background = 'rgba(16, 185, 129, 0.2)';
+            badge.style.color = '#10b981';
+          }
+        }
+      } catch (e) { }
+    }
+
+    setInterval(pollStatus, 4000);
+    pollStatus();
+  </script>
 
 </body>
+
 </html>

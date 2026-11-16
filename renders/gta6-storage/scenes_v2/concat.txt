@@ -1,5 +1,0 @@
-file '/home/varad/Videos/youtube/renders/gta6-storage/scenes_v2/scene1.mp4'
-file '/home/varad/Videos/youtube/renders/gta6-storage/scenes_v2/scene2.mp4'
-file '/home/varad/Videos/youtube/renders/gta6-storage/scenes_v2/scene3.mp4'
-file '/home/varad/Videos/youtube/renders/gta6-storage/scenes_v2/scene4.mp4'
-file '/home/varad/Videos/youtube/renders/gta6-storage/scenes_v2/scene5.mp4'

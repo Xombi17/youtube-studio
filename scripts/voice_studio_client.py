@@ -17,7 +17,7 @@ VOICE_STUDIO_URL = os.environ.get("VOICESTUDIO_URL", "http://localhost:3900")
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 VOICE_SAMPLE_DIR = Path(os.environ.get("VOICE_SAMPLE_DIR", WORKSPACE_ROOT / "assets" / "voices"))
 VOICE_SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
-DEFAULT_PROFILE_ID = os.environ.get("CREATOR_VOICE_PROFILE", "d788f49e") # TheDocumentarian (open archetype)
+DEFAULT_PROFILE_ID = os.environ.get("CREATOR_VOICE_PROFILE", "cb77bfeb")
 
 def is_voicestudio_running():
     try:
