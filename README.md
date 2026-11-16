@@ -11,7 +11,7 @@ Designed to run locally on your workstation or laptop with **NVIDIA GPU accelera
 Clone this repository and run the automated bootstrap script:
 
 ```bash
-git clone <your-repo-url> youtube-studio
+git clone https://github.com/Xombi17/youtube-studio.git
 cd youtube-studio
 ./setup.sh
 ```
