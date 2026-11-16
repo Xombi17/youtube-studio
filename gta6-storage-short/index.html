@@ -1,0 +1,139 @@
+<!doctype html><html lang="en" data-resolution="portrait"><head><meta charset="utf-8"><meta name="viewport" content="width=1080,height=1920"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=Inter:wght@500;700;800;900&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script><style>
+*{box-sizing:border-box}html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#101d2b}#root{position:relative;width:1080px;height:1920px;font-family:Inter,Arial,sans-serif;color:#f7f4ed}.scene{position:absolute;inset:0;overflow:hidden;padding:210px 96px 620px}.dark{background:#101d2b}.light{background:#f1eee7;color:#101d2b}.coral{background:#e96643;color:#101d2b}.eyebrow{font:600 31px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase}.title{font:800 106px/1.02 Inter,sans-serif;letter-spacing:-.065em;margin:42px 0 0;max-width:885px}.title strong{color:#f47750}.light .title strong,.coral .title strong{color:#101d2b}.rule{width:888px;height:2px;background:currentColor;opacity:.34;margin-top:42px}.footer{position:absolute;top:1075px;left:96px;font:500 29px 'IBM Plex Mono',monospace;letter-spacing:.04em;opacity:.72}.cap{position:absolute;left:96px;top:1190px;width:840px;min-height:114px;z-index:30;font:700 44px/1.15 Inter,sans-serif;letter-spacing:-.025em;padding:18px 24px;background:#f7f4ed;color:#101d2b;box-shadow:8px 8px 0 #e96643}.cap span{color:#d55335}.progress{position:absolute;left:0;top:1320px;width:1080px;height:3px;background:#ffffff33}#bar{height:100%;width:0;background:#f47750}.grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(#ffffff 1px,transparent 1px),linear-gradient(90deg,#ffffff 1px,transparent 1px);background-size:108px 108px}.giant{position:absolute;top:490px;left:48px;font:900 420px/1 Inter,sans-serif;letter-spacing:-.1em;color:#f47750}.orbit{position:absolute;left:380px;top:430px;width:730px;height:730px;border:5px solid #f47750;border-radius:50%;opacity:.7}.pill{font:700 39px Inter,sans-serif;border:2px solid currentColor;padding:20px 28px;display:inline-block;margin:17px 14px 0 0}
+/* Scene 2 bar comparison */
+.bar-wrap{position:absolute;top:580px;left:96px;width:888px}.bar-label{font:600 29px 'IBM Plex Mono',monospace;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;color:#101d2b}.bar-track{width:100%;height:48px;border:3px solid #101d2b;border-radius:4px;background:#f1eee7;overflow:hidden;margin-bottom:14px}.bar-fill{height:100%;border-radius:2px}.bar-pct-label{font:800 42px Inter,sans-serif;letter-spacing:-.04em;color:#101d2b;margin-top:36px}
+/* Scene 3 list */
+.list-item{font:700 62px/1.18 Inter,sans-serif;letter-spacing:-.04em;padding:22px 0 22px 0;border-bottom:2px solid rgba(16,29,43,.22);display:flex;align-items:flex-start;gap:28px;opacity:0;transform:translateY(50px)}.list-num{font:600 31px 'IBM Plex Mono',monospace;min-width:52px;padding-top:10px;opacity:.6}
+/* Scene 4 dots */
+.dot-row{position:absolute;top:720px;left:96px;display:flex;gap:40px}.dot{width:40px;height:40px;border-radius:50%;background:#f47750;opacity:.25}
+/* Scene 5 pill wrap */
+.pill-wrap{position:absolute;top:760px;left:96px}
+</style></head><body><div id="root" data-composition-id="main" data-start="0" data-duration="45" data-width="1080" data-height="1920">
+
+<!-- SCENE 1: HOOK 0–5s -->
+<section id="hook" class="clip scene dark" data-start="0" data-duration="5" data-track-index="1" data-track-kind="graphics">
+  <div class="grid"></div>
+  <div class="eyebrow">STORAGE ALERT</div>
+  <div class="giant" id="hook-num">212</div>
+  <h1 class="title" id="hook-title">GB of free space —<br>that's what <strong>GTA VI</strong> needs</h1>
+  <div class="footer">ROCKSTAR GAMES / NOV 2026</div>
+</section>
+
+<!-- SCENE 2: COMPARE 5–15s -->
+<section id="compare" class="clip scene light" data-start="5" data-duration="10" data-track-index="2" data-track-kind="graphics">
+  <div class="eyebrow">THE SCALE</div>
+  <h2 class="title" id="compare-title">PS5 has<br>~<strong>825 GB</strong> usable</h2>
+  <div class="bar-wrap" id="bar-wrap">
+    <div class="bar-label">GTA VI install</div>
+    <div class="bar-track"><div class="bar-fill" id="bar-gta" style="width:0%;background:#f47750"></div></div>
+    <div class="bar-label">PS5 total storage</div>
+    <div class="bar-track"><div class="bar-fill" id="bar-ps5" style="width:0%;background:#101d2b;opacity:.18"></div></div>
+    <div class="bar-pct-label" id="pct-label" style="opacity:0">That's <span style="color:#e96643">26%</span> of your whole drive.</div>
+  </div>
+  <div class="footer">SONY / OFFICIAL PS5 SPEC</div>
+</section>
+
+<!-- SCENE 3: SOLUTION 15–28s -->
+<section id="solution" class="clip scene coral" data-start="15" data-duration="13" data-track-index="3" data-track-kind="graphics">
+  <div class="eyebrow">HOW TO FREE SPACE</div>
+  <h2 class="title" style="font-size:88px;margin-bottom:32px">Make room <strong>now</strong></h2>
+  <div id="list-item-1" class="list-item"><span class="list-num">01</span>Delete unused games</div>
+  <div id="list-item-2" class="list-item"><span class="list-num">02</span>Move saves to USB</div>
+  <div id="list-item-3" class="list-item"><span class="list-num">03</span>Add an M.2 NVMe SSD</div>
+  <div class="footer">QUICK WINS / BEFORE NOV 19</div>
+</section>
+
+<!-- SCENE 4: PRELOAD 28–38s -->
+<section id="preload" class="clip scene dark" data-start="28" data-duration="10" data-track-index="4" data-track-kind="graphics">
+  <div class="orbit" id="preload-orbit"></div>
+  <div class="eyebrow">PRELOAD IS LIVE</div>
+  <h2 class="title" id="preload-title">Started Nov 10 —<br>download <strong>NOW</strong></h2>
+  <div style="position:absolute;top:650px;left:96px;font:500 51px/1.3 Inter,sans-serif;letter-spacing:-.035em;opacity:.82" id="preload-sub">Launches <strong>Nov 19</strong> at midnight</div>
+  <div class="dot-row" id="dot-row">
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+    <div class="dot" id="d4"></div>
+    <div class="dot" id="d5"></div>
+    <div class="dot" id="d6"></div>
+    <div class="dot" id="d7"></div>
+    <div class="dot" id="d8"></div>
+    <div class="dot" id="d9"></div>
+  </div>
+  <div class="footer">PLAYSTATION STORE / XBOX</div>
+</section>
+
+<!-- SCENE 5: CTA 38–45s -->
+<section id="cta" class="clip scene dark" data-start="38" data-duration="7" data-track-index="5" data-track-kind="graphics">
+  <div class="grid"></div>
+  <div class="eyebrow">MORE GTA 6 TIPS</div>
+  <h2 class="title" id="cta-title">Follow for<br>daily <strong>GTA 6</strong><br>updates</h2>
+  <div class="pill-wrap" id="pill-wrap">
+    <div class="pill">STORAGE</div>
+    <div class="pill">PRELOAD</div>
+    <div class="pill">EDITIONS</div>
+  </div>
+  <div class="footer">LIKE · SUBSCRIBE · COMMENT</div>
+</section>
+
+<!-- CAPTIONS -->
+<div id="cap0" class="clip cap" data-start="0" data-duration="5" data-track-index="7" data-track-kind="captions">GTA VI needs <span>212 GB</span> of free storage space.</div>
+<div id="cap1" class="clip cap" data-start="5" data-duration="5" data-track-index="7" data-track-kind="captions">The PS5 has about 825 GB usable — that's <span>26% gone</span>.</div>
+<div id="cap2" class="clip cap" data-start="10" data-duration="5" data-track-index="7" data-track-kind="captions">That's a quarter of your entire drive for one game.</div>
+<div id="cap3" class="clip cap" data-start="15" data-duration="4" data-track-index="7" data-track-kind="captions">Here's how to free up space fast before launch.</div>
+<div id="cap4" class="clip cap" data-start="19" data-duration="4" data-track-index="7" data-track-kind="captions">Delete unused games, move saves to USB drive.</div>
+<div id="cap5" class="clip cap" data-start="23" data-duration="5" data-track-index="7" data-track-kind="captions">Or add an <span>M.2 NVMe SSD</span> for the most headroom.</div>
+<div id="cap6" class="clip cap" data-start="28" data-duration="5" data-track-index="7" data-track-kind="captions">Preload is <span>already live</span> — started November 10.</div>
+<div id="cap7" class="clip cap" data-start="33" data-duration="5" data-track-index="7" data-track-kind="captions">Download now. Launches November 19 at midnight.</div>
+<div id="cap8" class="clip cap" data-start="38" data-duration="7" data-track-index="7" data-track-kind="captions">Follow for daily <span>GTA 6</span> tips, news, and storage guides.</div>
+
+<!-- AUDIO TRACK -->
+<audio id="tts-narration" class="clip" src="assets/voiceover_tts.wav" data-start="0" data-duration="45" data-track-index="8" data-volume="1"></audio>
+
+<!-- PROGRESS BAR -->
+<div class="progress" data-layout-ignore><div id="bar"></div></div>
+
+</div>
+<script>
+const tl = gsap.timeline({paused: true});
+
+// Scene 1 – HOOK
+tl.fromTo('#hook-num', {opacity:0, scale:0.5}, {opacity:1, scale:1, duration:0.6, ease:'back.out(1.6)'}, 0.2)
+  .fromTo('#hook-title', {opacity:0, y:60}, {opacity:1, y:0, duration:0.55, ease:'power3.out'}, 0.9)
+
+// Scene 2 – COMPARE
+  .fromTo('#compare-title', {opacity:0, y:50}, {opacity:1, y:0, duration:0.5, ease:'power3.out'}, 5.3)
+  .fromTo('#bar-gta',   {width:'0%'}, {width:'25.7%', duration:1.6, ease:'power2.inOut'}, 6.0)
+  .fromTo('#bar-ps5',   {width:'0%'}, {width:'100%',  duration:2.0, ease:'power2.inOut'}, 6.5)
+  .fromTo('#pct-label', {opacity:0, y:30}, {opacity:1, y:0, duration:0.5, ease:'power3.out'}, 9.0)
+
+// Scene 3 – SOLUTION
+  .fromTo('#list-item-1', {opacity:0, y:50}, {opacity:1, y:0, duration:0.5, ease:'power3.out'}, 16.0)
+  .fromTo('#list-item-2', {opacity:0, y:50}, {opacity:1, y:0, duration:0.5, ease:'power3.out'}, 18.5)
+  .fromTo('#list-item-3', {opacity:0, y:50}, {opacity:1, y:0, duration:0.5, ease:'power3.out'}, 21.0)
+
+// Scene 4 – PRELOAD
+  .fromTo('#preload-orbit', {scale:0.4, opacity:0}, {scale:1, opacity:0.7, duration:1.8, ease:'power2.out'}, 28.3)
+  .fromTo('#preload-title', {opacity:0, x:-80}, {opacity:1, x:0, duration:0.55, ease:'power3.out'}, 29.0)
+  .fromTo('#preload-sub',   {opacity:0, y:40},  {opacity:1, y:0, duration:0.5, ease:'power3.out'},  30.0)
+  // Dot pulse: stagger 9 dots in
+  .fromTo('.dot', {opacity:0.1}, {opacity:1, duration:0.3, stagger:{each:0.15, repeat:-1, yoyo:true}}, 31.0)
+
+// Scene 5 – CTA
+  .fromTo('#cta-title', {opacity:0, y:60}, {opacity:1, y:0, duration:0.6, ease:'power3.out'}, 38.4)
+  .fromTo('#pill-wrap', {opacity:0, y:50}, {opacity:1, y:0, duration:0.55, ease:'power3.out'}, 39.5)
+
+// Global progress bar (45s)
+  .fromTo('#bar', {width:0}, {width:1080, duration:45, ease:'none'}, 0);
+
+window.__timelines = window.__timelines || {};
+window.__timelines['main'] = tl;
+
+const urlParams = new URLSearchParams(window.location.search);
+const seekT = parseFloat(urlParams.get('t') || 0);
+if (seekT > 0) {
+  tl.seek(seekT);
+}
+
+</script>
+</body></html>

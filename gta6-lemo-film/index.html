@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTA VI Storage Teardown - Lemo-Opuscar</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0A0D14; color: #EDEAE3; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #canvas-container { width: 1080px; height: 1920px; position: relative; background: radial-gradient(circle at 50% 45%, #141B2D 0%, #080A10 100%); }
+    
+    /* Overlay HUD */
+    .hud { position: absolute; inset: 0; pointer-events: none; padding: 120px 80px; display: flex; flex-direction: column; justify-content: space-between; z-index: 10; }
+    .badge { align-self: flex-start; background: rgba(61, 139, 255, 0.15); border: 1px solid #3D8BFF; color: #3D8BFF; font-family: 'JetBrains Mono', monospace; font-size: 26px; padding: 10px 24px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .title-block { margin-top: 40px; }
+    .title-block h1 { font-size: 72px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: #FFFFFF; }
+    .title-block h1 span { color: #3D8BFF; }
+    .title-block p { font-size: 32px; color: #8F9BB3; margin-top: 16px; font-family: 'JetBrains Mono', monospace; }
+    
+    /* Hardware Spec Card */
+    .spec-card { background: rgba(17, 26, 46, 0.85); backdrop-filter: blur(20px); border: 2px solid rgba(61, 139, 255, 0.4); border-radius: 28px; padding: 48px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); }
+    .spec-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px; }
+    .spec-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+    .spec-label { font-size: 30px; color: #8F9BB3; font-weight: 600; }
+    .spec-val { font-size: 38px; color: #3D8BFF; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    
+    /* Leader annotation lines */
+    .annotation { position: absolute; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #3D8BFF; background: rgba(11, 18, 32, 0.9); border: 1px solid #3D8BFF; padding: 12px 20px; border-radius: 12px; pointer-events: none; }
+    .annotation-1 { top: 920px; left: 140px; }
+    .annotation-2 { top: 1140px; right: 120px; text-align: right; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="canvas-container">
+    <div class="hud">
+      <div class="header">
+        <div class="badge">LEMO-OPUSCAR · EXPLODED TEARDOWN</div>
+        <div class="title-block">
+          <h1>GTA VI HARDWARE<span>.</span><br>STORAGE TEARDOWN</h1>
+          <p>PS5 ARCHITECTURE // SPEC 150GB+</p>
+        </div>
+      </div>
+      
+      <div class="spec-card">
+        <div class="spec-row">
+          <span class="spec-label">Internal Bus Target</span>
+          <span class="spec-val">PCIe Gen4 x4</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Required Read Bandwidth</span>
+          <span class="spec-val">5,500 MB/s MIN</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Official Install Target</span>
+          <span class="spec-val">150 GB+ SSD</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="annotation annotation-1">
+      ◆ M.2 EXPANSION BAY<br>
+      <span style="color:#8F9BB3; font-size:20px;">KEY M / 2280 FORM FACTOR</span>
+    </div>
+    <div class="annotation annotation-2">
+      HIGH-SPEED NVMe FLASH ◆<br>
+      <span style="color:#8F9BB3; font-size:20px;">DIRECT ASSET STREAMING</span>
+    </div>
+  </div>
+
+  <script>
+    // Three.js 3D Scene setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1080 / 1920, 0.1, 1000);
+    camera.position.set(0, 0, 14);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(1080, 1920);
+    renderer.setPixelRatio(1);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    container.insertBefore(renderer.domElement, container.firstChild);
+
+    // Studio Lighting
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+    keyLight.position.set(6, 8, 8);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0x3D8BFF, 4.5);
+    rimLight.position.set(-8, -4, -6);
+    scene.add(rimLight);
+
+    const ambientLight = new THREE.AmbientLight(0x1B2438, 1.2);
+    scene.add(ambientLight);
+
+    // Exploded Layers Group
+    const group = new THREE.Group();
+    group.position.y = 0.2;
+    scene.add(group);
+
+    // 1. Back Plate (Matte White ABS)
+    const plateGeo = new THREE.BoxGeometry(4.2, 7.5, 0.15);
+    const plateMat = new THREE.MeshStandardMaterial({
+      color: 0xF0F2F5,
+      roughness: 0.6,
+      metalness: 0.05
+    });
+    const backPlate = new THREE.Mesh(plateGeo, plateMat);
+    backPlate.position.z = -1.2;
+    group.add(backPlate);
+
+    // 2. Chassis Core & Mainboard (Graphite / Copper Traces)
+    const chassisGeo = new THREE.BoxGeometry(3.6, 7.0, 0.5);
+    const chassisMat = new THREE.MeshStandardMaterial({
+      color: 0x111622,
+      roughness: 0.4,
+      metalness: 0.8
+    });
+    const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+    group.add(chassis);
+
+    // 3. Floating M.2 SSD Expansion Module
+    const ssdGeo = new THREE.BoxGeometry(1.2, 3.8, 0.12);
+    const ssdMat = new THREE.MeshStandardMaterial({
+      color: 0x05070A,
+      roughness: 0.25,
+      metalness: 0.9
+    });
+    const ssd = new THREE.Mesh(ssdGeo, ssdMat);
+    ssd.position.set(0.6, 0.4, 1.4);
+    group.add(ssd);
+
+    // SSD Heat spreader stripe (Electric Blue)
+    const stripeGeo = new THREE.BoxGeometry(0.9, 2.8, 0.05);
+    const stripeMat = new THREE.MeshStandardMaterial({
+      color: 0x3D8BFF,
+      roughness: 0.2,
+      metalness: 0.95,
+      emissive: 0x1A4FB3,
+      emissiveIntensity: 0.3
+    });
+    const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.set(0.6, 0.4, 1.5);
+    group.add(stripe);
+
+    // 4. Front Cover Plate (Floating exploded)
+    const frontPlate = new THREE.Mesh(plateGeo, plateMat);
+    frontPlate.position.z = 2.4;
+    group.add(frontPlate);
+
+    // Animation Render Loop
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.015;
+
+      // Orbit camera rotation
+      group.rotation.y = Math.sin(time * 0.4) * 0.35 + 0.3;
+      group.rotation.x = Math.cos(time * 0.3) * 0.12;
+
+      // Breathing Exploded layer translation
+      backPlate.position.z = -1.2 - Math.sin(time) * 0.4;
+      frontPlate.position.z = 2.4 + Math.sin(time) * 0.5;
+      ssd.position.z = 1.4 + Math.sin(time * 1.2) * 0.3;
+      stripe.position.z = ssd.position.z + 0.08;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
