@@ -1590,6 +1590,35 @@ def mark_upload_staged(receipt: dict[str, Any], status: str = "staged") -> dict[
     return staged
 
 
+def get_daily_upload_count(profile: str = "clipper", hours: int = 24) -> int:
+    """Return count of successful uploads in the rolling window for the given profile."""
+    hist = load_upload_history()
+    now_ts = datetime.now(timezone.utc).timestamp()
+    cutoff = now_ts - (hours * 3600)
+    count = 0
+    for r in hist:
+        if profile and r.get("profile") != profile:
+            continue
+        if r.get("publish_status") in ("deleted", "failed"):
+            continue
+        up_str = r.get("uploaded_at") or r.get("staged_at")
+        if not up_str:
+            continue
+        try:
+            dt = datetime.fromisoformat(up_str.replace("Z", "+00:00"))
+            if dt.timestamp() >= cutoff:
+                count += 1
+        except Exception:
+            continue
+    return count
+
+
+def check_daily_upload_quota(profile: str = "clipper", max_per_day: int = 4) -> tuple[bool, int, int]:
+    """Check if we are within the daily upload quota limit. Returns (allowed, used, limit)."""
+    used = get_daily_upload_count(profile=profile, hours=24)
+    return (used < max_per_day, used, max_per_day)
+
+
 def _manage_youtube_client(profile: str | None = "clipper"):
     """Authenticated YouTube client for videos.update / videos.delete (needs force-ssl)."""
     _, _, _, build, HttpError, _ = _lazy_google_imports()
@@ -1940,6 +1969,25 @@ def upload_video(
             "CreatorRadar Rule 4: Human approval required before uploading to YouTube. "
             "Sign off the checklist in the Studio UI or pass --approve."
         )
+
+    # YouTube upload quota and daily limit protection
+    actual_overrides = overrides or {}
+    if not actual_overrides.get("bypass_quota_limit"):
+        try:
+            from scripts.publish_agent import load_publish_config
+            cfg = load_publish_config()
+            max_daily = int(cfg.get("daily_upload_limit", 4))
+            allowed, used, limit = check_daily_upload_quota(profile=resolved_profile, max_per_day=max_daily)
+            if not allowed:
+                raise RuntimeError(
+                    f"YouTube daily upload limit reached ({used}/{limit} uploads in last 24h). "
+                    f"Workflow protected to preserve API quota and channel upload limits. "
+                    f"Candidate clips remain safely staged in your local/cloud reel."
+                )
+        except RuntimeError:
+            raise
+        except Exception:
+            pass
 
     creds, channel_info = load_credentials(refresh_if_needed=True, profile=resolved_profile)
     if not creds or not creds.valid:

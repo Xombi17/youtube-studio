@@ -45,9 +45,12 @@ from scripts.youtube_uploader import (  # noqa: E402
     CONFIG_DIR,
     LIVE_CLIPS_DIR,
     YouTubeScopeError,
+    check_daily_upload_quota,
     delete_video,
+    get_daily_upload_count,
     load_upload_history,
     set_video_privacy,
+    upload_video,
 )
 
 PUBLISH_CONFIG_PATH = CONFIG_DIR / "clipper-publish.json"
@@ -59,20 +62,31 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "dry_run": False,
     # How often the dashboard scheduler invokes a pass (seconds).
     "review_interval_sec": 300,
-    # Local wall-clock window in which POST verdicts are allowed to go public.
-    # Set both to null to publish as soon as a clip is reviewed.
-    "peak_window": {"start": "19:00", "end": "22:00", "timezone": "Asia/Kolkata"},
+    # Daily upload limit to respect YouTube channel upload limits and API quota (1600 units/upload)
+    "daily_upload_limit": 4,
+    "min_upload_score": 80.0,
+    # Local wall-clock windows in which POST verdicts are allowed to go public.
+    "peak_windows": [
+        {"start": "13:00", "end": "15:00", "timezone": "Asia/Kolkata"},
+        {"start": "19:00", "end": "23:00", "timezone": "Asia/Kolkata"}
+    ],
     # Never publish a clip whose human_review.json is missing or inconclusive.
     "require_verdict": True,
     # Keep exports/live-clips/<channel>/<clip_id>/ after publishing (audit trail
     # + taste-memory input). Rejects always have their local package removed.
     "keep_local_after_publish": True,
+    # Automatically select and upload the single highest-scoring candidate during peak window
+    "auto_publish_best_candidate": True,
     # Upper bound on publishes per pass, so a backlog cannot flood the channel.
-    "max_publish_per_run": 4,
+    "max_publish_per_run": 1,
     # Upper bound on deletes per pass (cheap, but keep runaway loops bounded).
     "max_delete_per_run": 25,
     # Automatically purge orphaned uploads from YouTube if their local package was lost
     "clean_orphans": False,
+    # Delete video from YouTube channel (strictly False — deleting a short only clears local storage)
+    "delete_from_youtube": False,
+    # Retention hours for un-uploaded low-tier candidates before local disk cleanup
+    "prune_unuploaded_after_hours": 48,
 }
 
 
@@ -106,25 +120,117 @@ def _parse_hhmm(value: Any) -> dtime | None:
 
 def in_peak_window(cfg: dict[str, Any], now: datetime | None = None) -> bool:
     """True when `now` falls inside the configured publish window (or none is set)."""
-    win = cfg.get("peak_window") or {}
-    start = _parse_hhmm(win.get("start"))
-    end = _parse_hhmm(win.get("end"))
-    if start is None or end is None:
+    windows = cfg.get("peak_windows")
+    if not windows:
+        win = cfg.get("peak_window")
+        windows = [win] if win else []
+    if not windows:
         return True
 
-    tz_name = str(win.get("timezone") or "UTC")
-    try:
-        from zoneinfo import ZoneInfo
+    now_dt = now or datetime.now(timezone.utc)
+    for win in windows:
+        if not isinstance(win, dict):
+            continue
+        start = _parse_hhmm(win.get("start"))
+        end = _parse_hhmm(win.get("end"))
+        if start is None or end is None:
+            return True
 
-        tz = ZoneInfo(tz_name)
-    except Exception:
-        tz = timezone.utc
+        tz_name = str(win.get("timezone") or "UTC")
+        try:
+            from zoneinfo import ZoneInfo
+            tz = ZoneInfo(tz_name)
+        except Exception:
+            tz = timezone.utc
 
-    local = (now or datetime.now(timezone.utc)).astimezone(tz).time()
-    if start <= end:
-        return start <= local <= end
-    # Window wraps midnight (e.g. 22:00 -> 02:00).
-    return local >= start or local <= end
+        local = now_dt.astimezone(tz).time()
+        if start <= end:
+            if start <= local <= end:
+                return True
+        else:
+            if local >= start or local <= end:
+                return True
+    return False
+
+
+def discover_candidates(min_score: float = 75.0, profile: str = "clipper") -> list[dict[str, Any]]:
+    """Scan exports/live-clips/ for un-uploaded candidate clips ranked by quality."""
+    if not LIVE_CLIPS_DIR.exists():
+        return []
+    hist = load_upload_history()
+    uploaded_sources = {
+        str(r.get("source_id") or r.get("title") or "")
+        for r in hist
+        if r.get("profile") == profile and r.get("publish_status") not in ("deleted", "failed")
+    }
+
+    candidates: list[dict[str, Any]] = []
+    for streamer_dir in LIVE_CLIPS_DIR.iterdir():
+        if not streamer_dir.is_dir():
+            continue
+        channel_slug = streamer_dir.name
+        for clip_dir in streamer_dir.iterdir():
+            if not clip_dir.is_dir():
+                continue
+            clip_id = clip_dir.name
+            if clip_id in uploaded_sources:
+                continue
+            mp4s = list(clip_dir.glob("*.mp4"))
+            if not mp4s:
+                continue
+
+            mj_p = clip_dir / "moment.json"
+            fus_score = 0.0
+            if mj_p.exists():
+                try:
+                    mj = json.loads(mj_p.read_text(encoding="utf-8"))
+                    fus_score = float((mj.get("fusion") or {}).get("total_score") or 0.0)
+                except Exception:
+                    pass
+
+            hr_p = clip_dir / "human_review.json"
+            h_score = 0
+            verdict = "UNREVIEWED"
+            gut = ""
+            if hr_p.exists():
+                try:
+                    hr = json.loads(hr_p.read_text(encoding="utf-8"))
+                    h_score = int(hr.get("human_score") or 0)
+                    verdict = str(hr.get("verdict") or "UNREVIEWED").upper()
+                    gut = str(hr.get("gut_reaction") or "")
+                except Exception:
+                    pass
+            else:
+                try:
+                    from scripts.human_clip_reviewer import review_clip_as_human
+                    hr = review_clip_as_human(clip_dir)
+                    if hr:
+                        h_score = int(hr.get("human_score") or 0)
+                        verdict = str(hr.get("verdict") or "UNREVIEWED").upper()
+                        gut = str(hr.get("gut_reaction") or "")
+                except Exception:
+                    pass
+
+            combined_score = round((h_score * 0.6) + (fus_score * 0.4), 1)
+            if combined_score < min_score and verdict != "POST":
+                continue
+
+            candidates.append({
+                "channel": channel_slug,
+                "clip_id": clip_id,
+                "folder": str(clip_dir),
+                "video_path": str(mp4s[0]),
+                "human_score": h_score,
+                "fusion_score": fus_score,
+                "combined_score": combined_score,
+                "verdict": verdict,
+                "gut_reaction": gut,
+                "created_at": clip_dir.stat().st_mtime,
+            })
+
+    # Sort candidates by POST verdict first, then highest combined score
+    candidates.sort(key=lambda x: (x["verdict"] == "POST", x["combined_score"]), reverse=True)
+    return candidates
 
 
 def local_clip_dir(rec: dict[str, Any]) -> Path | None:
@@ -465,6 +571,98 @@ def run_publish_agent(
         except Exception as exc:
             report["errors"].append({"video_id": vid, "error": str(exc)})
             log(f"  [ERR]   {title[:58]} — {exc}")
+
+    # -----------------------------------------------------------------------
+    # Curated Candidate Publishing: Select top S-tier winner from local reel
+    # -----------------------------------------------------------------------
+    max_daily = int(cfg.get("daily_upload_limit", 4))
+    quota_allowed, used_today, daily_limit = check_daily_upload_quota(profile=profile, max_per_day=max_daily)
+    report["quota"] = {"used_today": used_today, "limit": daily_limit, "allowed": quota_allowed}
+
+    if cfg.get("auto_publish_best_candidate", True) and published == 0:
+        if not quota_allowed:
+            log(f"[PublishAgent] Daily YouTube upload quota reached ({used_today}/{daily_limit}). Conserving quota.")
+            report["quota_note"] = f"daily upload limit reached ({used_today}/{daily_limit})"
+        elif not window_open:
+            log(f"[PublishAgent] Peak audience window closed. Candidates safely held in local reel pool.")
+        else:
+            candidates = discover_candidates(min_score=float(cfg.get("min_upload_score", 80.0)), profile=profile)
+            if candidates:
+                winner = candidates[0]
+                win_score = winner["combined_score"]
+                win_cid = winner["clip_id"]
+                win_ch = winner["channel"]
+                min_up_score = float(cfg.get("min_upload_score", 80.0))
+
+                if winner["verdict"] == "POST" or win_score >= min_up_score:
+                    if effective_dry:
+                        log(f"  [DRY] would curate and upload WINNER: {win_cid} ({win_score}/100, verdict={winner['verdict']})")
+                        report["published"].append({"clip_id": win_cid, "score": win_score, "dry_run": True})
+                        published += 1
+                    else:
+                        log(f"  [CURATE-PUB] Publishing daily winner {win_cid} ({win_score}/100, {winner['verdict']}) to YouTube...")
+                        try:
+                            receipt = upload_video(
+                                win_cid,
+                                target_type="clip",
+                                channel=win_ch,
+                                overrides={"privacy_status": "public", "bypass_quota_limit": True},
+                                require_approval=False,
+                                approve_now=True,
+                                profile=profile,
+                                delete_clip_after_upload=False,
+                            )
+                            _patch_history(
+                                receipt.get("video_id", ""),
+                                publish_status="published",
+                                published_at=datetime.now(timezone.utc).isoformat(),
+                                curated_winner=True,
+                                human_score=winner["human_score"],
+                                fusion_score=winner["fusion_score"],
+                            )
+                            report["published"].append({
+                                "video_id": receipt.get("video_id"),
+                                "title": receipt.get("title"),
+                                "human_score": winner["human_score"],
+                                "fusion_score": winner["fusion_score"],
+                                "url": receipt.get("url"),
+                            })
+                            published += 1
+                            log(f"  [PUB] WINNER published -> {receipt.get('url')} (daily {used_today + 1}/{daily_limit})")
+                        except Exception as u_exc:
+                            log(f"  [PUB-ERR] Failed to upload winner {win_cid}: {u_exc}")
+                            report["errors"].append({"clip_id": win_cid, "error": str(u_exc)})
+
+    # -----------------------------------------------------------------------
+    # Local Candidate Retention Pruning (Zero YouTube calls)
+    # -----------------------------------------------------------------------
+    prune_hours = float(cfg.get("prune_unuploaded_after_hours", 48.0))
+    prune_cutoff = time.time() - (prune_hours * 3600)
+    pruned_count = 0
+    if LIVE_CLIPS_DIR.exists():
+        for str_dir in LIVE_CLIPS_DIR.iterdir():
+            if not str_dir.is_dir():
+                continue
+            for c_dir in str_dir.iterdir():
+                if not c_dir.is_dir():
+                    continue
+                try:
+                    hr_file = c_dir / "human_review.json"
+                    v_skip = False
+                    if hr_file.exists():
+                        try:
+                            hr_data = json.loads(hr_file.read_text(encoding="utf-8"))
+                            v_skip = (hr_data.get("verdict") == "SKIP")
+                        except Exception:
+                            pass
+                    c_mtime = c_dir.stat().st_mtime
+                    if (v_skip or c_mtime < prune_cutoff) and not (c_dir / "upload_receipt.json").exists():
+                        shutil.rmtree(c_dir, ignore_errors=True)
+                        pruned_count += 1
+                except Exception:
+                    pass
+    if pruned_count > 0:
+        log(f"[PublishAgent] Pruned {pruned_count} old/skipped candidate folders to reclaim local disk.")
 
     report["finished_at"] = datetime.now(timezone.utc).isoformat()
     report["counts"] = {

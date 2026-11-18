@@ -40,6 +40,7 @@ except Exception:
 CONFIG_DIR = STUDIO_ROOT / "config"
 LOGS_DIR = STUDIO_ROOT / "logs"
 DAEMON_STATE_PATH = CONFIG_DIR / "autonomous_daemon_state.json"
+SCOUT_PAUSED_PATH = CONFIG_DIR / "scout_paused.json"
 
 active_sessions: dict[str, dict[str, Any]] = {}
 stop_requested = False
@@ -84,9 +85,6 @@ def spawn_clipper_for_stream(
         "--asr", clipper_asr,
         "--layout", layout,
         "--facecam-pos", facecam_pos,
-        "--auto-upload",
-        "--auto-upload-min-score", str(min_score),
-        "--upload-privacy", upload_privacy,
         "--upload-profile", "clipper",
     ]
 
@@ -171,7 +169,17 @@ def run_daemon(
         cleanup_old_logs()
         save_daemon_state()
 
-        if len(active_sessions) < max_parallel:
+        is_paused = SCOUT_PAUSED_PATH.exists()
+        if is_paused and active_sessions:
+            for slug in list(active_sessions.keys()):
+                info = active_sessions.pop(slug, None)
+                if info:
+                    proc = info.get("process")
+                    if proc and proc.poll() is None:
+                        proc.terminate()
+            save_daemon_state()
+
+        if not is_paused and len(active_sessions) < max_parallel:
             try:
                 cfg = load_watchlist_config()
                 # Dynamically discover trending streams across ALL categories on YouTube & Twitch

@@ -2,14 +2,26 @@
   "enabled": true,
   "dry_run": false,
   "review_interval_sec": 300,
-  "peak_window": {
-    "start": "19:00",
-    "end": "22:00",
-    "timezone": "Asia/Kolkata"
-  },
+  "daily_upload_limit": 4,
+  "min_upload_score": 80.0,
+  "peak_windows": [
+    {
+      "start": "13:00",
+      "end": "15:00",
+      "timezone": "Asia/Kolkata"
+    },
+    {
+      "start": "19:00",
+      "end": "23:00",
+      "timezone": "Asia/Kolkata"
+    }
+  ],
   "require_verdict": true,
   "keep_local_after_publish": true,
-  "max_publish_per_run": 4,
+  "auto_publish_best_candidate": true,
+  "max_publish_per_run": 1,
   "max_delete_per_run": 25,
-  "clean_orphans": false
+  "clean_orphans": false,
+  "delete_from_youtube": false,
+  "prune_unuploaded_after_hours": 48
 }

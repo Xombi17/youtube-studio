@@ -346,7 +346,7 @@ export default function StudioHome() {
             {apiOffline && (
               <div
                 role="alert"
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e08a8a]/25 bg-[#e08a8a]/08 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e08a8a]/25 bg-[#e08a8a]/8 px-4 py-3"
               >
                 <p className="text-xs leading-relaxed text-[#e9aaaa]">
                   <strong className="font-semibold">The studio engine is not answering on port 8080.</strong>{" "}
@@ -365,7 +365,7 @@ export default function StudioHome() {
 
             {/* Studio pulse */}
             <section aria-label="Studio overview" className="panel rise-in overflow-hidden">
-              <div className="grid grid-cols-2 gap-px bg-[#1a1f28] sm:grid-cols-3 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-px bg-[#1a1f28] lg:grid-cols-5">
                 <Metric
                   label="Subscribers"
                   value={(status?.subscribers ?? 11000).toLocaleString()}
@@ -391,6 +391,7 @@ export default function StudioHome() {
                   value={`${runningCount}`}
                   sub={runningCount > 0 ? "In progress now" : status?.has_voice_sample ? "Voice ready" : "No voice sample"}
                   tone={runningCount > 0 ? "warn" : undefined}
+                  wide
                 />
               </div>
             </section>
@@ -641,14 +642,16 @@ function Metric({
   value,
   sub,
   tone,
+  wide,
 }: {
   label: string;
   value: string;
   sub: string;
   tone?: "warn";
+  wide?: boolean;
 }) {
   return (
-    <div className="stat bg-[#101319]">
+    <div className={`stat bg-[#101319] ${wide ? "col-span-2 lg:col-span-1" : ""}`}>
       <div className="stat-label">{label}</div>
       <div className={`stat-value ${tone === "warn" ? "text-[#dbb675]" : ""}`}>{value}</div>
       <div className="stat-sub">{sub}</div>

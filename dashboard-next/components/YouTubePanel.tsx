@@ -172,12 +172,12 @@ export default function YouTubePanel({ onStatusChange }: Props) {
 return (
     <div className="space-y-5">
       {err && (
-        <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-4 py-3 text-[11.5px] leading-relaxed text-[#e9aaaa]">
+        <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/8 px-4 py-3 text-[11.5px] leading-relaxed text-[#e9aaaa]">
           <strong className="font-medium">Connection problem.</strong> {err}
         </div>
       )}
       {infoMsg && (
-        <div className="rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/08 px-4 py-3 text-[11.5px] leading-relaxed text-[#9ed6b8]">
+        <div className="rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/8 px-4 py-3 text-[11.5px] leading-relaxed text-[#9ed6b8]">
           {infoMsg}
         </div>
       )}
@@ -291,7 +291,7 @@ return (
               })}
             </div>
 
-            <div className="rounded-xl border border-[#9dbbcf]/22 bg-[#9dbbcf]/06 px-3.5 py-2.5 text-[11px] leading-relaxed text-[#b9d0de]">
+            <div className="rounded-xl border border-[#9dbbcf]/22 bg-[#9dbbcf]/6 px-3.5 py-2.5 text-[11px] leading-relaxed text-[#b9d0de]">
               Using a different Gmail for the clips channel? Add that address under{" "}
               <span className="font-medium">Google Cloud Console, OAuth consent screen, Test users</span>{" "}
               while the app is still in testing mode.

@@ -96,7 +96,7 @@ export default function ExportsReview({ projects, initialSlug, onRefresh, onOpen
                 onClick={() => setSelectedSlug(p.slug)}
                 aria-current={active ? "true" : undefined}
                 className={`relative w-full rounded-xl px-3 py-2.5 text-left transition-colors ${
-                  active ? "bg-[#e5a183]/09" : "hover:bg-white/[0.035]"
+                  active ? "bg-[#e5a183]/9" : "hover:bg-white/[0.035]"
                 }`}
               >
                 {active && (
@@ -197,7 +197,7 @@ export default function ExportsReview({ projects, initialSlug, onRefresh, onOpen
 
             <div className="space-y-5 p-5">
               {detail.human_approved && (
-                <div className="flex items-center gap-2 rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/08 px-3.5 py-2.5 text-[11.5px] text-[#9ed6b8]">
+                <div className="flex items-center gap-2 rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/8 px-3.5 py-2.5 text-[11.5px] text-[#9ed6b8]">
                   Signed off by the channel owner. Upload manually or hand it to the YouTube panel.
                 </div>
               )}
@@ -311,7 +311,7 @@ export default function ExportsReview({ projects, initialSlug, onRefresh, onOpen
                         {detail.review.findings.map((f, i) => (
                           <div
                             key={i}
-                            className="rounded-lg border border-[#e08a8a]/25 bg-[#e08a8a]/08 px-3 py-2 text-[11.5px] text-[#e9aaaa]"
+                            className="rounded-lg border border-[#e08a8a]/25 bg-[#e08a8a]/8 px-3 py-2 text-[11.5px] text-[#e9aaaa]"
                           >
                             <strong className="font-mono text-[10px] uppercase tracking-wide">
                               {f.severity}

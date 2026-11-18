@@ -2527,18 +2527,40 @@ def run_live_mode(args: argparse.Namespace, cfg: dict, use_nvenc: bool):
                 except Exception as hexc:
                     print(f"  [HumanReviewer] Unavailable ({hexc})", flush=True)
 
+                # In the new workflow, clips are safely staged in the local candidate reel pool.
+                # Daily YouTube upload limit & API quota guard protects from exhaustion.
+                print(
+                    f"  [ReelPool] Candidate staged locally: {cdir.name} (fusion {final_sc}/100, verdict={h_verdict})",
+                    flush=True,
+                )
+
                 if not do_auto:
                     continue
-                if h_verdict != "POST":
+
+                from scripts.youtube_uploader import check_daily_upload_quota, upload_video, mark_upload_staged
+                from scripts.publish_agent import load_publish_config
+                pub_cfg = load_publish_config()
+                max_daily = int(pub_cfg.get("daily_upload_limit", 4))
+                quota_ok, used_cnt, lim = check_daily_upload_quota(profile=prof, max_per_day=max_daily)
+                if not quota_ok:
                     print(
-                        f"  [HumanReviewer] BLOCKED auto-upload for {cdir.name} (verdict={h_verdict}, requires POST).",
+                        f"  [QuotaGuard] YouTube daily limit reached ({used_cnt}/{lim} in 24h). "
+                        f"Preserving quota — clip kept in local reel pool for review.",
                         flush=True,
                     )
                     continue
 
-                from youtube_uploader import upload_video, mark_upload_staged
+                # Elite curation threshold: Only S-tier POST verdicts trigger direct automated upload
+                if h_verdict != "POST" or final_sc < float(pub_cfg.get("min_upload_score", 85.0)):
+                    print(
+                        f"  [CurationGate] {cdir.name} held in candidate reel (score {final_sc}/100, verdict={h_verdict}). "
+                        f"Awaiting scheduled peak window winner selection or manual creator approval.",
+                        flush=True,
+                    )
+                    continue
+
                 print(
-                    f"  [YouTube:{prof}] score {final_sc}/100 + HUMAN POST — staging {cdir.name} ({priv})...",
+                    f"  [YouTube:{prof}] Top S-Tier Winner (score {final_sc}/100 + HUMAN POST) — uploading {cdir.name} ({priv})...",
                     flush=True,
                 )
                 receipt = upload_video(
@@ -2564,12 +2586,12 @@ def run_live_mode(args: argparse.Namespace, cfg: dict, use_nvenc: bool):
                 except Exception:
                     pass
                 print(
-                    f"  >>> STAGED ({receipt.get('channel_title') or prof}): "
-                    f"{receipt['url']} (Studio: {receipt['studio_url']}) — queued to Redis publish agent",
+                    f"  >>> UPLOADED ({receipt.get('channel_title') or prof}): "
+                    f"{receipt['url']} (Studio: {receipt['studio_url']}) — daily quota {used_cnt + 1}/{lim}",
                     flush=True,
                 )
             except Exception as exc:
-                print(f"  [YouTube:{prof}] S-Tier auto-upload failed for {cdir.name}: {exc}", flush=True)
+                print(f"  [YouTube:{prof}] Clip staging/upload note for {cdir.name}: {exc}", flush=True)
 
     def _export_worker():
         nonlocal clips_made, exporting_clip, groq_queue_since

@@ -336,6 +336,13 @@ def stop_live_clipper(channel: str | None = None) -> dict:
 
     if stopped_channels:
         log(f"Stopped Live Clipper session(s): {', '.join(stopped_channels)}")
+    if not channel:
+        try:
+            (STUDIO_ROOT / "config" / "scout_paused.json").write_text(
+                json.dumps({"paused": True, "at": time.time()}), encoding="utf-8"
+            )
+        except Exception:
+            pass
     return {"status": "STOPPED", "stopped": stopped_channels, "was_running": bool(stopped_channels)}
 
 
@@ -352,6 +359,12 @@ def start_live_clipper(payload: dict) -> dict:
         m_tw = re.search(r"twitch\.tv/([a-zA-Z0-9_]+)", url, re.I)
         m_yt = re.search(r"(?:v=|youtu\.be/|live/)([a-zA-Z0-9_-]{11})", url)
         channel = slugify(m_tw.group(1) if m_tw else (f"yt-{m_yt.group(1)}" if m_yt else f"stream-{int(time.time())}"))
+
+    # Clear pause flag when user starts a clipper
+    try:
+        (STUDIO_ROOT / "config" / "scout_paused.json").unlink(missing_ok=True)
+    except Exception:
+        pass
 
     # Only stop an existing session with the SAME channel name (supports multiple simultaneous streams!)
     stop_live_clipper(channel)
@@ -636,6 +649,15 @@ def set_auto_scout(payload: dict) -> dict:
         if payload.get("poll_interval_sec"):
             AUTO_SCOUT_STATE["poll_interval_sec"] = max(30, int(payload["poll_interval_sec"]))
 
+    sp = STUDIO_ROOT / "config" / "scout_paused.json"
+    if enabled:
+        sp.unlink(missing_ok=True)
+    else:
+        try:
+            sp.write_text(json.dumps({"paused": True, "at": time.time()}), encoding="utf-8")
+        except Exception:
+            pass
+
     if enabled and (AUTO_SCOUT_THREAD is None or not AUTO_SCOUT_THREAD.is_alive()):
         AUTO_SCOUT_THREAD = threading.Thread(target=_auto_scout_loop, daemon=True)
         AUTO_SCOUT_THREAD.start()
@@ -657,15 +679,33 @@ PUBLISH_THREAD: threading.Thread | None = None
 
 
 def get_publish_snapshot() -> dict:
-    """Scheduler view of the publish agent. Config lives in config/clipper-publish.json."""
-    from scripts.publish_agent import load_publish_config, in_peak_window, is_staged
-    from scripts.youtube_uploader import load_upload_history
+    """Scheduler view of the publish agent and daily YouTube upload quota."""
+    from scripts.publish_agent import load_publish_config, in_peak_window, is_staged, discover_candidates
+    from scripts.youtube_uploader import load_upload_history, check_daily_upload_quota
 
     cfg = load_publish_config()
     with PUBLISH_LOCK:
         snap = dict(PUBLISH_STATE)
     snap["config"] = cfg
     snap["peak_window_open"] = in_peak_window(cfg)
+
+    max_daily = int(cfg.get("daily_upload_limit", 4))
+    quota_allowed, used_today, daily_limit = check_daily_upload_quota(profile="clipper", max_per_day=max_daily)
+    snap["quota"] = {
+        "used_today": used_today,
+        "limit": daily_limit,
+        "remaining": max(0, daily_limit - used_today),
+        "allowed": quota_allowed,
+    }
+
+    try:
+        candidates = discover_candidates(min_score=75.0, profile="clipper")
+        snap["candidates_count"] = len(candidates)
+        snap["top_candidates"] = candidates[:10]
+    except Exception:
+        snap["candidates_count"] = 0
+        snap["top_candidates"] = []
+
     staged = [r for r in load_upload_history() if is_staged(r)]
     snap["staged_count"] = len(staged)
     snap["staged"] = [
@@ -1167,12 +1207,23 @@ def start_youtube_upload(payload: dict) -> dict:
 # The API binds 127.0.0.1, but that does NOT stop a web page the user visits from
 # issuing cross-origin POSTs. Echo CORS only for the Studio UI's own origins so a
 # random site cannot start/delete/upload clips through the user's browser.
-ALLOWED_ORIGINS = {
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-}
+def _get_allowed_origins() -> set[str]:
+    origins = {
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    }
+    env_origins = os.environ.get("STUDIO_ALLOWED_ORIGINS", "").strip()
+    if env_origins:
+        for o in env_origins.split(","):
+            o = o.strip()
+            if o:
+                origins.add(o)
+    return origins
+
+
+ALLOWED_ORIGINS = _get_allowed_origins()
 
 
 class StudioAPIHandler(BaseHTTPRequestHandler):
@@ -1180,14 +1231,62 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         pass
 
     def _origin_allowed(self) -> bool:
-        """Allow non-browser clients (no Origin header) and the Studio UI origins only."""
+        """Allow non-browser clients (no Origin header) and the Studio UI origins only.
+        Supports localhost, explicitly configured STUDIO_ALLOWED_ORIGINS, matching Host headers,
+        and direct IP access (e.g. cloud deployment http://<ip>:3000)."""
         origin = self.headers.get("Origin")
-        return origin is None or origin in ALLOWED_ORIGINS
+        if not origin:
+            return True
+
+        if os.environ.get("STUDIO_ALLOWED_ORIGINS", "").strip() == "*":
+            return True
+
+        if origin in ALLOWED_ORIGINS:
+            return True
+
+        try:
+            parsed = urllib.parse.urlparse(origin)
+            origin_host = parsed.netloc.lower()
+            origin_hostname = (parsed.hostname or "").lower()
+
+            # 1. Match against Host and X-Forwarded-Host headers
+            forwarded = self.headers.get("X-Forwarded-Host")
+            host_header = self.headers.get("Host")
+            for h in (forwarded, host_header):
+                if not h:
+                    continue
+                h = h.lower()
+                if origin_host == h:
+                    return True
+                # Allow port difference between Next.js UI (port 3000) and API (port 8080) on the same host
+                if origin_hostname == h.split(":")[0]:
+                    return True
+
+            # 2. Allow if origin hostname is an IPv4 or IPv6 address (direct cloud/LAN server access)
+            import ipaddress
+            try:
+                ipaddress.ip_address(origin_hostname)
+                return True
+            except ValueError:
+                pass
+
+            # 3. Allow if origin matches configured STUDIO_API_HOST
+            server_host = os.environ.get("STUDIO_API_HOST", "").strip().lower()
+            if server_host and server_host != "0.0.0.0" and origin_hostname == server_host:
+                return True
+        except Exception:
+            pass
+
+        return False
 
     def _send_cors(self):
         origin = self.headers.get("Origin")
-        if origin in ALLOWED_ORIGINS:
+        if origin and self._origin_allowed():
             self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Credentials", "true")
+        self.send_header("Vary", "Origin")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Range, Authorization")
         self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Range")
@@ -1253,15 +1352,18 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Range", f"bytes {start}-{end}/{file_size}")
             self.send_header("Content-Length", str(length))
             self.end_headers()
-            with open(target, "rb") as f:
-                f.seek(start)
-                remaining = length
-                while remaining > 0:
-                    chunk = f.read(min(65536, remaining))
-                    if not chunk:
-                        break
-                    self.wfile.write(chunk)
-                    remaining -= len(chunk)
+            try:
+                with open(target, "rb") as f:
+                    f.seek(start)
+                    remaining = length
+                    while remaining > 0:
+                        chunk = f.read(min(65536, remaining))
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        remaining -= len(chunk)
+            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+                pass
             return
 
         self.send_response(200)
@@ -1270,12 +1372,15 @@ class StudioAPIHandler(BaseHTTPRequestHandler):
         self.send_header("Accept-Ranges", "bytes")
         self.send_header("Content-Length", str(file_size))
         self.end_headers()
-        with open(target, "rb") as f:
-            while True:
-                chunk = f.read(65536)
-                if not chunk:
-                    break
-                self.wfile.write(chunk)
+        try:
+            with open(target, "rb") as f:
+                while True:
+                    chunk = f.read(65536)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            pass
 
     def do_OPTIONS(self):
         if not self._origin_allowed():

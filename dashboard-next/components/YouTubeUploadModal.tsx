@@ -279,7 +279,7 @@ export default function YouTubeUploadModal({
                 </div>
 
                 {job.error && (
-                  <div className="rounded-lg border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3 py-2 font-mono text-[10.5px] leading-relaxed text-[#e9aaaa]">
+                  <div className="rounded-lg border border-[#e08a8a]/30 bg-[#e08a8a]/8 px-3 py-2 font-mono text-[10.5px] leading-relaxed text-[#e9aaaa]">
                     {job.error}
                   </div>
                 )}
@@ -346,7 +346,7 @@ export default function YouTubeUploadModal({
             <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
               {/* Channel Routing Lock info */}
               {selectedConnected && selectedSlot?.channel && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/07 px-3.5 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/7 px-3.5 py-3">
                   <div className="flex min-w-0 items-center gap-2.5">
                     {selectedSlot.channel.thumbnail_url && (
                       <img
@@ -376,7 +376,7 @@ export default function YouTubeUploadModal({
               )}
 
               {!selectedConnected && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dbb675]/28 bg-[#dbb675]/07 px-3.5 py-3 text-[11.5px]">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dbb675]/28 bg-[#dbb675]/7 px-3.5 py-3 text-[11.5px]">
                   <div className="min-w-0">
                     <p className="font-medium text-[#e6c894]">
                       {selectedProfile === "clipper"
@@ -586,7 +586,7 @@ export default function YouTubeUploadModal({
               </div>
 
               {err && (
-                <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
+                <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/8 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
                   {err}
                 </div>
               )}

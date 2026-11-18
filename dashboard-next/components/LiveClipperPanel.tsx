@@ -587,7 +587,7 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
 
         <div className="space-y-3.5 p-5">
           {scoutNotice && (
-            <div className="rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/08 px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-[#9ed6b8]">
+            <div className="rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/8 px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-[#9ed6b8]">
               {scoutNotice}
             </div>
           )}
@@ -692,7 +692,7 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
                   key={s.channel}
                   className={`inline-flex items-center gap-1.5 rounded-lg border pl-2.5 pr-1.5 py-1 ${
                     isSel
-                      ? "border-[#e5a183]/45 bg-[#e5a183]/09"
+                      ? "border-[#e5a183]/45 bg-[#e5a183]/9"
                       : "border-[#222936] bg-[#0b0e13]"
                   }`}
                 >
@@ -977,7 +977,7 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
           </div>
 
           {err && (
-            <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
+            <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/8 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
               {err}
             </div>
           )}
@@ -1172,7 +1172,7 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
                 {inProgress.map((job, idx) => (
                   <div
                     key={`${job.trigger_idx}-${idx}`}
-                    className="flex items-center justify-between gap-2 rounded-lg border border-[#dbb675]/30 bg-[#dbb675]/08 px-3 py-2.5 text-[11.5px]"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-[#dbb675]/30 bg-[#dbb675]/8 px-3 py-2.5 text-[11.5px]"
                   >
                     <div className="min-w-0">
                       <p className="font-medium text-[#e6c894]">
@@ -1344,7 +1344,7 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
                       aria-current={active ? "true" : undefined}
                       className={`relative w-full rounded-xl border px-3.5 py-3 text-left transition-colors ${
                         active
-                          ? "border-[#e5a183]/40 bg-[#e5a183]/08"
+                          ? "border-[#e5a183]/40 bg-[#e5a183]/8"
                           : "border-transparent hover:border-[#222936] hover:bg-white/[0.03]"
                       }`}
                     >
@@ -1432,10 +1432,10 @@ const autoScoutOn = Boolean(data?.auto_scout?.enabled);
                         <div
                           className={`space-y-1.5 rounded-xl border p-3 ${
                             selectedClip.human_review.verdict === "POST"
-                              ? "border-[#7fc8a3]/30 bg-[#7fc8a3]/07"
+                              ? "border-[#7fc8a3]/30 bg-[#7fc8a3]/7"
                               : selectedClip.human_review.verdict === "MAYBE"
-                                ? "border-[#dbb675]/30 bg-[#dbb675]/07"
-                                : "border-[#e08a8a]/30 bg-[#e08a8a]/07"
+                                ? "border-[#dbb675]/30 bg-[#dbb675]/7"
+                                : "border-[#e08a8a]/30 bg-[#e08a8a]/7"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
