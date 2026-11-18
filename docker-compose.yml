@@ -1,0 +1,38 @@
+services:
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clipsurge_studio
+    restart: unless-stopped
+    ports:
+      - "3000:3000"   # Next.js Web UI
+      - "8080:8080"   # Studio Engine API
+    volumes:
+      - ./config:/app/config
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Kolkata
+    command: ["./scripts/start_studio.sh"]
+
+  autonomous_clipper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clipsurge_autonomous_daemon
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+      - ./exports:/app/exports
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Kolkata
+    # Autonomously polls watchlist, clips live streams, and auto-stages to private drafts (>= 80 score)
+    command: ["python", "scripts/autonomous_scout_daemon.py", "--min-score", "80.0", "--asr", "modal", "--privacy", "private"]
+    depends_on:
+      - studio
