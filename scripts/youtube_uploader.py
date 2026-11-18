@@ -838,15 +838,22 @@ def _sanitize_public_source_url(source_url: str, streamer: str = "", channel_slu
     return ""
 
 
+_STREAM_LINK_RE = re.compile(
+    r"https?://(?:www\.)?(?:twitch\.tv|youtube\.com|youtu\.be)/[^\s]+",
+    flags=re.I,
+)
+
+
 def _scrub_local_paths(text: str) -> str:
-    """Defense-in-depth scrub ensuring no local machine paths ever leak into public YouTube descriptions."""
+    """Defense-in-depth scrub ensuring no local machine paths or external stream links leak into YouTube descriptions."""
     cleaned_lines: list[str] = []
     for line in (text or "").splitlines():
-        if _LOCAL_PATH_RE.search(line):
-            # Drop lines like 'Watch full stream: /home/...' entirely rather than leaving a broken label
+        if _LOCAL_PATH_RE.search(line) or _STREAM_LINK_RE.search(line):
+            # Drop lines like 'Watch full stream: ...' entirely rather than leaving a broken label
             if re.match(r"^\s*(?:watch\s+full\s+stream|source\s+stream|file|path)\s*:", line, flags=re.I):
                 continue
-            line = _LOCAL_PATH_RE.sub("", line).strip()
+            line = _LOCAL_PATH_RE.sub("", line)
+            line = _STREAM_LINK_RE.sub("", line).strip()
         cleaned_lines.append(line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
@@ -1762,14 +1769,7 @@ def build_upload_metadata(
             f"Drop a comment with your favorite {streamer}{game_phrase} moment so far.",
         ]
         credit_line = f"Credit: {streamer} Live Stream ({platform})" if platform else f"Credit: {streamer} Live Stream"
-        if source_url:
-            lines.extend([
-                "",
-                credit_line,
-                f"Watch full stream: {source_url}",
-            ])
-        else:
-            lines.extend(["", credit_line])
+        lines.extend(["", credit_line])
         desc_body = "\n".join(lines)
     else:
         m_desc = re.search(r"## Description(?:\s*\(Draft\))?\s*\n(.*)", meta_md, flags=re.S)

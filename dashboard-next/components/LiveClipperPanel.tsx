@@ -28,10 +28,12 @@ function parseEmbedInfo(url: string): { platform: "youtube" | "twitch" | null; e
   return { platform: null, embedUrl: null };
 }
 
-function tierBadgeClass(tier: string) {
-  if (tier === "S-TIER") return "bg-amber-400/20 text-amber-300 border-amber-400/40";
-  if (tier === "A-TIER") return "bg-[#E3A484]/20 text-[#E3A484] border-[#E3A484]/40";
-  return "bg-sky-500/15 text-sky-300 border-sky-500/30";
+function latestTierChip(tier: string) {
+  const t = (tier || "").toUpperCase();
+  if (t.startsWith("S")) return "chip chip-accent";
+  if (t.startsWith("A")) return "chip chip-warn";
+  if (t.startsWith("B")) return "chip chip-info";
+  return "chip chip-neutral";
 }
 
 export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: Props) {
@@ -472,254 +474,284 @@ export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: P
   const running = Boolean(activeSession ? activeSession.running : data?.running);
   const runningCount = data?.running_count ?? (data?.running ? 1 : 0);
 
+const autoScoutOn = Boolean(data?.auto_scout?.enabled);
+
   return (
-    <div className="space-y-6">
-      {/* Live Stream Scout & Parallel Auto-Clipper */}
-      <section className="panel p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Live Stream Scout &amp; Parallel Auto-Clipper
-              {data?.auto_scout?.enabled && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  AUTO-SCOUT ON ({data.auto_scout.max_parallel}×)
+    <div className="space-y-5">
+      {/* Live stream scout */}
+      <section className="panel">
+        <div className="panel-head">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="panel-title">Live stream scout</h2>
+              {autoScoutOn && (
+                <span className="chip chip-ok">
+                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-[#7fc8a3]" />
+                  Auto-scout · {data?.auto_scout?.max_parallel}×
                 </span>
               )}
-            </h2>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Finds the hottest live Twitch &amp; YouTube streams right now and launches parallel 0-VRAM clipping sessions automatically.
+            </div>
+            <p className="panel-sub">
+              Finds live streams worth clipping and opens parallel sessions without local GPU time.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={scoutGame}
-              onChange={(e) => {
-                setScoutGame(e.target.value);
-                handleDiscoverStreams(e.target.value, scoutLang);
-              }}
-              className="rounded-lg bg-[#0A0C10] border border-[#2A313D] px-2.5 py-1.5 text-xs font-mono text-slate-200"
-            >
-              <option value="Grand Theft Auto VI">GTA VI (GTA 6)</option>
-              <option value="ALL">Top All Games</option>
-              <option value="Just Chatting">Just Chatting</option>
-              <option value="Grand Theft Auto V">GTA V</option>
-              <option value="VALORANT">VALORANT</option>
-              <option value="Minecraft">Minecraft</option>
-              <option value="Fortnite">Fortnite</option>
-            </select>
+            <label className="sr-only" htmlFor="scout-game">
+              Game
+            </label>
+            <div className="w-[156px]">
+              <select
+                id="scout-game"
+                value={scoutGame}
+                onChange={(e) => {
+                  setScoutGame(e.target.value);
+                  handleDiscoverStreams(e.target.value, scoutLang);
+                }}
+                className="select h-8 text-[11.5px]"
+              >
+                <option value="Grand Theft Auto VI">GTA VI (GTA 6)</option>
+                <option value="ALL">Top All Games</option>
+                <option value="Just Chatting">Just Chatting</option>
+                <option value="Grand Theft Auto V">GTA V</option>
+                <option value="VALORANT">VALORANT</option>
+                <option value="Minecraft">Minecraft</option>
+                <option value="Fortnite">Fortnite</option>
+              </select>
+            </div>
 
-            <select
-              value={scoutLang}
-              onChange={(e) => {
-                setScoutLang(e.target.value);
-                handleDiscoverStreams(scoutGame, e.target.value);
-              }}
-              className="rounded-lg bg-[#0A0C10] border border-[#2A313D] px-2.5 py-1.5 text-xs font-mono text-slate-200"
-            >
-              <option value="EN">English</option>
-              <option value="ALL">All Languages</option>
-            </select>
+            <label className="sr-only" htmlFor="scout-lang">
+              Language
+            </label>
+            <div className="w-[116px]">
+              <select
+                id="scout-lang"
+                value={scoutLang}
+                onChange={(e) => {
+                  setScoutLang(e.target.value);
+                  handleDiscoverStreams(scoutGame, e.target.value);
+                }}
+                className="select h-8 text-[11.5px]"
+              >
+                <option value="EN">English</option>
+                <option value="ALL">All languages</option>
+              </select>
+            </div>
 
-            <select
-              value={scoutMaxParallel}
-              onChange={(e) => setScoutMaxParallel(Number(e.target.value))}
-              className="rounded-lg bg-[#0A0C10] border border-[#2A313D] px-2.5 py-1.5 text-xs font-mono text-slate-200"
-              title="Max simultaneous parallel streams"
-            >
-              <option value={2}>2× Parallel</option>
-              <option value={3}>3× Parallel</option>
-              <option value={4}>4× Parallel</option>
-            </select>
+            <label className="sr-only" htmlFor="scout-parallel">
+              Parallel streams
+            </label>
+            <div className="w-[112px]">
+              <select
+                id="scout-parallel"
+                value={scoutMaxParallel}
+                onChange={(e) => setScoutMaxParallel(Number(e.target.value))}
+                title="Simultaneous parallel streams"
+                className="select h-8 text-[11.5px]"
+              >
+                <option value={2}>2 parallel</option>
+                <option value={3}>3 parallel</option>
+                <option value={4}>4 parallel</option>
+              </select>
+            </div>
 
             <button
               type="button"
               disabled={scoutLoading}
               onClick={() => handleDiscoverStreams()}
-              className="px-3 py-1.5 rounded-lg bg-[#181C23] border border-[#343C4A] text-xs font-mono text-slate-200 hover:text-white cursor-pointer disabled:opacity-50"
+              className="btn btn-sm btn-secondary"
             >
-              {scoutLoading ? "Scanning..." : "Scan Live"}
+              {scoutLoading ? "Scanning" : "Scan live"}
             </button>
 
             <button
               type="button"
               disabled={scoutBusy}
               onClick={handleAutoClipTopN}
-              className="px-3.5 py-1.5 rounded-lg bg-[#E3A484] text-slate-950 text-xs font-bold hover:bg-[#F0B79A] cursor-pointer disabled:opacity-50"
+              className="btn btn-sm btn-primary"
             >
-              ⚡ Auto-Clip Top {scoutMaxParallel}
+              Auto-clip top {scoutMaxParallel}
             </button>
 
             <button
               type="button"
               disabled={scoutBusy}
               onClick={handleToggleAutoScout}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border cursor-pointer transition disabled:opacity-50 ${
-                data?.auto_scout?.enabled
-                  ? "bg-emerald-500/20 border-emerald-400/60 text-emerald-300"
-                  : "bg-[#0A0C10] border-[#2A313D] text-slate-300 hover:border-emerald-500/50"
-              }`}
+              aria-pressed={autoScoutOn}
+              className={`btn btn-sm ${autoScoutOn ? "btn-secondary text-[#9ed6b8]" : "btn-ghost border border-[#222936]"}`}
             >
-              {data?.auto_scout?.enabled ? "● Auto-Scout ON" : "Auto-Scout OFF"}
+              {autoScoutOn ? "Auto-scout on" : "Auto-scout off"}
             </button>
           </div>
         </div>
 
-        {scoutNotice && (
-          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/35 px-3 py-2 text-xs font-mono text-emerald-200">
-            {scoutNotice}
-          </div>
-        )}
+        <div className="space-y-3.5 p-5">
+          {scoutNotice && (
+            <div className="rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/08 px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-[#9ed6b8]">
+              {scoutNotice}
+            </div>
+          )}
 
-        {scoutStreams.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {scoutStreams.slice(0, 8).map((item) => {
-              const isLiveClip =
-                item.already_clipping ||
-                sessions.some(
-                  (s) =>
-                    s.running &&
-                    (s.channel.toLowerCase() === item.suggested_channel.toLowerCase() ||
-                      (s.state.url || "").toLowerCase().replace(/\/$/, "") === item.url.toLowerCase().replace(/\/$/, ""))
-                );
-              return (
-                <div
-                  key={item.id}
-                  className={`rounded-xl bg-[#0A0C10] border overflow-hidden flex flex-col justify-between transition ${
-                    isLiveClip ? "border-emerald-500/60" : "border-[#1E232C] hover:border-[#3C4553]"
-                  }`}
-                >
-                  <div>
+          {scoutStreams.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {scoutStreams.slice(0, 8).map((item) => {
+                const isLiveClip =
+                  item.already_clipping ||
+                  sessions.some(
+                    (s) =>
+                      s.running &&
+                      (s.channel.toLowerCase() === item.suggested_channel.toLowerCase() ||
+                        (s.state.url || "").toLowerCase().replace(/\/$/, "") ===
+                          item.url.toLowerCase().replace(/\/$/, ""))
+                  );
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex flex-col overflow-hidden rounded-xl border bg-[#0b0e13] ${
+                      isLiveClip ? "border-[#7fc8a3]/45" : "border-[#1a1f28]"
+                    }`}
+                  >
                     <div className="relative aspect-video bg-black">
                       {item.thumbnail_url && (
                         <img
                           src={item.thumbnail_url}
                           alt={item.display_name}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       )}
-                      <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-600/90 text-white">
-                          LIVE {item.viewers > 0 ? `· ${(item.viewers / 1000).toFixed(1)}K` : ""}
+                      <span className="absolute left-2 top-2 rounded bg-[#c96f6f] px-1.5 py-0.5 font-mono text-[9.5px] font-semibold tracking-wide text-white">
+                        LIVE
+                      </span>
+                      {item.viewers > 0 && (
+                        <span className="absolute right-2 top-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[9.5px] text-[#ecebe6]">
+                          {(item.viewers / 1000).toFixed(1)}K
                         </span>
-                        {item.is_watchlist && (
-                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/90 text-slate-950">
-                            ★
-                          </span>
-                        )}
-                      </div>
-                      <span className="absolute bottom-1.5 right-1.5 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-black/75 text-slate-200">
+                      )}
+                      <span className="absolute bottom-2 right-2 rounded bg-black/72 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-[#a3a099]">
                         {item.platform} · {item.language}
                       </span>
+                      {item.is_watchlist && (
+                        <span className="absolute bottom-2 left-2 rounded bg-[#dbb675] px-1.5 py-0.5 font-mono text-[9px] font-semibold text-[#17100c]">
+                          Watchlist
+                        </span>
+                      )}
                     </div>
-                    <div className="p-2.5">
-                      <div className="text-xs font-bold text-white truncate">{item.display_name}</div>
-                      <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5" title={item.title}>
-                        {item.title || item.game}
+                    <div className="flex flex-1 flex-col justify-between gap-2.5 p-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-[12.5px] font-medium text-[#ecebe6]">
+                          {item.display_name}
+                        </p>
+                        <p className="mt-0.5 line-clamp-1 text-[11px] text-[#79776f]" title={item.title}>
+                          {item.title || item.game}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-mono text-[10px] text-[#79776f]">{item.game}</span>
+                        {isLiveClip ? (
+                          <span className="chip chip-ok shrink-0">
+                            <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-[#7fc8a3]" />
+                            Clipping
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={scoutBusy}
+                            onClick={() => handleClipDiscovered(item)}
+                            className="btn btn-xs btn-secondary shrink-0"
+                          >
+                            Clip stream
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="px-2.5 pb-2.5 flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-mono text-slate-500 truncate">{item.game}</span>
-                    {isLiveClip ? (
-                      <span className="text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        ● CLIPPING
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={scoutBusy}
-                        onClick={() => handleClipDiscovered(item)}
-                        className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-[#191E26] hover:bg-[#E3A484] hover:text-slate-950 text-sky-300 border border-[#343C4A] cursor-pointer transition disabled:opacity-50"
-                      >
-                        + Clip Live
-                      </button>
-                    )}
-                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-[#222936] px-4 py-10 text-center text-[11.5px] leading-relaxed text-[#79776f]">
+              {scoutLoading
+                ? "Scanning live platforms for GTA VI streams."
+                : "No live streams found for this filter. Pick another game or scan again."}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Active sessions */}
+      {sessions.length > 0 && (
+        <section className="panel px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#79776f]">
+              Sessions · {runningCount} live
+            </span>
+            {sessions.map((s) => {
+              const isSel = activeSession?.channel === s.channel;
+              return (
+                <div
+                  key={s.channel}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border pl-2.5 pr-1.5 py-1 ${
+                    isSel
+                      ? "border-[#e5a183]/45 bg-[#e5a183]/09"
+                      : "border-[#222936] bg-[#0b0e13]"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSession(s.channel)}
+                    className="inline-flex items-center gap-2 font-mono text-[11px] text-[#d8d4cb]"
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        s.running ? "pulse-dot bg-[#e08a8a]" : "bg-[#3a3936]"
+                      }`}
+                    />
+                    @{s.channel}
+                    <span className="text-[10px] text-[#79776f]">{s.state.segments_scanned} segs</span>
+                  </button>
+                  {s.running && (
+                    <button
+                      type="button"
+                      title={`Stop @${s.channel}`}
+                      onClick={() => handleStop(s.channel)}
+                      className="rounded px-1.5 py-0.5 text-[10px] text-[#79776f] transition-colors hover:bg-[#e08a8a]/12 hover:text-[#e9aaaa]"
+                    >
+                      Stop
+                    </button>
+                  )}
                 </div>
               );
             })}
-          </div>
-        )}
-      </section>
-
-      {/* Multi-Stream Active Sessions Bar */}
-      {sessions.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 panel px-4 py-3">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mr-1">
-            Streams ({runningCount} live):
-          </span>
-          {sessions.map((s) => {
-            const isSel = activeSession?.channel === s.channel;
-            return (
-              <div
-                key={s.channel}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition ${
-                  isSel
-                    ? "bg-[#1B2029] border-[#E3A484] text-white"
-                    : "bg-[#0A0C10] border-[#343C4A] text-slate-300 hover:border-[#3C4553]"
-                }`}
+            {runningCount > 1 && (
+              <button
+                type="button"
+                onClick={() => handleStop()}
+                className="btn btn-xs btn-danger ml-auto"
               >
-                <button
-                  type="button"
-                  onClick={() => setSelectedSession(s.channel)}
-                  className="inline-flex items-center gap-2 cursor-pointer"
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      s.running ? "bg-rose-500 animate-pulse" : "bg-slate-600"
-                    }`}
-                  />
-                  <span>@{s.channel}</span>
-                  <span className="text-[10px] text-slate-400">
-                    ({s.state.segments_scanned} segs)
-                  </span>
-                </button>
-                {s.running && (
-                  <button
-                    type="button"
-                    title={`Stop @${s.channel}`}
-                    onClick={() => handleStop(s.channel)}
-                    className="ml-1 text-[10px] text-rose-400 hover:text-rose-200 cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            );
-          })}
-          {runningCount > 1 && (
-            <button
-              type="button"
-              onClick={() => handleStop()}
-              className="ml-auto px-2.5 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-[11px] font-mono text-rose-300 hover:bg-rose-500/25 cursor-pointer"
-            >
-              Stop All
-            </button>
-          )}
-        </div>
+                Stop all
+              </button>
+            )}
+          </div>
+        </section>
       )}
 
-      {/* Top Launch & Config Bar */}
-      <section className="panel p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2.5">
+      {/* Clipper control */}
+      <section className="panel">
+        <div className="panel-head">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  running ? "bg-rose-500 animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.8)]" : "bg-slate-600"
+                className={`h-2 w-2 rounded-full ${
+                  running ? "live-ring bg-[#e08a8a]" : "bg-[#3a3936]"
                 }`}
               />
-              <h2 className="text-lg font-semibold text-white">
-                Live Stream Auto-Clipper <span className="text-[#E3A484]">v2</span>
-              </h2>
-              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#0A0C10] border border-[#2A313D] text-slate-300">
-                {running ? st?.status || "LISTENING LIVE" : "IDLE"}
+              <h2 className="panel-title">Live stream clipper</h2>
+              <span className="chip chip-neutral font-mono">
+                {running ? st?.status || "Listening live" : "Idle"}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Multi-stream concurrent clipper · Paste another URL with a new Channel Label to clip multiple streams simultaneously!
+            <p className="panel-sub">
+              Paste a Twitch or YouTube URL. Add a second URL with a new channel label to clip both at once.
             </p>
           </div>
 
@@ -728,315 +760,334 @@ export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: P
               type="button"
               disabled={busy || !url.trim()}
               onClick={handleStart}
-              className="px-4 py-2 rounded-xl bg-[#E3A484] hover:bg-[#F0B79A] text-slate-950 text-xs font-semibold cursor-pointer disabled:opacity-50"
+              className="btn btn-sm btn-primary"
             >
-              {busy ? "Connecting..." : runningCount > 0 ? "+ Add / Restart Stream" : "Start Live Clipper"}
+              {busy ? "Connecting" : runningCount > 0 ? "Add stream" : "Start clipper"}
             </button>
             {running && activeSession && (
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => handleStop(activeSession.channel)}
-                className="px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-200 hover:bg-rose-500/30 text-xs font-bold cursor-pointer disabled:opacity-50"
+                className="btn btn-sm btn-danger"
               >
-                {busy ? "Stopping..." : `Stop @${activeSession.channel}`}
+                {busy ? "Stopping" : `Stop @${activeSession.channel}`}
               </button>
             )}
           </div>
         </div>
 
-        <form onSubmit={handleStart} className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          <div className="md:col-span-5">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">
-              Twitch or YouTube Live URL
-            </label>
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=... or https://www.twitch.tv/..."
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-100 font-mono focus:outline-none focus:border-[#E3A484]"
-            />
+        <form onSubmit={handleStart} className="space-y-4 p-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-6 lg:grid-cols-12">
+            <div className="field sm:col-span-4 lg:col-span-6">
+              <label className="label" htmlFor="clip-url">
+                Stream URL
+              </label>
+              <input
+                id="clip-url"
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=... or https://twitch.tv/..."
+                className="input font-mono text-[11.5px]"
+              />
+            </div>
+
+            <div className="field sm:col-span-2 lg:col-span-3">
+              <label className="label" htmlFor="clip-name">
+                Channel label
+              </label>
+              <input
+                id="clip-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="mythpat-gta6"
+                className="input font-mono text-[11.5px]"
+              />
+            </div>
+
+            <div className="field sm:col-span-2 lg:col-span-1">
+              <label className="label" htmlFor="clip-max">
+                Max sec
+              </label>
+              <input
+                id="clip-max"
+                type="number"
+                min={15}
+                max={60}
+                value={maxClipSec}
+                onChange={(e) => setMaxClipSec(Number(e.target.value))}
+                className="input font-mono"
+              />
+            </div>
+
+            <div className="field sm:col-span-2 lg:col-span-2">
+              <label className="label" htmlFor="clip-layout">
+                Framing
+              </label>
+              <select
+                id="clip-layout"
+                value={layout}
+                onChange={(e) =>
+                  setLayout(
+                    e.target.value as "facecam-split" | "pip-overlay" | "split-blur" | "crop" | "landscape"
+                  )
+                }
+                className="select"
+              >
+                <option value="split-blur">9:16 split-blur</option>
+                <option value="facecam-split">9:16 zero-gap facecam</option>
+                <option value="pip-overlay">9:16 floating facecam</option>
+                <option value="crop">9:16 center crop</option>
+                <option value="landscape">16:9 landscape</option>
+              </select>
+            </div>
+
+            <div className="field sm:col-span-2 lg:col-span-2">
+              <label className="label" htmlFor="clip-facecam">
+                Facecam corner
+              </label>
+              <select
+                id="clip-facecam"
+                value={facecamPos}
+                disabled={layout !== "facecam-split" && layout !== "pip-overlay"}
+                onChange={(e) =>
+                  setFacecamPos(
+                    e.target.value as "top-right" | "top-left" | "bottom-right" | "bottom-left"
+                  )
+                }
+                className="select"
+              >
+                <option value="top-right">Top right</option>
+                <option value="top-left">Top left</option>
+                <option value="bottom-right">Bottom right</option>
+                <option value="bottom-left">Bottom left</option>
+              </select>
+            </div>
+
+            <div className="field sm:col-span-3 lg:col-span-4">
+              <label className="label" htmlFor="clip-asr">
+                Speech engine
+              </label>
+              <select
+                id="clip-asr"
+                value={asr}
+                onChange={(e) => setAsr(e.target.value as "modal" | "hinglish" | "whisper" | "whistle")}
+                className="select"
+              >
+                <option value="modal">Modal cloud GPU · free T4</option>
+                <option value="hinglish">Local Whisper Hinglish · RTX 4060</option>
+                <option value="whisper">Local Whisper small · RTX 4060</option>
+                <option value="whistle">Local Cactus Whistle · 16.9MB CPU</option>
+              </select>
+            </div>
+
+            <div className="field sm:col-span-3 lg:col-span-2">
+              <label className="label" htmlFor="clip-lang">
+                Language
+              </label>
+              <select
+                id="clip-lang"
+                value={asrLang}
+                onChange={(e) => setAsrLang(e.target.value as "auto" | "hi" | "en")}
+                className="select"
+              >
+                <option value="auto">Auto detect</option>
+                <option value="hi">Hindi</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+            <div className="field sm:col-span-6 lg:col-span-4">
+              <label className="label" htmlFor="clip-keywords">
+                Extra keywords
+              </label>
+              <input
+                id="clip-keywords"
+                type="text"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                className="input font-mono text-[11.5px]"
+              />
+              <p className="hint">About 160 more phrases live in the clipper config.</p>
+            </div>
+
+            <div className="field sm:col-span-6 lg:col-span-2">
+              <label className="label" htmlFor="clip-threshold">
+                Trigger score · {threshold}
+              </label>
+              <input
+                id="clip-threshold"
+                type="range"
+                min={72}
+                max={85}
+                value={threshold}
+                onChange={(e) => setThreshold(Number(e.target.value))}
+                className="mt-2.5 w-full"
+              />
+              <p className="hint">Minimum 72, the A-tier export gate.</p>
+            </div>
           </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Channel Label</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="mythpat-gta6"
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-100 font-mono"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">
-              Threshold ({threshold}/100)
-            </label>
-            <input
-              type="range"
-              min={72}
-              max={85}
-              value={threshold}
-              onChange={(e) => setThreshold(Number(e.target.value))}
-              className="w-full accent-[#E3A484] mt-2"
-            />
-            <p className="text-[10px] font-mono text-slate-500 mt-1">
-              Minimum 72 — the A-tier export gate. Lower scores are never rendered.
-            </p>
-          </div>
-
-          <div className="md:col-span-1">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Max (s)</label>
-            <input
-              type="number"
-              min={15}
-              max={60}
-              value={maxClipSec}
-              onChange={(e) => setMaxClipSec(Number(e.target.value))}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100 font-mono"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Output Framing</label>
-            <select
-              value={layout}
-              onChange={(e) => setLayout(e.target.value as "facecam-split" | "pip-overlay" | "split-blur" | "crop" | "landscape")}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100"
-            >
-              <option value="split-blur">9:16 Split-Blur (Recommended)</option>
-              <option value="facecam-split">9:16 Zero-Gap Facecam + Game</option>
-              <option value="pip-overlay">9:16 Full-Screen Game + Floating Facecam</option>
-              <option value="crop">9:16 Center Crop</option>
-              <option value="landscape">16:9 Landscape</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-3">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Facecam Corner</label>
-            <select
-              value={facecamPos}
-              disabled={layout !== "facecam-split" && layout !== "pip-overlay"}
-              onChange={(e) =>
-                setFacecamPos(e.target.value as "top-right" | "top-left" | "bottom-right" | "bottom-left")
-              }
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100 disabled:opacity-40"
-            >
-              <option value="top-right">Top-Right (Mythpat / Most YT)</option>
-              <option value="top-left">Top-Left</option>
-              <option value="bottom-right">Bottom-Right</option>
-              <option value="bottom-left">Bottom-Left</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-3">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Speech AI Engine</label>
-            <select
-              value={asr}
-              onChange={(e) => setAsr(e.target.value as "modal" | "hinglish" | "whisper" | "whistle")}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100"
-            >
-              <option value="modal">Modal Cloud GPU (Free T4 — 0% Laptop GPU)</option>
-              <option value="hinglish">Local Whisper Hinglish-Apex (RTX 4060)</option>
-              <option value="whisper">Local Whisper Small (RTX 4060)</option>
-              <option value="whistle">Local Cactus Whistle (16.9MB EN CPU)</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">Language</label>
-            <select
-              value={asrLang}
-              onChange={(e) => setAsrLang(e.target.value as "auto" | "hi" | "en")}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100"
-            >
-              <option value="auto">Auto (Hinglish)</option>
-              <option value="hi">Force Hindi</option>
-              <option value="en">Force English</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-4">
-            <label className="block text-[10px] font-medium uppercase text-slate-400 mb-1">
-              Extra Keywords (+ 160 phrases in config)
-            </label>
-            <input
-              type="text"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-200 font-mono"
-            />
-          </div>
-
-          <div className="md:col-span-12 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#1A1F27]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1a1f28] pt-3.5">
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+              <label className="flex cursor-pointer items-center gap-2 text-[12px] text-[#d8d4cb]">
                 <input
                   type="checkbox"
                   checked={autoUpload}
                   onChange={(e) => setAutoUpload(e.target.checked)}
-                  className="accent-[#E3A484]"
                 />
-                <span>
-                  <strong>Auto-Upload S-Tier Clips (≥ 90) to Clipper Channel</strong>{" "}
-                  <span className="text-slate-400">
-                    (Private Studio Draft by default · auto-deletes local clip after upload)
-                  </span>
-                </span>
+                Auto-upload S-tier clips (90+) to the clipper channel
               </label>
 
               {clipperYt?.connected && clipperYt.channel ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-[11px] font-mono text-emerald-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Clipper YT: <strong>{clipperYt.channel.title}</strong>
-                  {clipperYt.channel.custom_url ? ` (${clipperYt.channel.custom_url})` : ""}
+                <span className="chip chip-ok">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#7fc8a3]" />
+                  {clipperYt.channel.title}
                 </span>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => onOpenYouTubeTab?.()}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-[11px] font-mono text-amber-300 hover:bg-amber-500/25 cursor-pointer"
-                >
-                  ⚠ Clipper Channel Not Connected — Connect Now ↗
+                <button type="button" onClick={() => onOpenYouTubeTab?.()} className="btn btn-xs btn-danger">
+                  Connect clipper channel
                 </button>
               )}
             </div>
+
             {autoUpload && (
-              <div className="flex items-center gap-2 text-xs">
-                <span className="font-mono text-[11px] text-slate-400">Visibility:</span>
-                <select
-                  value={uploadPrivacy}
-                  onChange={(e) => setUploadPrivacy(e.target.value as "private" | "unlisted" | "public")}
-                  className="rounded-lg bg-[#0A0C10] border border-[#2A313D] px-2.5 py-1 text-xs text-slate-100"
-                >
-                  <option value="private">Private (YouTube Studio Draft — Safe)</option>
-                  <option value="unlisted">Unlisted</option>
-                  <option value="public">Public (Go Live Immediately)</option>
-                </select>
+              <div className="flex items-center gap-2">
+                <label className="label mb-0" htmlFor="clip-privacy">
+                  Visibility
+                </label>
+                <div className="w-[214px]">
+                  <select
+                    id="clip-privacy"
+                    value={uploadPrivacy}
+                    onChange={(e) =>
+                      setUploadPrivacy(e.target.value as "private" | "unlisted" | "public")
+                    }
+                    className="select h-8 text-[11.5px]"
+                  >
+                    <option value="private">Private draft · safe</option>
+                    <option value="unlisted">Unlisted</option>
+                    <option value="public">Public immediately</option>
+                  </select>
+                </div>
               </div>
             )}
           </div>
-        </form>
 
-        {err && (
-          <div className="rounded-xl bg-rose-500/15 border border-rose-500/40 px-3 py-2 text-xs text-rose-200">
-            {err}
-          </div>
-        )}
+          {err && (
+            <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
+              {err}
+            </div>
+          )}
+        </form>
       </section>
 
-      {/* Live Clipper Progress KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <MetricBox
-          label="Live Status"
-          value={running ? "LIVE" : "IDLE"}
-          sub={st?.channel ? `@${st.channel}` : "Paste URL to start"}
-          accent={running ? "text-rose-400" : "text-slate-400"}
-        />
-        <MetricBox
-          label="Segments Scanned"
-          value={`${st?.segments_scanned ?? 0}`}
-          sub={`${((st?.segments_scanned ?? 0) * 10 / 60).toFixed(1)} min analyzed`}
-          accent="text-sky-400"
-        />
-        <MetricBox
-          label="Clips In Progress"
-          value={`${inProgress.length}`}
-          sub={inProgress.length ? inProgress[0].stage.replace("_", " ") : "Waiting for spike"}
-          accent={inProgress.length > 0 ? "text-amber-400" : "text-slate-200"}
-        />
-        <MetricBox
-          label="Clips Created"
-          value={`${clips.length}`}
-          sub={`${clips.filter((c) => c.human_approved).length} human-approved`}
-          accent="text-emerald-400"
-        />
-        <MetricBox
-          label="Live Chat Velocity"
-          value={latest?.chat?.ratio ? `${latest.chat.ratio.toFixed(1)}x` : "—"}
-          sub={
-            latest?.chat?.msgs_in_window !== undefined
-              ? `${latest.chat.msgs_in_window} msgs / 10s (${latest.chat.unique_authors ?? 0} users)`
-              : "Chat monitor standby"
-          }
-          accent={latest?.chat?.is_explosion ? "text-[#E3A484]" : "text-slate-100"}
-        />
-      </div>
+      {/* Live pulse */}
+      <section className="panel overflow-hidden">
+        <div className="grid grid-cols-2 gap-px bg-[#1a1f28] sm:grid-cols-3 lg:grid-cols-5">
+          <MetricBox
+            label="Live status"
+            value={running ? "Live" : "Idle"}
+            sub={st?.channel ? `@${st.channel}` : "Paste a URL to start"}
+            tone={running ? "danger" : "muted"}
+          />
+          <MetricBox
+            label="Segments scanned"
+            value={`${st?.segments_scanned ?? 0}`}
+            sub={`${(((st?.segments_scanned ?? 0) * 10) / 60).toFixed(1)} min analyzed`}
+          />
+          <MetricBox
+            label="Clips in progress"
+            value={`${inProgress.length}`}
+            sub={inProgress.length ? inProgress[0].stage.replace("_", " ") : "Waiting for a spike"}
+            tone={inProgress.length > 0 ? "warn" : "muted"}
+          />
+          <MetricBox
+            label="Clips created"
+            value={`${clips.length}`}
+            sub={`${clips.filter((c) => c.human_approved).length} human approved`}
+            tone="ok"
+          />
+          <MetricBox
+            label="Chat velocity"
+            value={latest?.chat?.ratio ? `${latest.chat.ratio.toFixed(1)}×` : "None"}
+            sub={
+              latest?.chat?.msgs_in_window !== undefined
+                ? `${latest.chat.msgs_in_window} msgs / 10s · ${latest.chat.unique_authors ?? 0} users`
+                : "Chat monitor standby"
+            }
+            tone={latest?.chat?.is_explosion ? "accent" : "muted"}
+          />
+        </div>
+      </section>
 
-      {/* Main Split: Embedded Live Stream Player + Live Multimodal Radar & Queue */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left: Embedded Stream Preview */}
-        <section className="lg:col-span-7 panel overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b border-[#232934] flex items-center justify-between">
+      {/* Monitor + signals */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <section className="panel flex flex-col overflow-hidden lg:col-span-7">
+          <div className="flex items-center justify-between gap-3 border-b border-[#1a1f28] px-4 py-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
-                Live Stream Monitor
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#79776f]">
+                Live stream monitor
               </span>
-              {embed.platform && (
-                <span className="text-[10px] font-medium uppercase px-2 py-0.5 rounded bg-[#0A0C10] text-[#E3A484] border border-[#2A313D]">
-                  {embed.platform}
-                </span>
-              )}
+              {embed.platform && <span className="chip chip-neutral font-mono uppercase">{embed.platform}</span>}
             </div>
             {activeUrl && (
               <a
                 href={activeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[11px] font-mono text-sky-400 hover:underline"
+                className="font-mono text-[10.5px] text-[#9dbbcf] hover:underline"
               >
-                Open Original ↗
+                Open original ↗
               </a>
             )}
           </div>
 
-          <div className="aspect-video bg-black relative">
+          <div className="relative aspect-video bg-black">
             {embed.embedUrl ? (
               <iframe
                 src={embed.embedUrl}
-                title="Live Stream Player"
-                className="w-full h-full border-0"
+                title="Live stream player"
+                className="h-full w-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-xs text-slate-500 font-mono p-6 text-center">
-                Paste a live YouTube or Twitch stream URL above to preview the stream right here.
+              <div className="flex h-full w-full items-center justify-center px-6 text-center text-[11.5px] leading-relaxed text-[#79776f]">
+                Paste a live YouTube or Twitch URL above to preview the stream here.
               </div>
             )}
           </div>
 
-          {/* Rolling 36-Segment Virality Timeline Chart */}
-          <div className="p-4 border-t border-[#232934] space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>Live Virality Timeline (last {history.length} × 10s segments)</span>
-              <span>Trigger Line: {st?.threshold ?? threshold}/100</span>
+          <div className="space-y-2 border-t border-[#1a1f28] p-4">
+            <div className="flex items-center justify-between font-mono text-[10.5px] text-[#79776f]">
+              <span>Virality timeline · last {history.length} windows</span>
+              <span>Trigger {st?.threshold ?? threshold}</span>
             </div>
-            <div className="relative h-24 bg-[#0A0C10] rounded-xl border border-[#1B2029] px-2 pt-3 pb-1 flex items-end gap-1 overflow-hidden">
-              {/* Threshold horizontal line */}
+            <div className="relative flex h-24 items-end gap-1 overflow-hidden rounded-xl border border-[#1a1f28] bg-[#0b0e13] px-2 pb-1 pt-3">
               <div
-                className="absolute left-0 right-0 border-t border-dashed border-[#E3A484]/60 pointer-events-none"
+                className="pointer-events-none absolute left-0 right-0 border-t border-dashed border-[#e5a183]/55"
                 style={{ bottom: `${Math.min(95, st?.threshold ?? threshold)}%` }}
               />
               {history.length === 0 ? (
-                <div className="w-full h-full flex items-center justify-center text-[11px] font-mono text-slate-500">
-                  Waiting for first 10-second segment...
+                <div className="flex h-full w-full items-center justify-center font-mono text-[11px] text-[#79776f]">
+                  Waiting for the first ten-second window
                 </div>
               ) : (
                 history.map((pt) => (
                   <div
                     key={`${pt.idx}-${pt.time}`}
-                    title={`[${pt.time}] seg_${pt.idx} | Score ${pt.total} (Chat ${pt.chat}, Aud ${pt.audio}, Vis ${pt.visual}, Txt ${pt.txt})`}
-                    className="flex-1 min-w-[6px] rounded-t transition-all"
+                    title={`[${pt.time}] seg_${pt.idx} · ${pt.total}/100 · chat ${pt.chat} · audio ${pt.audio} · visual ${pt.visual} · text ${pt.txt}`}
+                    className="min-w-[6px] flex-1 rounded-t-[2px] transition-all"
                     style={{
                       height: `${Math.max(5, Math.min(100, pt.total))}%`,
                       backgroundColor: pt.triggered
-                        ? "#E3A484"
+                        ? "#e5a183"
                         : pt.total >= (st?.threshold ?? threshold) * 0.7
-                          ? "#D8B173"
-                          : "#9BC4D8",
+                          ? "#dbb675"
+                          : "#3d4757",
                     }}
                   />
                 ))
@@ -1045,104 +1096,123 @@ export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: P
           </div>
         </section>
 
-        {/* Right: Multimodal Signal Breakdown + In-Progress Queue + Live Feed */}
-        <section className="lg:col-span-5 space-y-4 flex flex-col">
-          {/* Live Signal Meters */}
-          <div className="panel p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
-                Multimodal Signal Radar
+        <div className="flex flex-col gap-4 lg:col-span-5">
+          <div className="panel p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#79776f]">
+                Multimodal signal radar
               </span>
               {latest && (
-                <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${tierBadgeClass(latest.tier)}`}>
+                <span className={`chip ${latestTierChip(latest.tier)}`}>
                   {latest.tier} · {latest.total_score}/100
                 </span>
               )}
             </div>
 
-            <SignalBar label="Chat Explosion (Twitch / YT)" value={latest?.chat?.score ?? 0} max={55} color="#E3A484" />
-            <SignalBar label="Audio Emotion DSP (Scream/Laugh)" value={latest?.audio?.score ?? 0} max={35} color="#D8B173" />
-            <SignalBar label="Transcript Hype & Keywords" value={latest?.transcript_score?.score ?? 0} max={40} color="#9BC4D8" />
-            <SignalBar label="Visual Action & Scene Cuts (Cool Plays)" value={latest?.visual?.score ?? 0} max={32} color="#B0A6CE" />
+            <div className="mt-3.5 space-y-3">
+              <SignalBar label="Chat explosion" value={latest?.chat?.score ?? 0} max={55} color="#e5a183" />
+              <SignalBar label="Audio emotion" value={latest?.audio?.score ?? 0} max={35} color="#dbb675" />
+              <SignalBar
+                label="Transcript hype"
+                value={latest?.transcript_score?.score ?? 0}
+                max={40}
+                color="#9dbbcf"
+              />
+              <SignalBar
+                label="Visual action"
+                value={latest?.visual?.score ?? 0}
+                max={32}
+                color="#8e8b84"
+              />
+            </div>
 
-            <div className="pt-2 border-t border-[#1A1F27] flex items-center justify-between text-[11px] font-mono">
-              <span className="text-slate-400">Cross-Modal Synergy</span>
-              <span
-                className={
-                  (latest?.synergy ?? 0) > 0
-                    ? "text-emerald-400 font-bold"
-                    : (latest?.synergy ?? 0) < 0
-                      ? "text-rose-400 font-bold"
-                      : "text-slate-400"
-                }
-              >
-                {(latest?.synergy ?? 0) >= 0 ? `+${latest?.synergy ?? 0}` : latest?.synergy}{" "}
-                {latest?.synergy_reasons?.length ? `(${latest.synergy_reasons.join(", ")})` : ""}
-              </span>
+            <div className="mt-3 border-t border-[#1a1f28] pt-2.5">
+              <div className="flex items-start justify-between gap-3 font-mono text-[10.5px]">
+                <span className="text-[#79776f]">Cross-modal synergy</span>
+                <span
+                  className={`text-right ${
+                    (latest?.synergy ?? 0) > 0
+                      ? "text-[#9ed6b8]"
+                      : (latest?.synergy ?? 0) < 0
+                        ? "text-[#e9aaaa]"
+                        : "text-[#79776f]"
+                  }`}
+                >
+                  {(latest?.synergy ?? 0) >= 0 ? `+${latest?.synergy ?? 0}` : latest?.synergy}
+                  {latest?.synergy_reasons?.length ? ` (${latest.synergy_reasons.join(", ")})` : ""}
+                </span>
+              </div>
             </div>
 
             {latest?.transcript && (
-              <div className="rounded-xl bg-[#0A0C10] border border-[#1B2029] p-2.5 text-xs text-slate-300 font-mono">
-                <span className="text-[10px] text-slate-500 block mb-0.5">
-                  LATEST SEGMENT [{latest.time}] · {latest.archetype}
-                </span>
-                “{latest.transcript}”
+              <div className="panel-inset mt-3 p-2.5">
+                <p className="mb-1 font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#79776f]">
+                  Segment {latest.time} · {latest.archetype}
+                </p>
+                <p className="font-mono text-[11px] leading-relaxed text-[#a3a099]">
+                  &ldquo;{latest.transcript}&rdquo;
+                </p>
               </div>
             )}
           </div>
 
-          {/* Clips Currently In Progress */}
-          <div className="panel p-4 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
-                In-Progress Clip Queue ({inProgress.length})
+          <div className="panel p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#79776f]">
+                In-progress queue · {inProgress.length}
               </span>
-              <span className="text-[10px] font-mono text-slate-500">Auto-renders via NVENC</span>
+              <span className="font-mono text-[10px] text-[#79776f]">NVENC</span>
             </div>
             {inProgress.length === 0 ? (
-              <div className="text-xs text-slate-500 font-mono py-2">
-                No clips rendering right now. Trigger threshold is {st?.threshold ?? threshold}/100.
-              </div>
+              <p className="mt-3 font-mono text-[11px] leading-relaxed text-[#79776f]">
+                Nothing rendering. Trigger threshold is {st?.threshold ?? threshold}/100.
+              </p>
             ) : (
-              <div className="space-y-2">
+              <div className="mt-3 space-y-2">
                 {inProgress.map((job, idx) => (
                   <div
                     key={`${job.trigger_idx}-${idx}`}
-                    className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-center justify-between gap-2 text-xs"
+                    className="flex items-center justify-between gap-2 rounded-lg border border-[#dbb675]/30 bg-[#dbb675]/08 px-3 py-2.5 text-[11.5px]"
                   >
-                    <div>
-                      <div className="font-bold text-amber-200">
-                        {job.stage === "EXPORTING_NVENC" ? "Rendering NVENC 9:16..." : "Collecting Post-Pad Reaction..."}
-                      </div>
-                      <div className="text-[11px] font-mono text-amber-300/80">
-                        {job.archetype} · Score {job.score}/100 · seg_{job.trigger_idx}
-                      </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-[#e6c894]">
+                        {job.stage === "EXPORTING_NVENC" ? "Rendering NVENC 9:16" : "Collecting post-pad reaction"}
+                      </p>
+                      <p className="font-mono text-[10.5px] text-[#a3a099]">
+                        {job.archetype} · {job.score}/100 · seg_{job.trigger_idx}
+                      </p>
                     </div>
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+                    <span className="pulse-dot h-2 w-2 shrink-0 rounded-full bg-[#dbb675]" />
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Live Clipper Console Tail */}
-          <div className="bg-[#0D1015] border border-[#232934] rounded-2xl overflow-hidden flex-1 flex flex-col min-h-[150px]">
-            <div className="px-3.5 py-2 bg-[#12151B] border-b border-[#232934] flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase text-slate-300">Live Clipper Feed</span>
-              <span className="text-[10px] font-mono text-slate-500">{data?.logs?.length ?? 0} lines</span>
+          <div className="panel flex min-h-[150px] flex-1 flex-col overflow-hidden">
+            <div className="flex items-center justify-between gap-2 border-b border-[#1a1f28] px-3.5 py-2">
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#79776f]">
+                Clipper feed
+              </span>
+              <span className="font-mono text-[10px] text-[#79776f]">{data?.logs?.length ?? 0} lines</span>
             </div>
-            <div className="p-3 h-40 overflow-y-auto font-mono text-[11px] space-y-1 text-slate-300">
-              {(data?.logs?.length ? data.logs : ["Start a stream to see live 10s segment scores here..."]).map((line, i) => (
+            <div className="h-40 space-y-1 overflow-y-auto p-3 font-mono text-[10.5px] leading-relaxed">
+              {(data?.logs?.length
+                ? data.logs
+                : ["Start a stream to see ten-second window scores here."]
+              ).map((line, i) => (
                 <div
                   key={i}
                   className={
                     line.includes("EXPORTED") || line.includes("SAVED")
-                      ? "text-emerald-400 font-semibold"
-                      : line.includes("LIVE MOMENT") || line.includes("CLIP TRIGGERED") || line.includes("ESCALATING")
-                        ? "text-amber-300 font-semibold"
+                      ? "text-[#9ed6b8]"
+                      : line.includes("LIVE MOMENT") ||
+                          line.includes("CLIP TRIGGERED") ||
+                          line.includes("ESCALATING")
+                        ? "text-[#e6c894]"
                         : line.includes("error") || line.includes("failed")
-                          ? "text-rose-400"
-                          : "text-slate-300"
+                          ? "text-[#e9aaaa]"
+                          : "text-[#79776f]"
                   }
                 >
                   {line}
@@ -1151,338 +1221,340 @@ export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: P
               <div ref={logRef} />
             </div>
           </div>
-        </section>
+        </div>
       </div>
 
-      {/* Created Clips Gallery + Built-In Vertical Video Reviewer */}
-      <section className="panel p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <h3 className="text-base font-bold text-white flex flex-wrap items-center gap-2">
-              Created Viral Clips ({clips.length})
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E3A484]/15 text-[#F6CDB8] border border-[#E3A484]/40">
-                S-TIER ≥ 90
-              </span>
+      {/* Created clips */}
+      <section className="panel">
+        <div className="panel-head">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="panel-title">Created clips</h2>
+              <span className="chip chip-neutral font-mono">{clips.length}</span>
+              <span className="chip chip-accent">S-tier is 90+</span>
               {data?.groq_usage?.configured && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">
-                  Groq Free-Tier: {data.groq_usage.llm_calls_today + data.groq_usage.whisper_calls_today}/{data.groq_usage.rpd_soft_cap} today · {data.groq_usage.calls_saved} saved
+                <span className="chip chip-ok font-mono">
+                  Groq {data.groq_usage.llm_calls_today + data.groq_usage.whisper_calls_today}/
+                  {data.groq_usage.rpd_soft_cap} · {data.groq_usage.calls_saved} saved
                 </span>
               )}
-            </h3>
-            <p className="text-xs text-slate-400">
-              Saved under <code>exports/live-clips/</code> with Groq Whisper + Wispr-Flow captions &amp; Blueprint v2 scoring.
+            </div>
+            <p className="panel-sub">
+              Saved under{" "}
+              <code className="font-mono text-[11px] text-[#a3a099]">exports/live-clips/</code> with captions
+              and Blueprint v2 scoring.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              disabled={batchReviewing}
-              onClick={handleBatchReview}
-              className="px-3 py-1.5 rounded-lg bg-[#191E26] border border-[#343C4A] text-xs font-mono font-bold text-sky-300 hover:bg-[#E3A484] hover:text-slate-950 cursor-pointer disabled:opacity-50"
-              title="Score & generate cached YouTube titles for up to 3 unreviewed clips in a single Groq API call"
-            >
-              {batchReviewing ? "Batching..." : "⚡ Batch-Review 3 (1 Groq Call)"}
-            </button>
-            <button
-              type="button"
-              disabled={humanReviewingKey === "__s_tier__"}
-              onClick={() => handleHumanReview()}
-              className="px-3 py-1.5 rounded-lg bg-purple-500/15 border border-purple-400/45 text-xs font-mono font-bold text-purple-200 hover:bg-purple-500/30 cursor-pointer disabled:opacity-50"
-              title="Run the simulated normal-human viewer agent (gpt-oss-120b) on unreviewed A-Tier and S-Tier clips"
-            >
-              {humanReviewingKey === "__s_tier__" ? "Reviewing..." : "🧠 Human-Review A/S"}
-            </button>
-            {/* Tier Filter Pills */}
-            <div className="inline-flex items-center gap-1 rounded-xl bg-[#0A0C10] border border-[#2A313D] p-1">
-              {(["ALL", "S-TIER", "A-TIER", "B-TIER", "REVIEW"] as const).map((tierKey) => {
-                const isActive = tierFilter === tierKey;
-                const count = tierCounts[tierKey];
-                return (
+          <button type="button" onClick={pollStatus} className="btn btn-xs btn-ghost">
+            Refresh
+          </button>
+        </div>
+
+        <div className="space-y-3.5 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={batchReviewing}
+                onClick={handleBatchReview}
+                className="btn btn-xs btn-secondary"
+                title="Score and title up to three unreviewed clips in one Groq call"
+              >
+                {batchReviewing ? "Batching" : "Batch review 3 · 1 call"}
+              </button>
+              <button
+                type="button"
+                disabled={humanReviewingKey === "__s_tier__"}
+                onClick={() => handleHumanReview()}
+                className="btn btn-xs btn-secondary"
+                title="Run the normal-viewer review agent on unreviewed A and S tier clips"
+              >
+                {humanReviewingKey === "__s_tier__" ? "Reviewing" : "Review A/S clips"}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="seg">
+                {(["ALL", "S-TIER", "A-TIER", "B-TIER", "REVIEW"] as const).map((tierKey) => (
                   <button
                     key={tierKey}
                     type="button"
+                    aria-pressed={tierFilter === tierKey}
                     onClick={() => setTierFilter(tierKey)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold transition cursor-pointer ${
-                      isActive
-                        ? tierKey === "S-TIER"
-                          ? "bg-[#E3A484]/25 text-[#F6CDB8] border border-[#E3A484]/50"
-                          : tierKey === "A-TIER"
-                            ? "bg-amber-500/20 text-amber-200 border border-amber-500/45"
-                            : tierKey === "B-TIER"
-                              ? "bg-sky-500/20 text-sky-200 border border-sky-500/45"
-                              : tierKey === "REVIEW"
-                                ? "bg-purple-500/25 text-purple-200 border border-purple-400/55"
-                                : "bg-[#1B2029] text-white border border-[#3C4553]"
-                        : "text-slate-400 hover:text-slate-200 border border-transparent"
-                    }`}
                   >
-                    {tierKey === "ALL" ? "All" : tierKey === "REVIEW" ? "🧠 Needs review" : tierKey} ({count})
+                    {tierKey === "ALL"
+                      ? "All"
+                      : tierKey === "REVIEW"
+                        ? "Needs review"
+                        : tierKey.replace("-TIER", "")}{" "}
+                    <span className="ml-1 font-mono text-[10px] opacity-60">
+                      {tierCounts[tierKey]}
+                    </span>
                   </button>
-                );
-              })}
-            </div>
+                ))}
+              </div>
 
-            {/* Tier / Score / Time Sorter */}
-            <label className="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
-              <span>Sort:</span>
-              <select
-                value={clipSort}
-                onChange={(e) => setClipSort(e.target.value as "tier_desc" | "tier_asc" | "score_desc" | "newest")}
-                className="rounded-lg bg-[#0A0C10] border border-[#2A313D] px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-[#E3A484]"
+              <label className="sr-only" htmlFor="clip-sort">
+                Sort clips
+              </label>
+              <div className="w-[176px]">
+                <select
+                  id="clip-sort"
+                  value={clipSort}
+                  onChange={(e) =>
+                    setClipSort(e.target.value as "tier_desc" | "tier_asc" | "score_desc" | "newest")
+                  }
+                  className="select h-8 text-[11.5px]"
+                >
+                  <option value="tier_desc">Tier, S to B</option>
+                  <option value="tier_asc">Tier, B to S</option>
+                  <option value="score_desc">Score, high to low</option>
+                  <option value="newest">Newest first</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {clips.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#222936] px-4 py-14 text-center text-[11.5px] leading-relaxed text-[#79776f]">
+              No clips exported yet. When a moment crosses the threshold, the vertical Short appears here.
+            </div>
+          ) : sortedClips.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#222936] px-4 py-12 text-center text-[11.5px] text-[#79776f]">
+              No {tierFilter.toLowerCase().replace("-tier", "")} clips right now.{" "}
+              <button
+                type="button"
+                onClick={() => setTierFilter("ALL")}
+                className="text-[#e5a183] underline underline-offset-2"
               >
-                <option value="tier_desc">Tier (S → A → B)</option>
-                <option value="tier_asc">Tier (B → A → S)</option>
-                <option value="score_desc">Score (High → Low)</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </label>
-
-            <button
-              type="button"
-              onClick={pollStatus}
-              className="px-3 py-1.5 rounded-lg bg-[#0A0C10] border border-[#2A313D] text-xs font-mono text-slate-300 hover:text-white cursor-pointer"
-            >
-              Refresh Clips
-            </button>
-          </div>
-        </div>
-
-        {clips.length === 0 ? (
-          <div className="rounded-xl bg-[#0A0C10] border border-[#1B2029] p-8 text-center text-xs font-mono text-slate-500">
-            No live clips exported yet. Once a moment crosses threshold, the vertical 9:16 Short will appear here automatically.
-          </div>
-        ) : sortedClips.length === 0 ? (
-          <div className="rounded-xl bg-[#0A0C10] border border-[#1B2029] p-8 text-center text-xs font-mono text-slate-400">
-            No {tierFilter} clips right now.{" "}
-            <button
-              type="button"
-              onClick={() => setTierFilter("ALL")}
-              className="text-[#E3A484] underline cursor-pointer"
-            >
-              Show all {clips.length} clips
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Clip List */}
-            <div className="lg:col-span-5 space-y-2 max-h-[540px] overflow-y-auto pr-1">
-              {sortedClips.map((c) => {
-                const key = `${c.channel}/${c.clip_id}`;
-                const active = selectedClip && `${selectedClip.channel}/${selectedClip.clip_id}` === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setSelectedClipKey(key)}
-                    className={`w-full text-left rounded-xl p-3.5 border transition cursor-pointer ${
-                      active
-                        ? "bg-[#152238] border-[#E3A484]"
-                        : "bg-[#0A0C10] border-[#1E232C] hover:border-[#3C4553]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${tierBadgeClass(c.tier)}`}>
-                          {c.tier} · {c.total_score}/100
-                        </span>
-                        {c.needs_human_review && !c.human_review && (
-                          <span
-                            className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border bg-purple-500/20 text-purple-200 border-purple-400/45"
-                            title="A/S-tier clip — automatic human review is queued or running"
-                          >
-                            🧠 PENDING REVIEW
-                          </span>
-                        )}
-                        {c.human_review && (
-                          <span
-                            className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                              c.human_review.verdict === "POST"
-                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/45"
-                                : c.human_review.verdict === "MAYBE"
-                                  ? "bg-amber-500/20 text-amber-200 border-amber-500/45"
-                                  : "bg-rose-500/20 text-rose-300 border-rose-500/45"
-                            }`}
-                          >
-                            🧠 {c.human_review.verdict} {c.human_review.human_score}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-400">{c.size_mb} MB</span>
-                    </div>
-                    <div className="text-xs font-bold text-slate-100 mt-1.5 truncate">
-                      {c.archetype} · @{c.channel}
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
-                      {c.transcript || c.clip_id}
-                    </p>
-                    <div className="flex items-center justify-between mt-2 text-[10px] font-mono text-slate-500">
-                      <span>{c.clip_id}</span>
-                      <span className={c.human_approved ? "text-emerald-400" : "text-amber-400"}>
-                        {c.human_approved ? "APPROVED" : "CHECKLIST OPEN"}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                Show all {clips.length}
+              </button>
             </div>
-
-            {/* Selected Clip Vertical Player & Details */}
-            {selectedClip && (
-              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-12 gap-4 bg-[#0A0C10] border border-[#1E232C] rounded-2xl p-4">
-                <div className="sm:col-span-5 flex flex-col items-center">
-                  <video
-                    key={`${selectedClip.video_url}-${selectedClip.mtime}`}
-                    src={`${selectedClip.video_url}?v=${Math.floor(selectedClip.mtime)}`}
-                    controls
-                    playsInline
-                    className="w-full max-w-[270px] aspect-[9/16] rounded-xl bg-black border border-[#343C4A] object-contain"
-                  />
-                </div>
-                <div className="sm:col-span-7 space-y-3 flex flex-col justify-between">
-                  <div className="space-y-2.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border ${tierBadgeClass(selectedClip.tier)}`}>
-                        {selectedClip.tier} · {selectedClip.total_score}/100
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-400">
-                        Lookback {selectedClip.pre_pad_used}s / Post {selectedClip.post_pad_used}s
-                      </span>
-                    </div>
-
-                    <div className="text-sm font-bold text-white">{selectedClip.archetype}</div>
-                    <div className="text-[11px] font-mono text-slate-400">
-                      Channel: @{selectedClip.channel} · File: {selectedClip.clip_id}.mp4
-                    </div>
-
-                    <div className="rounded-xl panel p-3 text-xs text-slate-300">
-                      <div className="text-[10px] font-medium uppercase text-slate-500 mb-1">Transcript</div>
-                      {selectedClip.transcript || "(No transcript)"}
-                    </div>
-
-                    {selectedClip.human_review && (
-                      <div
-                        className={`rounded-xl p-3 border text-xs space-y-1.5 ${
-                          selectedClip.human_review.verdict === "POST"
-                            ? "bg-emerald-500/10 border-emerald-500/40"
-                            : selectedClip.human_review.verdict === "MAYBE"
-                              ? "bg-amber-500/10 border-amber-500/40"
-                              : "bg-rose-500/10 border-rose-500/40"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono font-bold text-[11px] text-white">
-                            🧠 Human Viewer Verdict: {selectedClip.human_review.verdict} ({selectedClip.human_review.human_score}/100)
+          ) : (
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+              <div className="max-h-[560px] space-y-1 overflow-y-auto pr-1 lg:col-span-5">
+                {sortedClips.map((c) => {
+                  const key = `${c.channel}/${c.clip_id}`;
+                  const active = selectedClip && `${selectedClip.channel}/${selectedClip.clip_id}` === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedClipKey(key)}
+                      aria-current={active ? "true" : undefined}
+                      className={`relative w-full rounded-xl border px-3.5 py-3 text-left transition-colors ${
+                        active
+                          ? "border-[#e5a183]/40 bg-[#e5a183]/08"
+                          : "border-transparent hover:border-[#222936] hover:bg-white/[0.03]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={`chip ${latestTierChip(c.tier)}`}>
+                            {c.tier} · {c.total_score}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400">
-                            {selectedClip.human_review.model}
-                          </span>
+                          {c.needs_human_review && !c.human_review && (
+                            <span className="chip chip-neutral" title="A or S tier review is queued">
+                              Review pending
+                            </span>
+                          )}
+                          {c.human_review && (
+                            <span
+                              className={`chip ${
+                                c.human_review.verdict === "POST"
+                                  ? "chip-ok"
+                                  : c.human_review.verdict === "MAYBE"
+                                    ? "chip-warn"
+                                    : "chip-danger"
+                              }`}
+                            >
+                              {c.human_review.verdict} {c.human_review.human_score}
+                            </span>
+                          )}
                         </div>
-                        <p className="text-slate-200 italic">&ldquo;{selectedClip.human_review.gut_reaction}&rdquo;</p>
-                        <div className="flex flex-wrap gap-2 text-[10px] font-mono text-slate-300">
-                          <span>Swipe: {selectedClip.human_review.swipe_stop}</span>
-                          <span>· Clarity: {selectedClip.human_review.clarity}</span>
-                          <span>· Fun: {selectedClip.human_review.entertainment}</span>
-                          <span>· Loop: {selectedClip.human_review.share_loop}</span>
-                        </div>
-                        {selectedClip.human_review.edit_tip && (
-                          <div className="text-[11px] text-slate-400">
-                            Tip: {selectedClip.human_review.edit_tip}
-                          </div>
-                        )}
+                        <span className="shrink-0 font-mono text-[10px] text-[#79776f]">{c.size_mb} MB</span>
                       </div>
-                    )}
+                      <p className="mt-1.5 truncate text-[12.5px] font-medium text-[#ecebe6]">
+                        {c.archetype} · @{c.channel}
+                      </p>
+                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-[#79776f]">
+                        {c.transcript || c.clip_id}
+                      </p>
+                      <div className="mt-1.5 flex items-center justify-between font-mono text-[10px] text-[#79776f]">
+                        <span className="truncate">{c.clip_id}</span>
+                        <span className={c.human_approved ? "text-[#9ed6b8]" : "text-[#dbb675]"}>
+                          {c.human_approved ? "Approved" : "Checklist open"}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-                    {selectedClip.metadata_md && (
-                      <details className="rounded-xl panel p-3 text-xs text-slate-300">
-                        <summary className="cursor-pointer font-mono text-[11px] text-sky-400">
-                          View Draft Metadata &amp; Sources (metadata.md)
-                        </summary>
-                        <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-slate-400 max-h-40 overflow-y-auto">
-                          {selectedClip.metadata_md}
-                        </pre>
-                      </details>
-                    )}
+              {selectedClip && (
+                <div className="grid grid-cols-1 gap-4 rounded-xl border border-[#1a1f28] bg-[#0b0e13] p-4 sm:grid-cols-12 lg:col-span-7">
+                  <div className="flex flex-col items-center sm:col-span-5">
+                    <video
+                      key={`${selectedClip.video_url}-${selectedClip.mtime}`}
+                      src={`${selectedClip.video_url}?v=${Math.floor(selectedClip.mtime)}`}
+                      controls
+                      playsInline
+                      className="aspect-[9/16] w-full max-w-[270px] rounded-xl border border-[#222936] bg-black object-contain"
+                    />
                   </div>
 
-                  <div className="pt-3 border-t border-[#1A1F27] flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleApprove(selectedClip)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer ${
-                          selectedClip.human_approved
-                            ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-300"
-                            : "bg-[#E3A484] text-slate-950 hover:bg-[#F0B79A]"
-                        }`}
-                      >
-                        {selectedClip.human_approved ? "✓ Approved (Rule 4 & 5)" : "Approve Clip Checklist (Rule 4)"}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={humanReviewingKey === `${selectedClip.channel}/${selectedClip.clip_id}`}
-                        onClick={() => handleHumanReview(selectedClip)}
-                        className="px-3 py-2 rounded-xl bg-purple-500/15 border border-purple-400/45 text-purple-200 text-xs font-bold hover:bg-purple-500/30 cursor-pointer disabled:opacity-50"
-                      >
-                        {humanReviewingKey === `${selectedClip.channel}/${selectedClip.clip_id}`
-                          ? "Reviewing..."
-                          : selectedClip.human_review
-                            ? "🧠 Re-Review"
-                            : "🧠 Human Review"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setUploadClip(selectedClip)}
-                        className="px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-500 cursor-pointer"
-                      >
-                        {selectedClip.youtube_upload ? "Re-Upload to YT" : "Upload to YouTube"}
-                      </button>
-                      {selectedClip.youtube_upload && (
-                        <a
-                          href={selectedClip.youtube_upload.studio_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-2 rounded-xl bg-rose-500/20 border border-rose-500/40 text-xs font-bold text-rose-200"
+                  <div className="flex flex-col justify-between gap-3 sm:col-span-7">
+                    <div className="space-y-2.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`chip ${latestTierChip(selectedClip.tier)}`}>
+                          {selectedClip.tier} · {selectedClip.total_score}/100
+                        </span>
+                        <span className="font-mono text-[10.5px] text-[#79776f]">
+                          Lookback {selectedClip.pre_pad_used}s · post {selectedClip.post_pad_used}s
+                        </span>
+                      </div>
+
+                      <div>
+                        <p className="text-[13.5px] font-medium text-white">{selectedClip.archetype}</p>
+                        <p className="mt-0.5 font-mono text-[10.5px] text-[#79776f]">
+                          @{selectedClip.channel} · {selectedClip.clip_id}.mp4
+                        </p>
+                      </div>
+
+                      <div className="panel-inset p-3">
+                        <p className="label mb-1">Transcript</p>
+                        <p className="text-[11.5px] leading-relaxed text-[#a3a099]">
+                          {selectedClip.transcript || "No transcript"}
+                        </p>
+                      </div>
+
+                      {selectedClip.human_review && (
+                        <div
+                          className={`space-y-1.5 rounded-xl border p-3 ${
+                            selectedClip.human_review.verdict === "POST"
+                              ? "border-[#7fc8a3]/30 bg-[#7fc8a3]/07"
+                              : selectedClip.human_review.verdict === "MAYBE"
+                                ? "border-[#dbb675]/30 bg-[#dbb675]/07"
+                                : "border-[#e08a8a]/30 bg-[#e08a8a]/07"
+                          }`}
                         >
-                          YT Studio ↗
-                        </a>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-mono text-[10.5px] font-medium text-[#ecebe6]">
+                              Viewer verdict: {selectedClip.human_review.verdict} ·{" "}
+                              {selectedClip.human_review.human_score}/100
+                            </span>
+                            <span className="font-mono text-[9.5px] text-[#79776f]">
+                              {selectedClip.human_review.model}
+                            </span>
+                          </div>
+                          <p className="text-[11.5px] italic leading-relaxed text-[#a3a099]">
+                            &ldquo;{selectedClip.human_review.gut_reaction}&rdquo;
+                          </p>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[9.5px] text-[#79776f]">
+                            <span>Swipe {selectedClip.human_review.swipe_stop}</span>
+                            <span>Clarity {selectedClip.human_review.clarity}</span>
+                            <span>Fun {selectedClip.human_review.entertainment}</span>
+                            <span>Loop {selectedClip.human_review.share_loop}</span>
+                          </div>
+                          {selectedClip.human_review.edit_tip && (
+                            <p className="text-[10.5px] leading-relaxed text-[#79776f]">
+                              Tip: {selectedClip.human_review.edit_tip}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {selectedClip.metadata_md && (
+                        <details className="panel-inset p-3">
+                          <summary className="cursor-pointer font-mono text-[10.5px] text-[#9dbbcf]">
+                            Draft metadata and sources
+                          </summary>
+                          <pre className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap font-mono text-[10.5px] leading-relaxed text-[#79776f]">
+                            {selectedClip.metadata_md}
+                          </pre>
+                        </details>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={selectedClip.video_url}
-                        download={`${selectedClip.clip_id}.mp4`}
-                        className="px-3 py-2 rounded-xl bg-[#12151B] border border-[#2A313D] text-xs font-mono text-slate-200 hover:border-slate-400"
-                      >
-                        Download MP4
-                      </a>
-                      <button
-                        type="button"
-                        disabled={deletingKey === `${selectedClip.channel}/${selectedClip.clip_id}`}
-                        onClick={() => handleDeleteClip(selectedClip)}
-                        onMouseLeave={() => {
-                          if (confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`) {
-                            setConfirmDeleteKey(null);
+
+                    <div className="space-y-2.5 border-t border-[#1a1f28] pt-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleApprove(selectedClip)}
+                          className={`btn btn-xs ${selectedClip.human_approved ? "btn-secondary" : "btn-primary"}`}
+                        >
+                          {selectedClip.human_approved ? "Approved · revoke" : "Approve checklist"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={
+                            humanReviewingKey === `${selectedClip.channel}/${selectedClip.clip_id}`
                           }
-                        }}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold cursor-pointer transition disabled:opacity-50 ${
-                          confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`
-                            ? "bg-rose-600 text-white border border-rose-400"
-                            : "bg-rose-500/10 border border-rose-500/35 text-rose-300 hover:bg-rose-500/20"
-                        }`}
-                      >
-                        {deletingKey === `${selectedClip.channel}/${selectedClip.clip_id}`
-                          ? "Deleting..."
-                          : confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`
-                            ? "Confirm Trash?"
-                            : "Delete"}
-                      </button>
+                          onClick={() => handleHumanReview(selectedClip)}
+                          className="btn btn-xs btn-secondary"
+                        >
+                          {humanReviewingKey === `${selectedClip.channel}/${selectedClip.clip_id}`
+                            ? "Reviewing"
+                            : selectedClip.human_review
+                              ? "Review again"
+                              : "Human review"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUploadClip(selectedClip)}
+                          className="btn btn-xs btn-secondary"
+                        >
+                          {selectedClip.youtube_upload ? "Re-upload" : "Upload to YouTube"}
+                        </button>
+                        {selectedClip.youtube_upload && (
+                          <a
+                            href={selectedClip.youtube_upload.studio_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-xs btn-ghost"
+                          >
+                            YouTube Studio ↗
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <a
+                          href={selectedClip.video_url}
+                          download={`${selectedClip.clip_id}.mp4`}
+                          className="btn btn-xs btn-ghost"
+                        >
+                          Download MP4
+                        </a>
+                        <button
+                          type="button"
+                          disabled={deletingKey === `${selectedClip.channel}/${selectedClip.clip_id}`}
+                          onClick={() => handleDeleteClip(selectedClip)}
+                          onMouseLeave={() => {
+                            if (confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`) {
+                              setConfirmDeleteKey(null);
+                            }
+                          }}
+                          className={`btn btn-xs ${
+                            confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`
+                              ? "btn-danger"
+                              : "btn-ghost"
+                          }`}
+                        >
+                          {deletingKey === `${selectedClip.channel}/${selectedClip.clip_id}`
+                            ? "Deleting"
+                            : confirmDeleteKey === `${selectedClip.channel}/${selectedClip.clip_id}`
+                              ? "Confirm delete"
+                              : "Delete"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </section>
 
       {uploadClip && (
@@ -1499,28 +1571,61 @@ export default function LiveClipperPanel({ onStatusChange, onOpenYouTubeTab }: P
   );
 }
 
-function MetricBox({ label, value, sub, accent }: { label: string; value: string; sub: string; accent: string }) {
+function MetricBox({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  tone?: "ok" | "warn" | "danger" | "accent" | "muted";
+}) {
+  const color =
+    tone === "ok"
+      ? "text-[#9ed6b8]"
+      : tone === "warn"
+        ? "text-[#e6c894]"
+        : tone === "danger"
+          ? "text-[#e9aaaa]"
+          : tone === "accent"
+            ? "text-[#e5a183]"
+            : "text-[#ecebe6]";
   return (
-    <div className="panel p-4">
-      <div className="text-[10px] font-medium uppercase tracking-wider text-slate-400">{label}</div>
-      <div className={`text-2xl font-semibold font-mono mt-1 ${accent}`}>{value}</div>
-      <div className="text-[11px] text-slate-500 mt-0.5 truncate">{sub}</div>
+    <div className="stat bg-[#101319]">
+      <div className="stat-label">{label}</div>
+      <div className={`stat-value ${color}`}>{value}</div>
+      <div className="stat-sub truncate">{sub}</div>
     </div>
   );
 }
 
-function SignalBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+function SignalBar({
+  label,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+}) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-[11px] font-mono">
-        <span className="text-slate-300">{label}</span>
-        <span className="text-slate-400">
+      <div className="flex items-center justify-between font-mono text-[10.5px]">
+        <span className="text-[#a3a099]">{label}</span>
+        <span className="text-[#79776f]">
           {value.toFixed(1)} / {max}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-[#0A0C10] border border-[#1B2029] overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: color }} />
+      <div className="h-1.5 overflow-hidden rounded-full bg-[#0b0e13]">
+        <div
+          className="h-full rounded-full transition-all duration-300"
+          style={{ width: `${pct}%`, backgroundColor: color }}
+        />
       </div>
     </div>
   );
