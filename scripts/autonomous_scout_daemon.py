@@ -246,7 +246,7 @@ def main():
     p = argparse.ArgumentParser(description="Autonomous 24/7 Live Stream Clipper Daemon")
     p.add_argument("--poll-interval", type=int, default=120, help="Seconds between watchlist checks (default: 120)")
     p.add_argument("--min-score", type=float, default=80.0, help="Min fusion score for auto-upload (default: 80.0)")
-    p.add_argument("--asr", choices=["local", "modal", "groq"], default="local", help="ASR engine (default: local, use modal for zero-GPU cloud)")
+    p.add_argument("--asr", choices=["local", "whistle", "modal", "groq"], default="whistle", help="ASR engine (default: whistle for 0-GPU cloud)")
     p.add_argument("--max-parallel", type=int, default=2, help="Max simultaneous streams to clip (default: 2)")
     p.add_argument("--privacy", choices=["private", "unlisted", "public"], default="private", help="Staging privacy (default: private)")
     args = p.parse_args()

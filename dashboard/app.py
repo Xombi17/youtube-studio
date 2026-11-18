@@ -33,6 +33,7 @@ EXPORTS_DIR = STUDIO_ROOT / "exports"
 RENDERS_DIR = STUDIO_ROOT / "renders"
 SKILLS_DIR = STUDIO_ROOT / "skills"
 QUEUE_FILE = STUDIO_ROOT / "dashboard" / "ideas-queue.md"
+HOST = os.environ.get("STUDIO_API_HOST", "0.0.0.0")
 PORT = int(os.environ.get("STUDIO_API_PORT", "8080"))
 
 VOICE_DIR.mkdir(parents=True, exist_ok=True)
@@ -1992,11 +1993,11 @@ def main():
     styles = get_styles_catalog()
     skills = count_skills()
     log(
-        f"CreatorRadar Studio API v2 ready on http://127.0.0.1:{port} | "
+        f"CreatorRadar Studio API v2 ready on http://{HOST}:{port} | "
         f"GPU: {hw.get('gpu') or 'CPU'} (NVENC={'ON' if hw.get('nvenc') else 'OFF'}) | "
         f"{len(skills)} skills | {len(styles)} styles"
     )
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), StudioAPIHandler)
+    httpd = ThreadingHTTPServer((HOST, port), StudioAPIHandler)
     try:
         ensure_publish_scheduler()
         httpd.serve_forever()

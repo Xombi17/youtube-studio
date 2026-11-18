@@ -85,11 +85,11 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 EOF
 
-# 5. Create Systemd Service: clipsurge-api (FastAPI Studio Backend on port 8080)
+# 5. Create Systemd Service: clipsurge-api (Studio Backend on port 8080)
 echo "--> Registering clipsurge-api.service..."
 sudo tee /etc/systemd/system/clipsurge-api.service > /dev/null <<EOF
 [Unit]
-Description=ClipSurge FastAPI Studio Backend Server
+Description=ClipSurge Studio Backend Server
 After=network.target redis-server.service
 
 [Service]
@@ -98,8 +98,9 @@ User=$USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=-$APP_DIR/.env
 Environment=PYTHONUNBUFFERED=1
-Environment=PORT=8080
-ExecStart=$VENV_DIR/bin/python -m uvicorn dashboard.app:app --host 0.0.0.0 --port 8080
+Environment=STUDIO_API_HOST=0.0.0.0
+Environment=STUDIO_API_PORT=8080
+ExecStart=$VENV_DIR/bin/python $APP_DIR/dashboard/app.py 8080
 Restart=always
 RestartSec=5
 LimitNOFILE=65536
