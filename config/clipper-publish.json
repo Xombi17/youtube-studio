@@ -11,5 +11,5 @@
   "keep_local_after_publish": true,
   "max_publish_per_run": 4,
   "max_delete_per_run": 25,
-  "clean_orphans": true
+  "clean_orphans": false
 }

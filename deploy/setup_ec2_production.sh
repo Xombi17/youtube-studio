@@ -76,7 +76,7 @@ EnvironmentFile=-$APP_DIR/.env
 Environment=PYTHONUNBUFFERED=1
 Environment=REDIS_HOST=localhost
 Environment=REDIS_PORT=6379
-ExecStart=$VENV_DIR/bin/python $APP_DIR/scripts/publish_agent.py --daemon --interval 300 --clean-orphans
+ExecStart=$VENV_DIR/bin/python $APP_DIR/scripts/publish_agent.py --daemon --interval 300
 Restart=always
 RestartSec=15
 LimitNOFILE=65536

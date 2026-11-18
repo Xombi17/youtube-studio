@@ -147,9 +147,14 @@ def local_clip_dir(rec: dict[str, Any]) -> Path | None:
     return cand if cand.is_dir() else None
 
 
-def is_staged(rec: dict[str, Any]) -> bool:
+def is_staged(rec: dict[str, Any], profile: str = "clipper") -> bool:
     """A staged clip is private and not yet resolved by a previous pass."""
-    if rec.get("publish_status") in ("published", "deleted", "failed"):
+    # Only manage live stream clips belonging to this profile; never touch studio projects
+    if rec.get("kind") not in (None, "", "clip"):
+        return False
+    if rec.get("profile") and rec.get("profile") != profile:
+        return False
+    if rec.get("publish_status") in ("published", "deleted", "failed", "orphaned", "kept_private"):
         return False
     if rec.get("privacy_status") != "private":
         return False
@@ -270,7 +275,7 @@ def run_publish_agent(
     window_open = in_peak_window(cfg) or force_publish
     do_clean_orphans = cfg.get("clean_orphans", False) if clean_orphans is None else bool(clean_orphans)
 
-    staged = [r for r in load_upload_history() if is_staged(r)]
+    staged = [r for r in load_upload_history() if is_staged(r, profile=profile)]
     staged.sort(key=lambda r: str(r.get("uploaded_at") or ""), reverse=True)
 
     report: dict[str, Any] = {
@@ -666,7 +671,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.status:
-        staged = [r for r in load_upload_history() if is_staged(r)]
+        staged = [r for r in load_upload_history() if is_staged(r, profile=profile)]
         print(f"staged private clips: {len(staged)}")
         for r in staged:
             print(f"  {r.get('video_id')}  {r.get('privacy_status')}  {str(r.get('title'))[:70]}")
