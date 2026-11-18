@@ -1,0 +1,1509 @@
+{
+  "version": "1.0",
+  "updated_at": 1795023726.9786475,
+  "totals": {
+    "approved": 0,
+    "uploaded": 9,
+    "deleted": 105
+  },
+  "archetypes": {
+    "chat_explosion": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 20
+    },
+    "comedy_fail": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 10
+    },
+    "audio_peak": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 34
+    },
+    "emotional": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 1
+    },
+    "shock": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 3
+    },
+    "weird_dono": {
+      "approved": 0,
+      "uploaded": 2,
+      "deleted": 15
+    },
+    "cool_play": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 6
+    },
+    "facecam_antics": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 12
+    },
+    "wonky_glitch": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 4
+    }
+  },
+  "keywords": {
+    "bhai": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 2
+    },
+    "hinglish_indian_hype": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 9
+    },
+    "police": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 0
+    },
+    "thank you": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 1
+    },
+    "emotional_heartfelt": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 0
+    },
+    "bro": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 8
+    },
+    "disbelief_shock": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 5
+    },
+    "what": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 5
+    },
+    "jason": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 6
+    },
+    "clip": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 3
+    },
+    "bug": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 1
+    },
+    "gta 6": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 0
+    },
+    "gaming_news_reveals": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 0
+    },
+    "sus": {
+      "approved": 0,
+      "uploaded": 2,
+      "deleted": 6
+    },
+    "caught": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 6
+    },
+    "nahhh": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 1
+    },
+    "audience_hooks": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 2
+    },
+    "hype_clutch_victory": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 3
+    },
+    "npc": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 4
+    },
+    "nahh": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 2
+    },
+    "crazy": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 2
+    },
+    "weird": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 2
+    },
+    "jail": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    },
+    "comedy_fail_rage": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    },
+    "lucia": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    },
+    "pause": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    },
+    "freaky": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 0
+    }
+  },
+  "channels": {
+    "mythpat-gta6": {
+      "approved": 0,
+      "uploaded": 2,
+      "deleted": 5
+    },
+    "ishowspeed-gta6": {
+      "approved": 0,
+      "uploaded": 4,
+      "deleted": 45
+    },
+    "kaicenat-gta6": {
+      "approved": 0,
+      "uploaded": 1,
+      "deleted": 21
+    },
+    "jasontheween-gta6": {
+      "approved": 0,
+      "uploaded": 2,
+      "deleted": 17
+    },
+    "xqc-gta6": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 15
+    },
+    "smoke-test": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    },
+    "lirik-gta6": {
+      "approved": 0,
+      "uploaded": 0,
+      "deleted": 1
+    }
+  },
+  "recent_events": [
+    {
+      "ts": 1795013132.2,
+      "clip_id": "20261118_184537_mythpat-gta6_a-tier_s0024",
+      "channel": "mythpat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 63.4,
+      "features": []
+    },
+    {
+      "ts": 1795013135.0,
+      "clip_id": "20261118_185045_mythpat-gta6_a-tier_s0012",
+      "channel": "mythpat-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: BHAI",
+      "score": 74.3,
+      "features": [
+        "bhai",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795013436.0,
+      "clip_id": "20261118_185228_mythpat-gta6_s-tier_s0022",
+      "channel": "mythpat-gta6",
+      "decision": "uploaded",
+      "family": "chat_explosion",
+      "archetype": "CHAT + KEYWORD: POLICE",
+      "score": 93.3,
+      "features": [
+        "police",
+        "bhai",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795013737.6,
+      "clip_id": "20261118_185924_mythpat-gta6_b-tier_s0000",
+      "channel": "mythpat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "KEYWORD: BHAI",
+      "score": 31.5,
+      "features": [
+        "bhai",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795013744.4,
+      "clip_id": "20261118_190004_mythpat-gta6_b-tier_s0012",
+      "channel": "mythpat-gta6",
+      "decision": "deleted",
+      "family": "emotional",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: THANK YOU",
+      "score": 47.8,
+      "features": [
+        "thank you"
+      ]
+    },
+    {
+      "ts": 1795013813.5,
+      "clip_id": "20261118_185941_mythpat-gta6_a-tier_s0005",
+      "channel": "mythpat-gta6",
+      "decision": "uploaded",
+      "family": "emotional",
+      "archetype": "COOL PLAY \u00b7 EMOTIONAL MOMENT",
+      "score": 77.5,
+      "features": [
+        "thank you",
+        "emotional_heartfelt"
+      ]
+    },
+    {
+      "ts": 1795013855.9,
+      "clip_id": "20261118_202550_ishowspeed-gta6_b-tier_s0022",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795013858.2,
+      "clip_id": "20261118_202713_ishowspeed-gta6_a-tier_s0000",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795013879.2,
+      "clip_id": "20261118_202322_ishowspeed-gta6_b-tier_s0005",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "COOL GAMEPLAY ACTION",
+      "score": 54.7,
+      "features": []
+    },
+    {
+      "ts": 1795013901.4,
+      "clip_id": "20261118_194008_ishowspeed-gta6_b-tier_s0020",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: BRO",
+      "score": 55.1,
+      "features": [
+        "bro"
+      ]
+    },
+    {
+      "ts": 1795013905.2,
+      "clip_id": "20261118_193921_ishowspeed-gta6_b-tier_s0016",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: BRO",
+      "score": 52.0,
+      "features": [
+        "bro"
+      ]
+    },
+    {
+      "ts": 1795013943.2,
+      "clip_id": "20261118_194252_ishowspeed-gta6_b-tier_s0037",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "shock",
+      "archetype": "COOL PLAY \u00b7 SHOCK / DISBELIEF",
+      "score": 55.8,
+      "features": [
+        "disbelief_shock"
+      ]
+    },
+    {
+      "ts": 1795014041.7,
+      "clip_id": "20261118_202355_ishowspeed-gta6_b-tier_s0009",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "WEIRD SUPERCHAT / BITS",
+      "score": 56.1,
+      "features": []
+    },
+    {
+      "ts": 1795014045.0,
+      "clip_id": "20261118_194713_ishowspeed-gta6_b-tier_s0063",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: WHAT",
+      "score": 57.7,
+      "features": [
+        "what"
+      ]
+    },
+    {
+      "ts": 1795014048.9,
+      "clip_id": "20261118_193724_ishowspeed-gta6_b-tier_s0004",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: BRO",
+      "score": 59.9,
+      "features": [
+        "bro"
+      ]
+    },
+    {
+      "ts": 1795014060.0,
+      "clip_id": "20261118_193823_ishowspeed-gta6_s-tier_s0010",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: WHAT",
+      "score": 88.0,
+      "features": [
+        "what",
+        "bro",
+        "disbelief_shock"
+      ]
+    },
+    {
+      "ts": 1795014068.3,
+      "clip_id": "20261118_194621_ishowspeed-gta6_a-tier_s0058",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: WHAT",
+      "score": 77.4,
+      "features": [
+        "what",
+        "bro"
+      ]
+    },
+    {
+      "ts": 1795014070.0,
+      "clip_id": "20261118_194153_ishowspeed-gta6_a-tier_s0030",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: JASON",
+      "score": 75.2,
+      "features": [
+        "jason",
+        "bro",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795014074.5,
+      "clip_id": "20261118_202226_ishowspeed-gta6_a-tier_s0001",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "WEIRD SUPERCHAT / BITS",
+      "score": 70.1,
+      "features": [
+        "clip"
+      ]
+    },
+    {
+      "ts": 1795014076.7,
+      "clip_id": "20261118_194451_ishowspeed-gta6_a-tier_s0049",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 69.7,
+      "features": []
+    },
+    {
+      "ts": 1795014077.8,
+      "clip_id": "20261118_194101_ishowspeed-gta6_a-tier_s0025",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: WHAT",
+      "score": 68.3,
+      "features": [
+        "what",
+        "bro"
+      ]
+    },
+    {
+      "ts": 1795014079.7,
+      "clip_id": "20261118_194351_ishowspeed-gta6_a-tier_s0043",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: WHAT",
+      "score": 67.9,
+      "features": [
+        "what",
+        "bro",
+        "disbelief_shock"
+      ]
+    },
+    {
+      "ts": 1795014080.5,
+      "clip_id": "20261118_202451_ishowspeed-gta6_a-tier_s0015",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 SPEECH MOMENT",
+      "score": 65.3,
+      "features": []
+    },
+    {
+      "ts": 1795014081.3,
+      "clip_id": "20261118_185136_mythpat-gta6_a-tier_s0017",
+      "channel": "mythpat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 63.1,
+      "features": []
+    },
+    {
+      "ts": 1795014935.6,
+      "clip_id": "20261118_203804_ishowspeed-gta6_b-tier_s0029",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "WEIRD SUPERCHAT / BITS",
+      "score": 52.5,
+      "features": []
+    },
+    {
+      "ts": 1795014957.9,
+      "clip_id": "20261118_203357_ishowspeed-gta6_b-tier_s0005",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 58.6,
+      "features": []
+    },
+    {
+      "ts": 1795015102.7,
+      "clip_id": "20261118_204554_kaicenat-gta6_s-tier_s0001",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "WEIRD SUPERCHAT / BITS",
+      "score": 85.3,
+      "features": []
+    },
+    {
+      "ts": 1795015681.6,
+      "clip_id": "20261118_203441_ishowspeed-gta6_s-tier_s0009",
+      "channel": "ishowspeed-gta6",
+      "decision": "uploaded",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 100.0,
+      "features": [
+        "bug"
+      ]
+    },
+    {
+      "ts": 1795016069.3,
+      "clip_id": "20261118_204729_jasontheween-gta6_s-tier_s0008",
+      "channel": "jasontheween-gta6",
+      "decision": "uploaded",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: GTA 6",
+      "score": 95.7,
+      "features": [
+        "gta 6",
+        "gaming_news_reveals",
+        "sus",
+        "caught",
+        "nahhh"
+      ]
+    },
+    {
+      "ts": 1795016323.6,
+      "clip_id": "20261118_204732_kaicenat-gta6_s-tier_s0005",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 100.0,
+      "features": [
+        "audience_hooks"
+      ]
+    },
+    {
+      "ts": 1795017095.5,
+      "clip_id": "20261118_211917_ishowspeed-gta6_s-tier_s0047",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 100.0,
+      "features": []
+    },
+    {
+      "ts": 1795017173.5,
+      "clip_id": "20261118_211510_jasontheween-gta6_s-tier_s0056",
+      "channel": "jasontheween-gta6",
+      "decision": "uploaded",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 100.0,
+      "features": [
+        "sus"
+      ]
+    },
+    {
+      "ts": 1795017313.6,
+      "clip_id": "20261118_210547_jasontheween-gta6_s-tier_s0005",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM ANTICS \u00b7 CLUTCH / HYPE",
+      "score": 100.0,
+      "features": [
+        "hype_clutch_victory"
+      ]
+    },
+    {
+      "ts": 1795017339.7,
+      "clip_id": "20261118_211528_xqc-gta6_s-tier_s0045",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 100.0,
+      "features": [
+        "npc"
+      ]
+    },
+    {
+      "ts": 1795017342.5,
+      "clip_id": "20261118_210538_kaicenat-gta6_s-tier_s0004",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 99.8,
+      "features": [
+        "nahhh"
+      ]
+    },
+    {
+      "ts": 1795017374.5,
+      "clip_id": "20261118_204817_xqc-gta6_s-tier_s0008",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "SPEECH MOMENT",
+      "score": 95.2,
+      "features": []
+    },
+    {
+      "ts": 1795017390.1,
+      "clip_id": "20261118_210937_jasontheween-gta6_s-tier_s0028",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 94.6,
+      "features": []
+    },
+    {
+      "ts": 1795017412.2,
+      "clip_id": "20261118_211645_xqc-gta6_s-tier_s0049",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 87.0,
+      "features": [
+        "nahh"
+      ]
+    },
+    {
+      "ts": 1795017427.5,
+      "clip_id": "20261118_211451_kaicenat-gta6_s-tier_s0049",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 88.0,
+      "features": [
+        "clip"
+      ]
+    },
+    {
+      "ts": 1795017431.2,
+      "clip_id": "20261118_211138_kaicenat-gta6_s-tier_s0031",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: CRAZY",
+      "score": 87.0,
+      "features": [
+        "crazy"
+      ]
+    },
+    {
+      "ts": 1795017433.2,
+      "clip_id": "20261118_211158_jasontheween-gta6_s-tier_s0036",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 86.7,
+      "features": [
+        "weird"
+      ]
+    },
+    {
+      "ts": 1795017436.1,
+      "clip_id": "20261118_211546_kaicenat-gta6_s-tier_s0053",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT + HOOK / SETUP",
+      "score": 86.4,
+      "features": [
+        "audience_hooks"
+      ]
+    },
+    {
+      "ts": 1795017437.0,
+      "clip_id": "20261118_211108_ishowspeed-gta6_s-tier_s0021",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "COOL GAMEPLAY ACTION",
+      "score": 85.1,
+      "features": []
+    },
+    {
+      "ts": 1795018322.1,
+      "clip_id": "20261118_205538_kaicenat-gta6_a-tier_s0014",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795018323.0,
+      "clip_id": "20261118_211009_kaicenat-gta6_s-tier_s0025",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM ANTICS \u00b7 SHOCK / DISBELIEF",
+      "score": 89.3,
+      "features": [
+        "disbelief_shock"
+      ]
+    },
+    {
+      "ts": 1795018326.4,
+      "clip_id": "20261118_205525_ishowspeed-gta6_a-tier_s0012",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795018332.4,
+      "clip_id": "20261118_205300_jasontheween-gta6_s-tier_s0005",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 88.0,
+      "features": [
+        "sus",
+        "caught"
+      ]
+    },
+    {
+      "ts": 1795018333.6,
+      "clip_id": "20261118_210812_ishowspeed-gta6_s-tier_s0010",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 87.9,
+      "features": [
+        "jail"
+      ]
+    },
+    {
+      "ts": 1795018334.3,
+      "clip_id": "20261118_210838_kaicenat-gta6_s-tier_s0020",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 86.8,
+      "features": []
+    },
+    {
+      "ts": 1795018334.8,
+      "clip_id": "20261118_205726_jasontheween-gta6_s-tier_s0005",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 85.8,
+      "features": []
+    },
+    {
+      "ts": 1795018335.3,
+      "clip_id": "20261118_205112_xqc-gta6_s-tier_s0005",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "SPEECH MOMENT",
+      "score": 85.5,
+      "features": [
+        "caught"
+      ]
+    },
+    {
+      "ts": 1795018335.7,
+      "clip_id": "20261118_205300_ishowspeed-gta6_s-tier_s0004",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 83.4,
+      "features": [
+        "clip",
+        "caught",
+        "bug"
+      ]
+    },
+    {
+      "ts": 1795018336.1,
+      "clip_id": "20261118_203624_ishowspeed-gta6_s-tier_s0019",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "SHOCK / DISBELIEF",
+      "score": 82.6,
+      "features": [
+        "disbelief_shock",
+        "npc",
+        "caught"
+      ]
+    },
+    {
+      "ts": 1795018337.3,
+      "clip_id": "20261118_204734_ishowspeed-gta6_s-tier_s0008",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 81.9,
+      "features": []
+    },
+    {
+      "ts": 1795018337.9,
+      "clip_id": "20261118_205027_kaicenat-gta6_a-tier_s0000",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "CHAT EXPLOSION",
+      "score": 79.2,
+      "features": []
+    },
+    {
+      "ts": 1795018338.4,
+      "clip_id": "20261118_210710_jasontheween-gta6_a-tier_s0009",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 78.6,
+      "features": []
+    },
+    {
+      "ts": 1795018338.9,
+      "clip_id": "20261118_205811_kaicenat-gta6_a-tier_s0010",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 77.5,
+      "features": []
+    },
+    {
+      "ts": 1795018339.4,
+      "clip_id": "20261118_205413_ishowspeed-gta6_a-tier_s0008",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: JASON",
+      "score": 76.6,
+      "features": [
+        "jason",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795018387.2,
+      "clip_id": "20261118_203537_ishowspeed-gta6_a-tier_s0015",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT + SPEECH MOMENT",
+      "score": 76.5,
+      "features": [
+        "nahh"
+      ]
+    },
+    {
+      "ts": 1795018398.0,
+      "clip_id": "20261118_210805_xqc-gta6_a-tier_s0014",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 74.1,
+      "features": []
+    },
+    {
+      "ts": 1795018404.3,
+      "clip_id": "20261118_204644_xqc-gta6_a-tier_s0004",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "SPEECH MOMENT",
+      "score": 73.9,
+      "features": []
+    },
+    {
+      "ts": 1795018405.2,
+      "clip_id": "20261118_210336_jasontheween-gta6_a-tier_s0037",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795018729.7,
+      "clip_id": "20261118_203624_ishowspeed-gta6_s-tier_s0019",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "shock",
+      "archetype": "SHOCK / DISBELIEF",
+      "score": 82.6,
+      "features": []
+    },
+    {
+      "ts": 1795019497.6,
+      "clip_id": "20261118_205413_ishowspeed-gta6_a-tier_s0008",
+      "channel": "ishowspeed-gta6",
+      "decision": "uploaded",
+      "family": "comedy_fail",
+      "archetype": "STORY / COMEDY \u00b7 KEYWORD: JASON",
+      "score": 76.6,
+      "features": []
+    },
+    {
+      "ts": 1795019628.5,
+      "clip_id": "20261118_205300_ishowspeed-gta6_s-tier_s0004",
+      "channel": "ishowspeed-gta6",
+      "decision": "uploaded",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795019656.0,
+      "clip_id": "20261118_205651_ishowspeed-gta6_a-tier_s0004",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 65.9,
+      "features": []
+    },
+    {
+      "ts": 1795019755.0,
+      "clip_id": "20261118_220422_kaicenat-gta6_s-tier_s0035",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "comedy_fail",
+      "archetype": "CHAT + COMEDY / FAIL",
+      "score": 100.0,
+      "features": [
+        "comedy_fail_rage"
+      ]
+    },
+    {
+      "ts": 1795019756.8,
+      "clip_id": "20261118_220412_jasontheween-gta6_s-tier_s0029",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT + KEYWORD: JASON",
+      "score": 100.0,
+      "features": [
+        "jason",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795019758.5,
+      "clip_id": "20261118_220329_ishowspeed-gta6_s-tier_s0030",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM ANTICS \u00b7 KEYWORD: JASON",
+      "score": 100.0,
+      "features": [
+        "jason",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795019761.6,
+      "clip_id": "20261118_220007_xqc-gta6_s-tier_s0010",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "wonky_glitch",
+      "archetype": "WONKY GLITCH / AYO MOMENT",
+      "score": 100.0,
+      "features": [
+        "lucia",
+        "hinglish_indian_hype",
+        "sus",
+        "npc"
+      ]
+    },
+    {
+      "ts": 1795019763.2,
+      "clip_id": "20261118_215959_ishowspeed-gta6_s-tier_s0009",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 93.8,
+      "features": [
+        "pause"
+      ]
+    },
+    {
+      "ts": 1795019765.2,
+      "clip_id": "20261118_220117_xqc-gta6_s-tier_s0015",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 CLUTCH / HYPE",
+      "score": 90.0,
+      "features": [
+        "hype_clutch_victory",
+        "sus"
+      ]
+    },
+    {
+      "ts": 1795019766.5,
+      "clip_id": "20261118_205300_jasontheween-gta6_s-tier_s0005",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 88.0,
+      "features": []
+    },
+    {
+      "ts": 1795019773.1,
+      "clip_id": "20261118_205726_jasontheween-gta6_s-tier_s0005",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 85.8,
+      "features": []
+    },
+    {
+      "ts": 1795019773.9,
+      "clip_id": "20261118_220117_ishowspeed-gta6_a-tier_s0015",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM FREAKOUT",
+      "score": 85.7,
+      "features": []
+    },
+    {
+      "ts": 1795019774.6,
+      "clip_id": "20261118_220453_ishowspeed-gta6_a-tier_s0037",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "facecam_antics",
+      "archetype": "FACECAM ANTICS \u00b7 KEYWORD: CRAZY",
+      "score": 84.8,
+      "features": [
+        "crazy",
+        "caught"
+      ]
+    },
+    {
+      "ts": 1795019775.4,
+      "clip_id": "20261118_203624_ishowspeed-gta6_s-tier_s0019",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "shock",
+      "archetype": "SHOCK / DISBELIEF",
+      "score": 82.6,
+      "features": []
+    },
+    {
+      "ts": 1795019776.1,
+      "clip_id": "20261118_220358_xqc-gta6_a-tier_s0033",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "wonky_glitch",
+      "archetype": "WONKY GLITCH / AYO MOMENT",
+      "score": 79.0,
+      "features": [
+        "sus",
+        "weird",
+        "npc"
+      ]
+    },
+    {
+      "ts": 1795019777.8,
+      "clip_id": "20261118_205811_kaicenat-gta6_a-tier_s0010",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 77.5,
+      "features": []
+    },
+    {
+      "ts": 1795019778.7,
+      "clip_id": "20261118_203537_ishowspeed-gta6_a-tier_s0015",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT + SPEECH MOMENT",
+      "score": 76.5,
+      "features": []
+    },
+    {
+      "ts": 1795019779.6,
+      "clip_id": "20261118_220245_jasontheween-gta6_a-tier_s0025",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "COOL GAMEPLAY ACTION",
+      "score": 75.4,
+      "features": []
+    },
+    {
+      "ts": 1795019780.5,
+      "clip_id": "20261118_215842_xqc-gta6_a-tier_s0000",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "wonky_glitch",
+      "archetype": "WONKY GLITCH / AYO MOMENT",
+      "score": 73.0,
+      "features": [
+        "sus"
+      ]
+    },
+    {
+      "ts": 1795019781.5,
+      "clip_id": "20261118_205940_kaicenat-gta6_a-tier_s0015",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 70.0,
+      "features": []
+    },
+    {
+      "ts": 1795019782.1,
+      "clip_id": "20261118_205911_xqc-gta6_a-tier_s0014",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 67.5,
+      "features": []
+    },
+    {
+      "ts": 1795019782.9,
+      "clip_id": "20261118_210137_kaicenat-gta6_a-tier_s0028",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 64.7,
+      "features": []
+    },
+    {
+      "ts": 1795019783.4,
+      "clip_id": "20261118_205846_ishowspeed-gta6_a-tier_s0014",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 64.2,
+      "features": []
+    },
+    {
+      "ts": 1795019784.1,
+      "clip_id": "20261118_210215_ishowspeed-gta6_a-tier_s0029",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 63.8,
+      "features": []
+    },
+    {
+      "ts": 1795019784.6,
+      "clip_id": "20261118_203717_ishowspeed-gta6_a-tier_s0025",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 62.6,
+      "features": []
+    },
+    {
+      "ts": 1795019785.6,
+      "clip_id": "20261118_205538_kaicenat-gta6_a-tier_s0014",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": 60.0,
+      "features": []
+    },
+    {
+      "ts": 1795019786.2,
+      "clip_id": "20261118_205525_ishowspeed-gta6_a-tier_s0012",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": 60.0,
+      "features": []
+    },
+    {
+      "ts": 1795019786.9,
+      "clip_id": "20261118_205943_jasontheween-gta6_b-tier_s0021",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 56.9,
+      "features": []
+    },
+    {
+      "ts": 1795019787.6,
+      "clip_id": "20261118_210144_jasontheween-gta6_b-tier_s0032",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 56.8,
+      "features": []
+    },
+    {
+      "ts": 1795019788.3,
+      "clip_id": "20261118_210028_ishowspeed-gta6_b-tier_s0025",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 55.5,
+      "features": []
+    },
+    {
+      "ts": 1795019789.0,
+      "clip_id": "20261118_205436_kaicenat-gta6_b-tier_s0009",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 55.4,
+      "features": []
+    },
+    {
+      "ts": 1795019789.8,
+      "clip_id": "20261118_205331_kaicenat-gta6_b-tier_s0004",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 54.9,
+      "features": []
+    },
+    {
+      "ts": 1795019790.5,
+      "clip_id": "20261118_210052_xqc-gta6_b-tier_s0024",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 54.4,
+      "features": []
+    },
+    {
+      "ts": 1795019791.5,
+      "clip_id": "20261118_205442_jasontheween-gta6_b-tier_s0013",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 54.0,
+      "features": []
+    },
+    {
+      "ts": 1795019792.0,
+      "clip_id": "20261118_205802_xqc-gta6_b-tier_s0009",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 50.9,
+      "features": []
+    },
+    {
+      "ts": 1795019792.9,
+      "clip_id": "20261118_205356_jasontheween-gta6_b-tier_s0009",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 50.7,
+      "features": []
+    },
+    {
+      "ts": 1795019793.4,
+      "clip_id": "20261118_205759_ishowspeed-gta6_b-tier_s0008",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 48.6,
+      "features": []
+    },
+    {
+      "ts": 1795019794.1,
+      "clip_id": "20261118_214422_ishowspeed-gta6_b-tier_s0002",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "MUNDANE CHAT",
+      "score": 44.9,
+      "features": [
+        "jason",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795019794.6,
+      "clip_id": "20261118_210242_xqc-gta6_b-tier_s0033",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "RECOVERED MOMENT",
+      "score": 59.5,
+      "features": []
+    },
+    {
+      "ts": 1795019795.3,
+      "clip_id": "20261118_220550_jasontheween-gta6_a-tier_s0036",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795019796.0,
+      "clip_id": "20261118_220625_ishowspeed-gta6_a-tier_s0041",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795019796.4,
+      "clip_id": "20261118_214520_kaicenat-gta6_b-tier_s0008",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795019796.8,
+      "clip_id": "20261118_214443_jasontheween-gta6_s-tier_s0004",
+      "channel": "jasontheween-gta6",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795020060.1,
+      "clip_id": "20261118_220632_kaicenat-gta6_a-tier_s0048",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "cool_play",
+      "archetype": "COOL PLAY \u00b7 KEYWORD: JASON",
+      "score": 80.5,
+      "features": [
+        "jason",
+        "hype_clutch_victory",
+        "hinglish_indian_hype"
+      ]
+    },
+    {
+      "ts": 1795020061.6,
+      "clip_id": "20261118_220749_xqc-gta6_a-tier_s0056",
+      "channel": "xqc-gta6",
+      "decision": "deleted",
+      "family": "weird_dono",
+      "archetype": "WONKY GLITCH / AYO MOMENT",
+      "score": 77.8,
+      "features": [
+        "sus",
+        "caught"
+      ]
+    },
+    {
+      "ts": 1795020062.5,
+      "clip_id": "20261118_220737_kaicenat-gta6_a-tier_s0052",
+      "channel": "kaicenat-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT EXPLOSION",
+      "score": 72.6,
+      "features": []
+    },
+    {
+      "ts": 1795020065.6,
+      "clip_id": "zz_trash_test",
+      "channel": "smoke-test",
+      "decision": "deleted",
+      "family": "audio_peak",
+      "archetype": "LIVE MOMENT",
+      "score": null,
+      "features": []
+    },
+    {
+      "ts": 1795022031.2,
+      "clip_id": "20261118_222707_ishowspeed-gta6_a-tier_s0053",
+      "channel": "ishowspeed-gta6",
+      "decision": "uploaded",
+      "family": "wonky_glitch",
+      "archetype": "GLITCH REACTION",
+      "score": 89.5,
+      "features": [
+        "freaky",
+        "clip"
+      ]
+    },
+    {
+      "ts": 1795022070.7,
+      "clip_id": "20261118_223245_ishowspeed-gta6_a-tier_s0089",
+      "channel": "ishowspeed-gta6",
+      "decision": "deleted",
+      "family": "chat_explosion",
+      "archetype": "CHAT + SPEECH MOMENT",
+      "score": 89.5,
+      "features": []
+    },
+    {
+      "ts": 1795022129.4,
+      "clip_id": "20261118_223535_kaicenat-gta6_a-tier_s0106",
+      "channel": "kaicenat-gta6",
+      "decision": "uploaded",
+      "family": "weird_dono",
+      "archetype": "GTA6 SHARK ATTACK",
+      "score": 86.9,
+      "features": [
+        "disbelief_shock"
+      ]
+    },
+    {
+      "ts": 1795023727.0,
+      "clip_id": "20261118_230927_lirik-gta6_s-tier_s0014",
+      "channel": "lirik-gta6",
+      "decision": "deleted",
+      "family": "wonky_glitch",
+      "archetype": "PHYSICS GLITCH SHOCK",
+      "score": 100.0,
+      "features": []
+    }
+  ]
+}

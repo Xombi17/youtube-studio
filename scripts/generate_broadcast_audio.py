@@ -1,100 +1,180 @@
 #!/usr/bin/env python3
 """
-Broadcast Audio Engine for CreatorRadar Studio Ads
-Generates studio-grade neural voiceover with parametric EQ, dynamic compression,
-and precise scene synchronization.
+Broadcast Audio Engine for CreatorRadar Studio
+Synthesizes per-beat narration via VoiceStudio (with neural Edge-TTS fallback),
+measures exact beat durations, applies broadcast mastering (-14 LUFS), and
+mixes synchronized SFX transitions from assets/sfx/.
 """
 
-import os
-import sys
+import argparse
 import json
+import os
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
-VENV_BIN = Path("/home/varad/Videos/youtube/.venv/bin")
-EDGE_TTS = VENV_BIN / "edge-tts"
-FFMPEG = "ffmpeg"
+WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", Path(__file__).resolve().parent.parent))
+SFX_DIR = WORKSPACE_ROOT / "assets" / "sfx"
 
-def generate_voice_clip(text: str, out_path: Path, voice: str = "en-US-ChristopherNeural", rate: str = "+8%"):
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+# Ensure sibling imports work whether run as script or imported as module
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from voice_studio_client import (  # noqa: E402
+    DEFAULT_EDGE_RATE,
+    DEFAULT_EDGE_VOICE,
+    DEFAULT_PROFILE_ID,
+    generate_narration,
+    master_audio,
+)
+
+
+def probe_duration(audio_path: Path) -> float:
     cmd = [
-        str(EDGE_TTS),
-        "--voice", voice,
-        "--rate", rate,
-        "--text", text,
-        "--write-media", str(out_path)
+        "ffprobe", "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1",
+        str(audio_path),
     ]
-    subprocess.run(cmd, check=True)
-    return out_path
+    res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    return float(res.stdout.strip())
 
-def master_vocal_track(input_path: Path, output_path: Path):
+
+def build_synced_beat_audio(
+    beats: list[dict],
+    output_path: Path,
+    voice_id: str = DEFAULT_PROFILE_ID,
+    edge_voice: str = DEFAULT_EDGE_VOICE,
+    rate: str = DEFAULT_EDGE_RATE,
+    gap_sec: float = 0.22,
+    lead_in_sec: float = 0.25,
+    tail_sec: float = 0.65,
+    include_sfx: bool = True,
+    sfx_gain_db: float = -12.0,
+) -> dict:
     """
-    Applies broadcast-standard audio mastering:
-    - 75Hz high-pass filter to eliminate sub-bass rumble
-    - 120Hz bell boost (+2.5dB) for warm proximity effect
-    - 350Hz narrow cut (-2.0dB) to remove boxiness/mud
-    - 4.5kHz presence boost (+3.0dB) for crisp vocal intelligibility
-    - Studio optical compression (threshold -18dB, ratio 3.5:1, attack 15ms, release 100ms)
-    - EBU R128 loudness normalization (-14 LUFS, TP -1.5dB)
+    Synthesize each beat individually so we know exact start/end timestamps
+    for frame-accurate visual cuts, kinetic captions, and SFX hits.
+
+    beats: list of dicts with at least {"text": str} and optional {"id", "sfx"}
+    Returns dict with output path, total_duration, engine, and timed_beats list.
     """
-    filter_chain = (
-        "highpass=f=75,"
-        "equalizer=f=120:width_type=o:width=1.0:g=2.5,"
-        "equalizer=f=350:width_type=o:width=1.5:g=-2.0,"
-        "equalizer=f=4500:width_type=o:width=1.2:g=3.0,"
-        "acompressor=threshold=-18dB:ratio=3.5:attack=15:release=100,"
-        "loudnorm=I=-14:LRA=7:TP=-1.5"
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    sfx_cycle = ["impact.wav", "whoosh.wav", "click.wav", "whoosh.wav", "riser.wav"]
+
+    with tempfile.TemporaryDirectory(prefix="creatorradar_audio_") as tmp:
+        tmp_dir = Path(tmp)
+        inputs: list[str] = []
+        filter_parts: list[str] = []
+        mix_labels: list[str] = []
+        timed_beats: list[dict] = []
+        engines_used: set[str] = set()
+
+        cursor = lead_in_sec
+        input_idx = 0
+
+        for i, beat in enumerate(beats):
+            text = beat["text"].strip()
+            clip_path = tmp_dir / f"beat_{i:02d}.wav"
+            res = generate_narration(
+                text,
+                clip_path,
+                voice_name=voice_id,
+                edge_voice=edge_voice,
+                rate=rate,
+            )
+            engines_used.add(res["engine"])
+            dur = probe_duration(clip_path)
+
+            start_t = round(cursor, 3)
+            end_t = round(cursor + dur, 3)
+
+            timed_entry = dict(beat)
+            timed_entry["start"] = start_t
+            timed_entry["end"] = end_t
+            timed_entry["duration"] = round(dur, 3)
+            timed_beats.append(timed_entry)
+
+            inputs.extend(["-i", str(clip_path)])
+            delay_ms = int(round(start_t * 1000))
+            filter_parts.append(f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[v{i}];")
+            mix_labels.append(f"[v{i}]")
+            input_idx += 1
+
+            # Optional SFX transition accent at beat entry
+            if include_sfx and SFX_DIR.exists():
+                sfx_name = beat.get("sfx") or sfx_cycle[i % len(sfx_cycle)]
+                sfx_file = SFX_DIR / sfx_name
+                if sfx_file.exists():
+                    sfx_t = max(0.0, start_t - 0.06)
+                    sfx_ms = int(round(sfx_t * 1000))
+                    inputs.extend(["-i", str(sfx_file)])
+                    filter_parts.append(
+                        f"[{input_idx}:a]aresample=48000,aformat=channel_layouts=stereo,"
+                        f"volume={sfx_gain_db}dB,adelay={sfx_ms}|{sfx_ms}[s{i}];"
+                    )
+                    mix_labels.append(f"[s{i}]")
+                    input_idx += 1
+
+            cursor = end_t + gap_sec
+
+        total_duration = round(cursor + tail_sec, 3)
+
+        silence = f"aevalsrc=0:d={total_duration}:s=48000:c=stereo[base];"
+        all_labels = "[base]" + "".join(mix_labels)
+        n_inputs = len(mix_labels) + 1
+
+        # normalize=0 prevents amix from dividing voice volume by N inputs; loudnorm masters to -14 LUFS
+        filter_complex = (
+            "".join(filter_parts)
+            + silence
+            + f"{all_labels}amix=inputs={n_inputs}:duration=first:dropout_transition=0:normalize=0,"
+            + "alimiter=limit=0.92,loudnorm=I=-14:LRA=7:TP=-1.5[out]"
+        )
+
+        cmd = [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            *inputs,
+            "-filter_complex", filter_complex,
+            "-map", "[out]",
+            "-ar", "48000",
+            "-ac", "2",
+            str(output_path),
+        ]
+        subprocess.run(cmd, check=True)
+
+    actual_duration = probe_duration(output_path)
+    return {
+        "audio_path": str(output_path),
+        "duration": round(actual_duration, 3),
+        "engines": sorted(engines_used),
+        "sfx_enabled": include_sfx,
+        "beats": timed_beats,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Build mastered beat-synced broadcast audio with SFX")
+    parser.add_argument("beats_json", help="Path to JSON file containing a list of beat objects")
+    parser.add_argument("output_wav", help="Output master WAV file")
+    parser.add_argument("--voice", default=DEFAULT_PROFILE_ID)
+    parser.add_argument("--edge-voice", default=DEFAULT_EDGE_VOICE)
+    parser.add_argument("--no-sfx", action="store_true")
+    args = parser.parse_args()
+
+    beats = json.loads(Path(args.beats_json).read_text(encoding="utf-8"))
+    result = build_synced_beat_audio(
+        beats=beats,
+        output_path=Path(args.output_wav),
+        voice_id=args.voice,
+        edge_voice=args.edge_voice,
+        include_sfx=not args.no_sfx,
     )
-    cmd = [
-        FFMPEG, "-y",
-        "-i", str(input_path),
-        "-af", filter_chain,
-        "-ar", "48000",
-        "-ac", "2",
-        str(output_path)
-    ]
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return output_path
+    print(json.dumps(result, indent=2))
 
-def build_timeline_audio(beats, total_duration: float, output_path: Path, voice: str = "en-US-ChristopherNeural", rate: str = "+8%"):
-    """
-    beats: list of dicts: [{"text": str, "start": float, "id": str}]
-    """
-    temp_dir = Path("/tmp/studio_audio_build")
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    
-    inputs = []
-    filter_complex = []
-    
-    # Generate each beat
-    for i, b in enumerate(beats):
-        raw_clip = temp_dir / f"beat_{i}_raw.mp3"
-        mastered_clip = temp_dir / f"beat_{i}_master.wav"
-        print(f"Generating Beat {i+1}: '{b['text']}'...")
-        generate_voice_clip(b["text"], raw_clip, voice=voice, rate=rate)
-        master_vocal_track(raw_clip, mastered_clip)
-        
-        inputs.extend(["-i", str(mastered_clip)])
-        # Delay to start time in ms
-        delay_ms = int(b["start"] * 1000)
-        filter_complex.append(f"[{i}]adelay={delay_ms}|{delay_ms}[a{i}];")
-
-    mix_inputs = "".join(f"[a{i}]" for i in range(len(beats)))
-    silence_cmd = f"aevalsrc=0:d={total_duration}:s=48000:c=stereo[silence];"
-    mix_filter = f"{''.join(filter_complex)}{silence_cmd}[silence]{mix_inputs}amix=inputs={len(beats)+1}:duration=longest:dropout_transition=0,loudnorm=I=-14:LRA=7:TP=-1.5[out]"
-
-    cmd = [
-        FFMPEG, "-y",
-        *inputs,
-        "-filter_complex", mix_filter,
-        "-map", "[out]",
-        "-ar", "48000",
-        "-ac", "2",
-        str(output_path)
-    ]
-    subprocess.run(cmd, check=True)
-    print(f"Successfully rendered synchronized audio master: {output_path}")
-    return output_path
 
 if __name__ == "__main__":
-    print("Broadcast Audio Engine loaded.")
+    main()

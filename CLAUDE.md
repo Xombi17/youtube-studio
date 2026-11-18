@@ -29,8 +29,21 @@ All skills live in `skills/<name>/SKILL.md`. Read the matching skill file **befo
 | Orchestrate the full TOPIC→METADATA pipeline | `production-pipeline` | `.claude/skills/production-pipeline/` |
 | Voice cloning & neural speech synthesis via VoiceStudio | `voice-studio` | `.claude/skills/voice-studio/` |
 | Select optimal visual motion style across catalogs | `style-selector` | `.claude/skills/style-selector/` |
+| Produce Vox-style documentary explainer videos | `vox-explainer` | `.claude/skills/vox-explainer/` |
+| Portable viral Shorts blueprint v2 (2.5D motion, visual proof, plan validator, 3-stem handoff) | `codex-shorts-blueprint` | `.claude/skills/codex-shorts-blueprint/` |
+| Write script from 21 hook formulas with retention beats | `yt-script` | `.claude/skills/yt-script/` |
+| Title & thumbnail pairing linter | `yt-package` | `.claude/skills/yt-package/` |
+| Edit decision list from transcript (dead air, filler cues) | `yt-edit` | `.claude/skills/yt-edit/` |
+| Triage comments and draft replies in voice | `yt-comment` | `.claude/skills/yt-comment/` |
+| Weekly YouTube content schedule planner | `yt-plan` | `.claude/skills/yt-plan/` |
+| Outlier video research ranked by channel multiple | `yt-viral` | `.claude/skills/yt-viral/` |
+| Audience retention curve & cliff diagnostics | `yt-retention` | `.claude/skills/yt-retention/` |
+| Extract Shorts from long-form video transcript | `yt-shorts` | `.claude/skills/yt-shorts/` |
+| Description, tags, and search query optimization | `yt-seo` | `.claude/skills/yt-seo/` |
+| Video chapters generator from transcript | `yt-chapters` | `.claude/skills/yt-chapters/` |
+| Channel audit ending in high-leverage single fix | `yt-audit` | `.claude/skills/yt-audit/` |
 
-**Total skills: 19**
+**Total skills: 32**
 
 ---
 
@@ -52,6 +65,8 @@ These rules are **mandatory** and cannot be overridden by any task instruction:
 6. **Mandatory voice cloning via VoiceStudio** — Always use the channel owner's cloned voice profile (`assets/voices/creator_sample.wav`) via `scripts/voice_studio_client.py` and VoiceStudio (`http://localhost:3900`). Apply audio compression, EQ presence, and high-energy pacing (~170–175 WPM).
 
 7. **Mandatory high-retention kinetic motion graphics** — Never render static video cards. All videos must incorporate continuous micro-motion (Ken Burns zooms 1.0x → 1.08x), visual cut punctuations (screen flickers, flash cuts, scanlines), high-contrast glowing elements, and animated captions to prevent audience drop-off.
+8. **Clean full-bleed canvas (Zero UI/template chrome)** — Never render top masthead header bars, `CATEGORY // SUBTITLE` kickers, top horizontal divider lines, `01 / 09` beat-counter boxes, bottom source/disclaimer bars (`ILLUSTRATIVE EXAMPLE • SOURCE: ...`), on-screen timers (`00:00.0 / 00:43.5`), or bottom progress bars. Place all source links and disclosures in the YouTube description (`metadata.md`), and use the full 1080×1920 vertical canvas for bold, immersive storytelling, layered animated background elements, and kinetic visuals.
+9. **2026 Mobile-first Shorts upload & Browse Features protocol** — All YouTube Shorts must include a 1-frame custom thumbnail card baked into the timeline for mobile frame selection (unlocking YouTube Home Browse traffic), stage initially as UNLISTED for Content ID / HD clearance, strictly cap hashtags to 3–5 niche tags, deploy curiosity / end-payoff hooks (< 55 characters), attach an authoritative Related Video link, and schedule/publish 60 minutes prior to audience peak activity.
 
 ---
 

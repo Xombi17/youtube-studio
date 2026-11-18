@@ -1,0 +1,153 @@
+{
+  "version": "2.0",
+  "description": "Multimodal viral highlight detection lexicon & timing parameters for CreatorRadar Live Clipper v2",
+  "timing": {
+    "segment_sec": 10,
+    "chat_pre_pad_sec": 20,
+    "audio_pre_pad_sec": 15,
+    "post_pad_sec": 8,
+    "max_clip_sec": 32,
+    "cooldown_sec": 35
+  },
+  "transcript_categories": {
+    "explicit_clip_calls": {
+      "weight": 26,
+      "label": "CLIP CALL",
+      "phrases": [
+        "clip that", "clip it", "somebody clip", "chat clip", "clip this",
+        "put that on youtube", "put this on tiktok", "save that", "record that",
+        "that's a clip", "thats a clip", "highlight of the year", "best clip"
+      ]
+    },
+    "disbelief_shock": {
+      "weight": 15,
+      "label": "SHOCK / DISBELIEF",
+      "phrases": [
+        "no way", "ain't no way", "aint no way", "what just happened",
+        "are you kidding", "are you serious", "you're lying", "youre lying",
+        "how did that", "how did i", "wait what", "excuse me", "bro what",
+        "impossible", "no chance", "no shot", "what the hell", "what the fuck",
+        "oh my god", "holy shit", "holy crap", "my jaw dropped", "i cannot believe",
+        "did you see that", "did that just happen", "wtf", "nah bro"
+      ]
+    },
+    "hype_clutch_victory": {
+      "weight": 14,
+      "label": "CLUTCH / HYPE",
+      "phrases": [
+        "let's go", "lets go", "clutch", "one tap", "one shot", "ace",
+        "world record", "first try", "we did it", "beat it", "god mode",
+        "insane", "unbelievable", "cooked", "destroyed", "obliterated",
+        "headshot", "team wipe", "pentakill", "victory", "outplayed",
+        "diffed", "cleanest", "nasty", "disgusting", "peak cinema", "aura",
+        "goat", "greatest of all time", "unreal"
+      ]
+    },
+    "comedy_fail_rage": {
+      "weight": 13,
+      "label": "COMEDY / FAIL",
+      "phrases": [
+        "i'm dead", "im dead", "i can't breathe", "cant breathe", "bro fell",
+        "nooooo", "why did i", "uninstall", "scammed", "rigged", "my bad",
+        "i threw", "i sold", "karma", "instant regret", "wait no",
+        "don't tell me", "dont tell me", "messed up", "fumbled", "choked",
+        "skill issue", "broken game", "fix your game", "how did i miss",
+        "i'm crying", "im crying", "laughing so hard"
+      ]
+    },
+    "story_drama_hot_take": {
+      "weight": 12,
+      "label": "HOT TAKE / DRAMA",
+      "phrases": [
+        "hot take", "unpopular opinion", "truth is", "be honest", "exposed",
+        "confession", "hear me out", "biggest mistake", "never told anyone",
+        "plot twist", "leaked", "controversial", "the real reason",
+        "nobody talks about", "stop doing this", "biggest lie", "cancelled"
+      ]
+    },
+    "gaming_news_reveals": {
+      "weight": 13,
+      "label": "REVEAL / NEWS",
+      "phrases": [
+        "trailer", "release date", "announced", "confirmed", "gameplay reveal",
+        "official", "gta 6", "gta vi", "rockstar", "new update", "patch notes",
+        "new map", "secret ending", "easter egg", "world premiere", "breaking news",
+        "just dropped", "live now", "preload"
+      ]
+    },
+    "audience_hooks": {
+      "weight": 10,
+      "label": "HOOK / SETUP",
+      "phrases": [
+        "watch this", "look at this", "hold on", "wait for it", "trust me",
+        "bet you", "you won't believe", "check this out", "chat look",
+        "listen to this", "pay attention", "ready for this"
+      ]
+    },
+    "hinglish_indian_hype": {
+      "weight": 13,
+      "label": "HINGLISH HYPE",
+      "phrases": [
+        "bhai", "arey", "arre", "kya baat", "gajab", "bawaal", "khatam",
+        "mar gaya", "maza aa gaya", "pagal", "bapre", "oh bhai", "op",
+        "kya hua", "vice city", "lucia", "jason", "wasted", "busted"
+      ]
+    },
+    "emotional_heartfelt": {
+      "weight": 18,
+      "label": "EMOTIONAL MOMENT",
+      "phrases": [
+        "ro raha", "rona", "mat ro", "aansu", "cry", "crying", "tears",
+        "emotional", "thank you guys", "thank you so much", "dil se",
+        "sapna", "dream come true", "proud", "shukriya", "love you guys",
+        "mummy", "papa", "family", "goosebumps", "cant believe", "cannot believe",
+        "speechless", "literally shaking", "heart", "miss you", "memories",
+        "journey", "years ago", "made it"
+      ]
+    },
+    "wonky_glitch_weird": {
+      "weight": 17,
+      "label": "WONKY GLITCH / WEIRD",
+      "phrases": [
+        "what is he doing", "why is he", "bro is flying", "stuck in the",
+        "glitched", "glitching", "bugged out", "broke the game", "npc is",
+        "ragdoll", "pause bro", "ayo pause", "what did he just say",
+        "who sent this", "who donated", "weird superchat", "weird dono",
+        "read that again", "nah thats crazy", "what am i looking at",
+        "cursed", "wonky", "freaky"
+      ]
+    }
+  },
+  "chat_hype_tokens": [
+    "kekw", "lul", "lulw", "omegalul", "icant", "aintnoway", "aware", "monkas",
+    "monkaw", "pog", "pogu", "poggers", "pogchamp", "pagman", "gigachad",
+    "pepega", "sadge", "copium", "pausechamp", "catjam", "xdd", "kapp", "kappa",
+    "clip", "clipped", "clipit", "wtf", "omg", "lmao", "lmfao", "rofl",
+    "insane", "goat", "clutch", "holy", "bruh", "crazy", "cooked", "cinema",
+    "peak", "aura", "ayo", "caught", "real", "cap", "nah", "bro", "what",
+    "nooo", "rip", "gg", "ez", "diff", "ratio", "massive", "huge", "w", "ww",
+    "www", "wwww", "l", "ll", "lll", "fire", "god",
+    "op", "bhai", "arey", "arre", "gajab", "bawaal", "maza", "khatam", "legend", "mythpat", "gta6", "gta",
+    "cry", "crying", "emotional", "respect", "proud", "love", "heart", "matro", "king", "goosebumps"
+  ],
+  "chat_hype_emojis": ["💀", "😭", "🔥", "😂", "🤣", "😱", "🤯", "🐐", "👑", "💯", "⚡", "🚨", "🗣️", "👀", "👏", "❤️", "🥹", "😢", "🥺", "💔", "🙏", "🫂"],
+  "chat_weird_glitch_tokens": [
+    "ayo", "ayoo", "ayooo", "pause", "sus", "nahhh", "nahh", "hellnah", "glitch",
+    "glitched", "bug", "bugged", "broken", "ragdoll", "physics", "wonky", "cursed",
+    "npc", "tts", "dono", "donation", "superchat", "freaky", "weird", "unhinged",
+    "clipit", "clip", "whatthe", "ewww", "brotha", "caught", "wild", "jail", "fbi"
+  ],
+  "chat_weird_glitch_emojis": ["💀", "🤨", "🗿", "🤡", "😬", "🫣", "👀", "🚨", "🤮", "😳"],
+  "weird_dono_cues": [
+    "ayo", "pause", "sus", "bark", "ronaldo", "messi", "ratio", "bald", "fraud",
+    "scam", "mom", "girlfriend", "married", "kiss", "feet", "weird", "dare",
+    "roast", "washed", "fake", "cheat", "police", "arrest", "wtf", "crazy",
+    "unhinged", "cursed", "rizz", "ohio", "freaky", "exposed", "truth", "confess",
+    "skill issue", "cry", "laugh", "bet you", "do a backflip", "backflip"
+  ],
+  "chat_noise_complaints": [
+    "lag", "lagging", "buffering", "muted", "mic muted", "no audio", "no sound",
+    "stream down", "frozen", "frame drop", "bitrate", "ads", "ad break", "f in chat",
+    "discord ping", "echo", "too quiet", "too loud"
+  ]
+}

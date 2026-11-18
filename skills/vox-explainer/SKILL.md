@@ -119,6 +119,20 @@ Motion prompts for the collage aesthetic should be SUBTLE — this is the most c
 
 Explicitly forbid in every prompt: "no camera shake, no 3D rotation, no morphing of faces or text, no style drift, elements remain flat paper cutouts."
 
+> **CreatorRadar Studio Override — Clean Full-Bleed Canvas:** Never burn top mastheads, `CATEGORY // SUBTITLE` kickers, divider rules, `01 / 09` beat-counter boxes, bottom source/disclaimer bars, timers, or progress bars onto rendered frames. Put source links in `metadata.md` and use the full vertical canvas for rich animated backgrounds and hero motion.
+
+## YouTube Shorts Virality & Vertical Adaptation Standards (9:16 — Blueprint v2.0.0)
+
+When producing a **9:16 YouTube Short** (28–45s) in the Vox/paper-collage style, follow `skills/codex-shorts-blueprint/SKILL.md` (v2.0.0), `presets/motion-presets.json`, and `references/ae-workflow.md`:
+
+1. **Frame-0 "Stop-Stack" Hook:** Start audio at `<= 0.05s` with `<= 8–10` words in the first 2.5s opening a curiosity loop (do not explain the whole answer in Beat 1), paired with an already-composed Frame-0 story image.
+2. **Coherent Story Worlds & Mandatory Visual Proof:** Define the one-sentence hidden mechanism and one-sentence visual proof before generating art. Build a small number of coherent 2.5D worlds (foreground/subject/background planes) spanning at least 4 presentation families with at least one genuine visual-proof sequence (`occlusion_reveal`, `cross_section`, `matched_comparison`, or causal chain that holds up muted). Avoid >2 consecutive centered headline + floating-object slides.
+3. **Strict Mobile UI Safe Zones (`1080×1920`):** Keep all critical text/figures/badges in `x = 60–910, y = 200–1350`, hero artwork in `x = 60–900, y = 220–1180`, and captions in `x = 70–900, y = 1160–1340` (right UI rail `x = 915–1080` and bottom zone `y > 1350` stay clear except for background atmosphere). Validate full swept bounds.
+4. **Frameless Stable Captions:** Never use wide dark rectangular subtitle boxes. Use frameless crisp display sans starting around `64–72px`, **3–5 words** per chunk (max 2 lines, broken on spoken meaning), stable baseline, one emphasis color for the active word/phrase, no constant per-word scale pumping or bounces, and zero motion blur on captions.
+5. **1.2–2.0s Meaningful Events, 3-Clock Timing & Motion Presets:** Trigger a meaningful information change + persistent visual anchor every `1.2–2.0s` (with re-hooks every `10–12s`). Separate **three clocks**: `12 fps` intrinsic paper poses inside `30 fps` camera/matte/world motion and `30 fps` 2D typography/captions (never posterize the entire final comp). Use authored velocity curves from `presets/motion-presets.json` and native transform/shutter motion blur (`180°` / `-90°`) instead of full-frame Gaussian blur.
+6. **Clean PNG Cutouts & Plan Gate:** Use high-res transparent raster PNG cutouts checked on light and dark backgrounds (no SVG replacement packs for paper-collage explainers, no AI-generated charts/maps passed as measured evidence). Author `premium_plan.json` and run `python3 skills/codex-shorts-blueprint/scripts/validate_plan.py <plan.json>` before full render.
+7. **Zero Dead Air, Seamless Loop & 3-Stem Broadcast Handoff:** Keep inter-beat pauses at `0.06–0.12s` (at most one `0.18–0.24s` twist pause), place material-specific SFX on real visual actions (not generic cut whooshes), use a purposeful music lift/subtraction at the twist, and end with a grammatical + visual **Seamless Loop Bridge** (`<= 0.10s` tail, verified across two loop cycles). Master single-pass from Whisper-verified (`>= 0.98`) takes (`-14.0 ± 0.5 LUFS` studio / `-16 LUFS` social target, `<= -1.0 dBTP`), and deliver full-length sample-aligned **48 kHz / 24-bit** `dialogue`, `music`, and `sfx` WAV stems alongside the BT.709 `yuv420p` CRF 16–18 MP4, clean picture master, and SRT.
+
 Poll each generation task to completion and download to `clips/clip_NN.mp4`. Generations fail or drift sometimes — review each clip; regenerate any where text warps or the style breaks. Budget for ~15% regeneration.
 
 ## Stage 5 — Music (MiniMax Music 2.6)

@@ -40,7 +40,8 @@ Emit a parallel `storyboard-scenes.json` array alongside the human shot list.
 
 ## Never
 - Use real gameplay screenshots you don't personally own
-- Pass AI-generated imagery as genuine game footage
+- Pass AI-generated imagery as genuine game footage, or AI-generated charts/maps as measured evidence
+- Render top masthead bars, `CATEGORY // SUBTITLE` kickers, divider lines, `01 / 09` beat-counter rectangles, bottom source/disclaimer bars, timers, or progress bars on screen — keep critical 9:16 graphics inside `x = 60–910, y = 200–1350` (hero `x = 60–900, y = 220–1180`, captions `x = 70–900, y = 1160–1340`), mark any illustrative UI mockup in `metadata.md`, and include at least one visual-proof/comparison sequence rather than disconnected static cards
 
 ## Output
-Save to `scripts/<topic>/storyboard.md` + `scripts/<topic>/storyboard-scenes.json`
+Save to `scripts/<topic>/storyboard.md` + `scripts/<topic>/storyboard-scenes.json` (plus `premium_plan.json` validated via `skills/codex-shorts-blueprint/scripts/validate_plan.py` for 9:16 editorial Shorts)

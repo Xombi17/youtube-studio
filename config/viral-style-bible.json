@@ -1,0 +1,68 @@
+{
+  "version": "2.0",
+  "name": "ClipSurge Viral Gaming Shorts Blueprint v2 (2026 Retention Benchmark)",
+  "description": "Data-backed 2026 Shorts virality & retention blueprint modeled on top-performing GTA 6 / IShowSpeed / Kai Cenat / Mythpat clips. Targets >=70% Viewed vs Swiped Away, >=95% APV, and >=20% loop rate.",
+  "tiers": {
+    "s_tier_min": 90.0,
+    "a_tier_min": 72.0,
+    "auto_upload_min_score": 90.0
+  },
+  "retention_targets": {
+    "viewed_vs_swiped_min_pct": 70,
+    "apv_target_pct": 95,
+    "loop_rate_target_pct": 20,
+    "hook_window_sec": 2.0
+  },
+  "pacing": {
+    "target_clip_sec": 20,
+    "min_clip_sec": 11,
+    "max_clip_sec": 28,
+    "opening_hook_window_sec": 2.0,
+    "max_trailing_silence_sec": 1.2,
+    "dono_reaction_watch_sec": 15.0
+  },
+  "visual_packaging": {
+    "default_layout": "split-blur",
+    "caption_font": "Adwaita Sans",
+    "caption_highlight_hex": "#FFE600",
+    "max_words_per_caption_card": 3,
+    "zero_ui_chrome": true,
+    "punch_zoom_enabled": true,
+    "punch_zoom_boost": 0.13,
+    "reaction_sfx_enabled": true
+  },
+  "archetype_weights": {
+    "weird_dono": 1.26,
+    "wonky_glitch": 1.24,
+    "facecam_antics": 1.20,
+    "emotional": 1.20,
+    "clip_call": 1.22,
+    "comedy_fail": 1.15,
+    "shock": 1.12,
+    "chat_explosion": 1.10,
+    "cool_play": 1.06,
+    "story_comedy": 1.05,
+    "audio_peak": 0.94,
+    "silent_visual": 0.78
+  },
+  "viral_drivers": [
+    "High-velocity cultural relevance (GTA 6 early access, first-time reactions, major creator marathons)",
+    "0-2s extreme emotional contrast (open mid-scream, mid-glitch, mid-shock, or direct question — zero dead air)",
+    "Abrupt punchline cut (<=1.2s tail after laugh/scream to trigger >20% loop rate and >95% APV)",
+    "Comment-war & shareability triggers (streamer comparisons, GTA 6 vs GTA 5 debates, absurd NPC/physics bugs, wholesome milestones)",
+    "Muted-scroll clarity (3-word Cyber Yellow captions + visible facecam reaction + verified dono cutout card)"
+  ],
+  "groq_free_tier": {
+    "max_rpm_soft": 18,
+    "max_rpd_soft": 850,
+    "batch_size": 3,
+    "whisper_min_score": 65.0
+  },
+  "title_rules": {
+    "max_chars": 92,
+    "require_shorts_tag": true,
+    "ban_internal_metrics": true,
+    "ban_profanity": true,
+    "curiosity_gap_first": true
+  }
+}

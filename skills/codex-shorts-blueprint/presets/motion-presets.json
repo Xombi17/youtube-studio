@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "units": "1080x1920 pixels and seconds; frame counts refer to 30 fps delivery",
+  "status": "Editorial starting values, not empirically proven viral settings",
+  "delivery": {"width": 1080, "height": 1920, "fps": 30, "paper_pose_fps": 12, "camera_fps": 30, "type_fps": 30},
+  "safe_rect": [60, 200, 910, 1350],
+  "hero_rect": [60, 220, 900, 1180],
+  "caption_band": [70, 1160, 900, 1340],
+  "caption_defaults": {"font_px": 64, "max_lines": 2, "preferred_words": [3, 5], "line_height_px": 76, "shrink_or_reflow_if_bounds_fail": true},
+  "motion_blur": {"method": "native_transform_or_temporal_shutter_sampling", "shutter_angle_degrees": 180, "shutter_phase_degrees": -90, "local_samples_starting_point": 8, "blur_caption_hud": false},
+  "presets": [
+    {"id": "evidence_push", "purpose": "Move toward the detail that proves the narrated claim", "duration_frames": [24, 42], "camera_scale": [1.0, 1.08], "camera_translation_px_max": [30, 18], "temporal_bezier": [0.22, 1.0, 0.36, 1.0], "depth_planes": ["background", "subject", "foreground"], "rules": ["One camera intention", "Keep the evidence point registered", "Validate swept bounds and overscan"]},
+    {"id": "object_carry", "purpose": "Change context while preserving a recognizable object across the cut", "boundary_anchor_error_px_max": 12, "boundary_scale_difference_percent_max": 3, "boundary_rotation_difference_degrees_max": 2, "settle_frames": [6, 10], "temporal_bezier": [0.16, 1.0, 0.30, 1.0], "rules": ["Reuse the same cutout or matched geometry", "No generative morph", "A meaningful context change must occur"]},
+    {"id": "occlusion_reveal", "purpose": "Expose a hidden mechanism behind a surface", "duration_frames": [12, 18], "matte": "alpha_or_shape", "edge_feather_px": [1, 3], "temporal_bezier": [0.40, 0.0, 0.20, 1.0], "rules": ["Move the foreground surface or reveal mask", "Keep the interior geographically aligned", "Treat the reveal as information, not a full-screen wipe"]},
+    {"id": "cross_section", "purpose": "Move from exterior to the mechanism inside the same object", "duration_frames": [18, 30], "camera_scale": [1.0, 1.06], "temporal_bezier": [0.22, 1.0, 0.36, 1.0], "rules": ["Preserve the object's orientation", "Separate surface, interior and labels", "Show the causal connection after opening it"]},
+    {"id": "attached_callout", "purpose": "Identify the exact evidence point without competing with the visual", "line_draw_frames": [8, 12], "label_reveal_frames": [6, 9], "temporal_bezier": [0.16, 1.0, 0.30, 1.0], "rules": ["Track the anchor in screen space", "Keep label type crisp", "Short label, not a paragraph", "Validate label bounds after camera movement"]},
+    {"id": "kinetic_emphasis", "purpose": "Emphasize one narrated word or phrase", "duration_frames": [7, 10], "rise_px_max": 12, "scale": [1.0, 1.0], "temporal_bezier": [0.16, 1.0, 0.30, 1.0], "rules": ["No bounce by default", "No per-word scale pumping", "Keep caption baseline stable", "Use one emphasis color"]},
+    {"id": "material_settle", "purpose": "Place a paper object with weight and then let it rest", "duration_frames": [8, 12], "rotation_degrees_max": 2, "scale_overshoot_percent_max": 2.5, "temporal_bezier": [0.16, 1.0, 0.30, 1.0], "intrinsic_pose_fps": 12, "rules": ["Only where a placement action occurs", "Contact shadow must agree with elevation", "No perpetual sway on every object"]},
+    {"id": "focus_handoff", "purpose": "Move attention from context to the evidence detail", "duration_frames": [10, 18], "background_blur_px_max": 10, "temporal_bezier": [0.40, 0.0, 0.20, 1.0], "rules": ["Never blur caption HUD", "Keep contextual depth plausible", "One focal subject at a time"]},
+    {"id": "matched_comparison", "purpose": "Make a change verifiable on a shared scale", "duration_frames": [12, 24], "temporal_bezier": [0.40, 0.0, 0.20, 1.0], "rules": ["Common baseline and units", "Matched camera and object scale", "No misleading data geometry", "Use sourced values, not generated chart art"]},
+    {"id": "motivated_whip", "purpose": "A single directional turn at a genuine narrative twist", "duration_frames": [6, 9], "overscan_percent_min": 15, "maximum_default_per_10_seconds": 1, "temporal_bezier": [0.50, 0.0, 0.30, 1.0], "rules": ["Use temporal motion blur", "Follow a visible direction or object", "Return to a readable hold", "Do not use as the default transition"]}
+  ]
+}

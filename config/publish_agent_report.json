@@ -1,0 +1,51 @@
+{
+  "started_at": "2026-11-18T18:28:57.288760+00:00",
+  "dry_run": true,
+  "peak_window_open": false,
+  "staged_found": 5,
+  "published": [],
+  "rejected": [
+    {
+      "video_id": "UKfNFOhQNh0",
+      "title": "Speed Reacts to GTA 6 Jasons AHH \ud83e\udd2f #Shorts",
+      "verdict": "ORPHAN_CLEAN",
+      "dry_run": true
+    },
+    {
+      "video_id": "KXSPwUy-xcs",
+      "title": "Why 20% Smaller Actually Means 25% Pricier #Shorts",
+      "verdict": "ORPHAN_CLEAN",
+      "dry_run": true
+    },
+    {
+      "video_id": "gzpUrh27ElI",
+      "title": "GTA 6 Glitch: 'She Touch My Head' #Shorts",
+      "verdict": "ORPHAN_CLEAN",
+      "dry_run": true
+    },
+    {
+      "video_id": "43eL0AzprOU",
+      "title": "Mythpat's Emotional Moment Playing GTA 6 Live! \u2764\ufe0f #Shorts",
+      "verdict": "ORPHAN_CLEAN",
+      "dry_run": true
+    },
+    {
+      "video_id": "nOLTcL7-K2c",
+      "title": "Mythpat Witnesses a Wild Police Arrest in GTA 6! \ud83d\udea8 #Shorts",
+      "verdict": "ORPHAN_CLEAN",
+      "dry_run": true
+    }
+  ],
+  "deferred": [],
+  "orphaned": [],
+  "errors": [],
+  "finished_at": "2026-11-18T18:28:57.289016+00:00",
+  "counts": {
+    "staged": 5,
+    "published": 0,
+    "rejected": 5,
+    "deferred": 0,
+    "orphaned": 0,
+    "errors": 0
+  }
+}

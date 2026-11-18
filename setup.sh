@@ -6,13 +6,12 @@
 
 set -e
 
-# Terminal colors
 BOLD='\033[1m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 WORKSPACE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$WORKSPACE_ROOT"
@@ -27,31 +26,36 @@ echo -e "Workspace Root: ${BOLD}$WORKSPACE_ROOT${NC}\n"
 # ------------------------------------------------------------------------------
 echo -e "${BOLD}[1/7] Checking System Requirements & Toolchain...${NC}"
 
-# Python 3
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Error: python3 is not installed. Please install Python 3.10+ (sudo apt install python3 python3-venv).${NC}"
+# Prefer Python 3.11 / 3.12 for full PyTorch/CUDA wheel compatibility
+PYTHON_BIN=""
+for candidate in python3.11 python3.12 python3; do
+    if command -v "$candidate" &> /dev/null; then
+        PYTHON_BIN="$(command -v "$candidate")"
+        break
+    fi
+done
+if [ -z "$PYTHON_BIN" ]; then
+    echo -e "${RED}Error: Python 3.11+ is required.${NC}"
     exit 1
 fi
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-echo -e "  ✔ Python 3: ${GREEN}$PYTHON_VERSION${NC}"
+echo -e "  ✔ Python: ${GREEN}$($PYTHON_BIN --version) ($PYTHON_BIN)${NC}"
 
-# Node.js
+if command -v uv &> /dev/null; then
+    echo -e "  ✔ uv: ${GREEN}$(uv --version)${NC}"
+fi
+
 if ! command -v node &> /dev/null; then
-    echo -e "${YELLOW}Notice: node is not installed. Required for Next.js dashboard and HyperFrames rendering.${NC}"
+    echo -e "${YELLOW}Notice: node is not installed. Required for Next.js Studio UI.${NC}"
 else
-    NODE_VERSION=$(node --version)
-    echo -e "  ✔ Node.js: ${GREEN}$NODE_VERSION${NC}"
+    echo -e "  ✔ Node.js: ${GREEN}$(node --version)${NC}"
 fi
 
-# FFmpeg & FFprobe
 if ! command -v ffmpeg &> /dev/null; then
-    echo -e "${RED}Error: ffmpeg is not installed. Please install FFmpeg (sudo apt install ffmpeg).${NC}"
+    echo -e "${RED}Error: ffmpeg is not installed. Please install FFmpeg.${NC}"
     exit 1
 fi
-FFMPEG_VERSION=$(ffmpeg -version 2>&1 | head -n1 | awk '{print $3}')
-echo -e "  ✔ FFmpeg: ${GREEN}$FFMPEG_VERSION${NC}"
+echo -e "  ✔ FFmpeg: ${GREEN}$(ffmpeg -version 2>&1 | head -n1 | awk '{print $3}')${NC}"
 
-# Git
 if ! command -v git &> /dev/null; then
     echo -e "${RED}Error: git is not installed.${NC}"
     exit 1
@@ -73,10 +77,8 @@ if command -v nvidia-smi &> /dev/null; then
 fi
 
 if [ "$HAS_NVIDIA_GPU" = true ]; then
-    # Check NVENC in ffmpeg
     if ffmpeg -encoders 2>/dev/null | grep -q "h264_nvenc"; then
         echo -e "  ${GREEN}✔ FFmpeg NVENC Hardware Acceleration: Available (h264_nvenc, hevc_nvenc)${NC}"
-        export FF_HWACCEL="nvenc"
     else
         echo -e "  ${YELLOW}⚠ FFmpeg does not have NVENC compiled; falling back to CPU libx264.${NC}"
     fi
@@ -87,29 +89,22 @@ fi
 # ------------------------------------------------------------------------------
 # 3. Setup Top-Level Python Virtual Environment
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[3/7] Setting up Studio Python Virtual Environment...${NC}"
+echo -e "\n${BOLD}[3/7] Setting up Studio Python Virtual Environment (.venv)...${NC}"
 
-if [ ! -d ".venv" ]; then
-    echo "  Creating python3 virtual environment in .venv..."
-    python3 -m venv .venv
-fi
-
-source .venv/bin/activate
-pip install --upgrade pip --quiet
-
-if [ -f "requirements.txt" ]; then
-    echo "  Installing core requirements..."
+if command -v uv &> /dev/null; then
+    if [ ! -d ".venv" ]; then
+        uv venv --python "$PYTHON_BIN" .venv
+    fi
+    uv pip install --python .venv/bin/python -r requirements.txt
+else
+    if [ ! -d ".venv" ]; then
+        "$PYTHON_BIN" -m venv .venv
+    fi
+    source .venv/bin/activate
+    pip install --upgrade pip --quiet
     pip install -r requirements.txt --quiet
 fi
-
-# If NVIDIA GPU is present, install CUDA-accelerated PyTorch
-if [ "$HAS_NVIDIA_GPU" = true ]; then
-    echo "  Configuring PyTorch with CUDA 12.1 support for NVIDIA GPU..."
-    pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121 --quiet || {
-        echo "  Notice: Defaulting to standard torch installation."
-        pip install torch torchaudio --quiet
-    }
-fi
+echo -e "  ${GREEN}✔ Studio .venv ready (Playwright, Edge-TTS, audio utilities installed).${NC}"
 
 # ------------------------------------------------------------------------------
 # 4. Clone & Setup VoiceStudio Sub-Repository
@@ -126,32 +121,26 @@ else
     echo -e "  ${GREEN}✔ VoiceStudio repository present.${NC}"
 fi
 
-# Setup VoiceStudio virtualenv if missing
-if [ -d "$VOICE_STUDIO_DIR" ]; then
-    if [ ! -d "$VOICE_STUDIO_DIR/.venv" ]; then
-        echo "  Setting up VoiceStudio virtual environment (.venv)..."
-        (
-            cd "$VOICE_STUDIO_DIR"
-            python3 -m venv .venv
-            source .venv/bin/activate
-            pip install --upgrade pip --quiet
-            if [ -f "requirements.txt" ]; then
-                pip install -r requirements.txt --quiet || true
-            fi
-            if [ "$HAS_NVIDIA_GPU" = true ]; then
-                pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121 --quiet || true
-            fi
-        )
-        echo -e "  ${GREEN}✔ VoiceStudio virtual environment initialized.${NC}"
+if [ -d "$VOICE_STUDIO_DIR" ] && [ ! -d "$VOICE_STUDIO_DIR/.venv" ]; then
+    echo "  Syncing VoiceStudio Python environment..."
+    if command -v uv &> /dev/null; then
+        if [ "$HAS_NVIDIA_GPU" = true ]; then
+            (cd "$VOICE_STUDIO_DIR" && uv sync --python "$PYTHON_BIN" --no-group dev --group cuda)
+        else
+            (cd "$VOICE_STUDIO_DIR" && uv sync --python "$PYTHON_BIN" --no-group dev --group cpu)
+        fi
     else
-        echo -e "  ${GREEN}✔ VoiceStudio virtual environment ready.${NC}"
+        echo -e "  ${YELLOW}⚠ Install 'uv' to sync VoiceStudio's lockfile cleanly.${NC}"
     fi
+    echo -e "  ${GREEN}✔ VoiceStudio virtual environment initialized.${NC}"
+elif [ -d "$VOICE_STUDIO_DIR/.venv" ]; then
+    echo -e "  ${GREEN}✔ VoiceStudio virtual environment ready.${NC}"
 fi
 
 # ------------------------------------------------------------------------------
-# 5. Dashboard-Next (Next.js) Dependencies
+# 5. Dashboard-Next (Next.js Studio UI) Dependencies
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}[5/7] Setting up Dashboard-Next (UI Control Center)...${NC}"
+echo -e "\n${BOLD}[5/7] Setting up Next.js Studio UI (dashboard-next)...${NC}"
 
 if [ -d "dashboard-next" ] && command -v npm &> /dev/null; then
     if [ ! -d "dashboard-next/node_modules" ]; then
@@ -163,7 +152,7 @@ if [ -d "dashboard-next" ] && command -v npm &> /dev/null; then
 fi
 
 # ------------------------------------------------------------------------------
-# 6. Claude Code & Agent Skills Verification
+# 6. Agent Skills Verification
 # ------------------------------------------------------------------------------
 echo -e "\n${BOLD}[6/7] Verifying Agent Skills & Relative Links...${NC}"
 
@@ -176,11 +165,10 @@ for skill_dir in skills/*; do
         fi
     fi
 done
-SKILL_COUNT=$(ls -1 skills | wc -l)
+SKILL_COUNT=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l)
 echo -e "  ${GREEN}✔ Verified $SKILL_COUNT production skills linked to .claude/skills/${NC}"
 
-# Ensure helper scripts are executable
-chmod +x scripts/*.py scripts/**/*.py orchestration/*.py dashboard/*.py 2>/dev/null || true
+chmod +x scripts/*.py scripts/*.sh orchestration/*.py dashboard/*.py 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
 # 7. Voice Profile Verification
@@ -192,27 +180,23 @@ if [ -f "$VOICE_SAMPLE" ]; then
     SAMPLE_SIZE=$(ls -lh "$VOICE_SAMPLE" | awk '{print $5}')
     echo -e "  ${GREEN}✔ Channel Owner voice profile found (${SAMPLE_SIZE}): assets/voices/creator_sample.wav${NC}"
 else
-    echo -e "  ${YELLOW}⚠ Voice sample not found. Record or place your voice sample at assets/voices/creator_sample.wav${NC}"
+    echo -e "  ${YELLOW}⚠ Voice sample not found. Record via Studio UI -> Voice Studio tab.${NC}"
 fi
 
-# ------------------------------------------------------------------------------
-# Finished!
-# ------------------------------------------------------------------------------
 echo -e "\n${BOLD}${GREEN}==============================================================================${NC}"
 echo -e "${BOLD}${GREEN}   Setup Complete! CreatorRadar Studio is ready on your machine.              ${NC}"
 echo -e "${BOLD}${GREEN}==============================================================================${NC}"
 echo -e "\n${BOLD}Quickstart Commands:${NC}"
-echo -e "  1. ${BOLD}Start VoiceStudio Voice Cloning Service:${NC}"
-echo -e "     cd VoiceStudio && source .venv/bin/activate && python app.py"
-echo -e "     (Runs on http://localhost:3900 with GPU/CUDA acceleration)"
+echo -e "  1. ${BOLD}Start Studio API + Next.js UI (one command):${NC}"
+echo -e "     ./scripts/start_studio.sh"
+echo -e "     (UI: http://localhost:3000 | API: http://127.0.0.1:8080)"
 echo -e ""
-echo -e "  2. ${BOLD}Launch Mission Control Dashboard:${NC}"
-echo -e "     python3 dashboard/app.py"
-echo -e "     (Open http://localhost:8080 in your browser)"
+echo -e "  2. ${BOLD}Optional — Start VoiceStudio GPU Server (CUDA):${NC}"
+echo -e "     cd VoiceStudio && .venv/bin/uvicorn main:app --app-dir backend --host 127.0.0.1 --port 3900"
 echo -e ""
-echo -e "  3. ${BOLD}Run Autonomous End-to-End Video Production Wave:${NC}"
-echo -e "     python3 orchestration/multi_agent_studio.py \"GTA VI Storage Requirements PS5\""
+echo -e "  3. ${BOLD}Run Autonomous End-to-End Video Production Wave (CLI):${NC}"
+echo -e "     .venv/bin/python orchestration/multi_agent_studio.py \"GTA VI Launch Day Survival Guide\""
 echo -e ""
-echo -e "  4. ${BOLD}Open with Claude Code or Codex:${NC}"
-echo -e "     claude   (all 19 skills loaded automatically from .claude/skills/)"
+echo -e "  4. ${BOLD}Open with Claude Code / Codex / Antigravity:${NC}"
+echo -e "     All $SKILL_COUNT skills linked in .claude/skills/ and indexed in AGENTS.md"
 echo -e "${BOLD}${BLUE}==============================================================================${NC}\n"

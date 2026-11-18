@@ -32,6 +32,11 @@ if str(STUDIO_ROOT) not in sys.path:
 
 from scripts.live_stream_scout import discover_live_streams, load_watchlist_config
 
+try:
+    import scripts.redis_studio as redis_studio
+except Exception:
+    redis_studio = None
+
 CONFIG_DIR = STUDIO_ROOT / "config"
 LOGS_DIR = STUDIO_ROOT / "logs"
 DAEMON_STATE_PATH = CONFIG_DIR / "autonomous_daemon_state.json"
@@ -105,8 +110,24 @@ def prune_dead_sessions():
         if ret is not None:
             print(f"[Daemon] Clipper for {slug} exited with code {ret}.", flush=True)
             dead.append(slug)
+            url = info.get("stream", {}).get("url")
+            if url and redis_studio:
+                redis_studio.release_stream_lock(url)
     for slug in dead:
         active_sessions.pop(slug, None)
+
+
+def cleanup_old_logs(max_age_sec: int = 86400 * 2):
+    """Keep logs directory tidy by removing logs older than max_age_sec."""
+    if not LOGS_DIR.exists():
+        return
+    now = time.time()
+    for log_p in LOGS_DIR.glob("daemon_*.log"):
+        try:
+            if now - log_p.stat().st_mtime > max_age_sec:
+                log_p.unlink()
+        except Exception:
+            pass
 
 
 def save_daemon_state():
@@ -142,19 +163,24 @@ def run_daemon(
     print(f" • Auto-Upload Min: {min_score} (Privacy: {upload_privacy})")
     print(f" • ASR Engine:      {asr}")
     print(f" • Max Parallel:    {max_parallel} concurrent stream(s)")
+    print(f" • Redis Engine:    {'CONNECTED' if redis_studio and redis_studio.is_redis_connected() else 'MEMORY-FALLBACK'}")
     print("=" * 64, flush=True)
 
     while not stop_requested:
         prune_dead_sessions()
+        cleanup_old_logs()
         save_daemon_state()
 
         if len(active_sessions) < max_parallel:
             try:
                 cfg = load_watchlist_config()
+                # Dynamically discover trending streams across ALL categories on YouTube & Twitch
                 res = discover_live_streams(
                     game=cfg.get("default_game", "ALL"),
                     min_viewers=200,
-                    limit=15,
+                    limit=20,
+                    include_watchlist=True,
+                    include_youtube=True,
                 )
                 live_candidates = res.get("streams", [])
 
@@ -163,8 +189,18 @@ def run_daemon(
                         break
 
                     slug = stream.get("suggested_channel") or stream.get("display_name")
+                    url = stream.get("url")
+                    if not url:
+                        continue
+
                     if slug in active_sessions:
                         continue
+
+                    # Distributed Redis lock to prevent duplicate clipping
+                    if redis_studio:
+                        locked = redis_studio.acquire_stream_lock(url, ttl_sec=7200)
+                        if not locked:
+                            continue
 
                     proc = spawn_clipper_for_stream(
                         stream=stream,
@@ -191,6 +227,9 @@ def run_daemon(
     print("[Daemon] Terminating all child clipper processes...", flush=True)
     for slug, info in active_sessions.items():
         try:
+            url = info.get("stream", {}).get("url")
+            if url and redis_studio:
+                redis_studio.release_stream_lock(url)
             info["process"].terminate()
             info["process"].wait(timeout=5)
         except Exception:

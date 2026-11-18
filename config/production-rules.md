@@ -70,16 +70,30 @@ Before exporting any video, run `copyright-checker` and confirm:
 
 ## 7. Mandatory High-Retention Kinetic Motion Graphics
 
-Every Short and video produced in this studio must comply with the **High-Retention Kinetic Framework** to prevent audience drop-off:
-- **The 2.5-Second Rule:** Zero static frames. Every beat must contain continuous micro-motion.
-- **Dynamic Ken Burns Zooms:** Every graphic card/scene must continuously scale (1.0x → 1.08x) or pan across its duration.
-- **Visual Punctuation on Cuts:** Every transition must trigger a visual effect—screen flicker, white flash cut, glowing edge flare, or camera punch-in.
-- **High-Contrast Styling:** Dark backgrounds (`#0b1420`), GTA sunset orange (`#f47750`), coral alerts (`#e96643`), and glowing neon accent badges.
-- **Kinetic Word-by-Word Captions:** Captions must emphasize key stress words in contrasting accent colors to keep eyes locked on screen.
+Every Short and video produced in this studio must comply with the **High-Retention Kinetic Framework** (and `skills/codex-shorts-blueprint/` v2.0.0 for 9:16 editorial explainers) to prevent audience drop-off:
+- **Meaningful Visual Cadence (1.2–2.0s):** Never rely on static slides or decorative jitter. Every 1.2–2.0s must deliver a meaningful visual event (revealing crop, state change, comparison, mechanism demonstration, evidence highlight, or new shot) anchored inside coherent story worlds.
+- **Mandatory Visual Proof & Authored Motion:** Include at least one mechanism/proof sequence (occlusion reveal, cross-section, matched comparison, or causal follow-through). Use authored velocity curves (not one default easing or perpetual zoom everywhere) and physically tied transform/shutter motion blur where fast motion occurs.
+- **Three-Clock Separation (Paper-Collage Shorts):** Render intrinsic paper poses at `12 fps` while keeping camera, mattes, world placement, typography, and 2D screen-space captions at `30 fps`.
+- **Strict Mobile Safe Zones (`1080×1920`):** Keep all critical text, figures, badges, and captions inside `x = 60–910`, `y = 200–1350`, hero artwork inside `x = 60–900`, `y = 220–1180`, and captions inside `x = 70–900`, `y = 1160–1340` (keep `x = 915–1080` right UI rail and `y > 1350` bottom UI zone clear except for background atmosphere).
+- **Frameless Kinetic Captions:** Render 3–5 words per chunk (max 2 lines, `64–72px` starting size), breaking on spoken meaning with a stable baseline, single active-word emphasis color, no per-word scale pumping/bounce, and swept bounds verified inside the safe zone.
+- **Clean Full-Bleed Canvas (Zero HUD/Template Chrome):** Never render top masthead bars, `CATEGORY // SUBTITLE` kickers, horizontal divider lines, `01 / 09` beat-counter rectangles, bottom source/disclaimer bars, timers, or progress bars on screen. Source citations and AI disclosures belong in `metadata.md` / `POST_CAPTION.txt`.
+- **Pre-Render Plan Validation:** For editorial Shorts using `codex-shorts-blueprint`, author `premium_plan.json` and validate structure with `python3 skills/codex-shorts-blueprint/scripts/validate_plan.py <plan.json>` before full render.
 
 ---
 
-## 8. Brand Consistency
+## 8. 2026 YouTube Shorts Packaging & Upload Standards (Browse Features Funnel)
+
+To bypass the standard Shorts Feed volatility and unlock 2x–5x total views from **YouTube Browse Features (Homepage)**:
+1. **1-Frame Injected Thumbnail:** Every Short must include a high-contrast thumbnail card baked into the timeline for 1–2 frames at `t=0` or the tail.
+2. **Mobile App Upload Mandate:** Upload via the YouTube Mobile App; use the preview pencil icon to scrub and select the custom frame (desktop does not support Shorts custom thumbnail frames).
+3. **Curiosity & Reverse-Psychology Titles:** Titles must be under 55 characters, utilizing an end-payoff hook (*"What happens at the 25-second mark is wild"*) or reverse-psychology friction (*"Don't click the sound"*).
+4. **Minimalist Metadata & Anti-Spam Tagging:** Strict maximum of **3–5 niche hashtags**. Never exceed 15 hashtags. Always select the accurate Video Category in YouTube Studio.
+5. **UNLISTED Staging & Precision Timing:** Always stage uploads as **UNLISTED** (never Private) to allow full Content ID copyright checks and HD 1080p60 encoding to complete. Schedule or release **60 minutes prior to audience peak activity hours**.
+6. **Related Video Funnel:** In YouTube Studio, always link a high-value long-form video or episodic Short in the **Related Video** slot to initiate channel binge loops.
+
+---
+
+## 9. Brand Consistency
 
 | Element | Standard |
 |---|---|
@@ -92,7 +106,7 @@ Every Short and video produced in this studio must comply with the **High-Retent
 
 ---
 
-## 7. Quality Gates Before Export
+## 10. Quality Gates Before Export
 
 A video may only proceed to export after **all** gates pass:
 
@@ -112,7 +126,7 @@ No autonomous upload. Human approval is required at fact-check, quality review, 
 
 ---
 
-## 8. File Naming & Storage
+## 11. File Naming & Storage
 
 ```
 research/<topic>/claims.md         — fact-checked claim ledger

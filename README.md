@@ -1,147 +1,87 @@
 # CreatorRadar — Autonomous YouTube Production Studio
 
-CreatorRadar is an autonomous, agentic YouTube video production workspace engineered for high-retention vertical Shorts and long-form video production. It orchestrates research, verified claim checks, scriptwriting, voice cloning, HTML5/GSAP kinetic motion graphic rendering, and YouTube SEO packaging.
-
-Designed to run locally on your workstation or laptop with **NVIDIA GPU acceleration (CUDA + NVENC)**.
+CreatorRadar is a local-first, agentic YouTube production studio for high-retention vertical Shorts (9:16) and long-form videos (16:9). It orchestrates hook scoring, verified research, structured scriptwriting, VoiceStudio voice cloning (with neural Edge-TTS fallback), -14 LUFS broadcast audio mastering + SFX mixing, deterministic HTML5/GSAP kinetic rendering via **NVIDIA NVENC**, automated QA auditing, and YouTube SEO packaging.
 
 ---
 
-## ⚡ Quickstart: One-Click Setup
-
-Clone this repository and run the automated bootstrap script:
+## ⚡ Quickstart
 
 ```bash
-git clone https://github.com/Xombi17/youtube-studio.git
-cd youtube-studio
 ./setup.sh
+./scripts/start_studio.sh
+# Or include the local VoiceStudio CUDA server:
+./scripts/start_studio.sh --with-voicestudio
 ```
 
-### What `./setup.sh` does automatically:
-1. **Toolchain Verification**: Checks Python 3.10+, Node.js 18+, FFmpeg, and Git.
-2. **NVIDIA GPU Detection**: Probes `nvidia-smi` for CUDA version and GPU VRAM; configures CUDA-accelerated PyTorch (`torch`, `torchaudio`).
-3. **Hardware Video Acceleration**: Detects FFmpeg NVENC support (`h264_nvenc`, `hevc_nvenc`) for blazing fast video renders.
-4. **Sub-Repository Auto-Clone**: Automatically clones the external [VoiceStudio](https://github.com/debpalash/VoiceStudio.git) repository into `./VoiceStudio` and configures its virtual environment.
-5. **Skill Links**: Verifies and links all 19 agent skills into `.claude/skills/` for Claude Code and AGENTS.md for Codex / Antigravity.
-6. **Voice Profile**: Validates the channel owner's cloned voice sample at `assets/voices/creator_sample.wav`.
+- **Studio UI (Next.js):** `http://localhost:3000`
+- **Studio Engine API (Python):** `http://127.0.0.1:8080`
+- **VoiceStudio CUDA Server (optional):** `http://127.0.0.1:3900`
 
 ---
 
-## 🚀 Running on a Laptop with NVIDIA GPU
+## 🤖 Multi-Agent Autonomous Production (CLI)
 
-### 1. Hardware Video Acceleration (FFmpeg NVENC)
-When an NVIDIA GPU driver is detected, FFmpeg can utilize hardware-accelerated NVENC encoding instead of CPU software rendering, yielding 5x–10x faster export speeds:
-- **H.264 NVENC**: `ffmpeg -hwaccel cuda -i input.mp4 -c:v h264_nvenc -preset p4 -cq 20 output.mp4`
-- **HEVC NVENC**: `ffmpeg -hwaccel cuda -i input.mp4 -c:v hevc_nvenc -preset p4 -cq 22 output.mp4`
+Run the end-to-end 7-stage production wave for **any topic** from the command line:
 
-### 2. CUDA-Accelerated Voice Cloning & Speech Synthesis
-VoiceStudio utilizes PyTorch and CUDA for real-time neural voice cloning:
 ```bash
-# Verify GPU availability in Python
-python3 -c "import torch; print('CUDA available:', torch.cuda.is_available(), '| Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
+# Vertical 9:16 Short (auto-selects style from 120 styles)
+.venv/bin/python orchestration/multi_agent_studio.py "GTA VI Launch Day Survival Guide"
+
+# Landscape 16:9 Explainer with explicit style & custom script
+.venv/bin/python orchestration/multi_agent_studio.py \
+  --topic "Why Local AI Workflows Beat Cloud Subscriptions" \
+  --format long \
+  --style swiss-kinetic \
+  --script path/to/script.md
 ```
+
+### The Production Wave:
+1. **Trend & Hook Analyst**: Formulates candidate hooks and scores them with `skills/yt-script/hookscore.py`.
+2. **Script Architect**: Parses a provided `script.md`/`beats.json` or drafts verified beats (strictly citing `config/gta6-sources.md` for GTA VI topics).
+3. **Studio Director**: Indexes all **120 styles** (21 Claude Video 2.0 + 99 Lemo-Opuscar) via `scripts/select_style.py` and extracts real color tokens.
+4. **Voice & Audio Engineer**: Synthesizes per-beat narration via VoiceStudio (`http://localhost:3900`) or neural Edge-TTS fallback, applies broadcast EQ/compression (`-14 LUFS`), measures exact beat durations, and mixes beat-synced SFX from `assets/sfx/`.
+5. **Motion Graphics Artist**: Builds a deterministic `studio.js` + GSAP HTML5 composition in the selected style's palette with continuous Ken Burns motion, beat cut flashes, and word-by-word synced captions.
+6. **Video Assembler**: Renders frames deterministically via `scripts/render_scene.py` (Playwright + Chrome → FFmpeg `h264_nvenc` GPU encoding) and muxes the master MP4 into `exports/<slug>/`.
+7. **Quality & Compliance Gatekeeper**: Runs `scripts/video_review_agent.py` (real `ffprobe` streams, EBU R128 loudness & True Peak audit, frame-hash motion verification, `metadata.md` with AI disclosure, and unchecked human-approval `checklist.md`).
 
 ---
 
-## 🎙️ VoiceStudio Sub-Repository (Voice Cloning)
+## 🎙️ VoiceStudio (CUDA Voice Cloning)
 
-VoiceStudio is maintained as a separate repository to keep this studio repository lean and modular:
-- **Repository URL**: `https://github.com/debpalash/VoiceStudio.git`
-- **Local Directory**: `./VoiceStudio` (automatically managed by `setup.sh` and ignored by `.gitignore`)
+`setup.sh` clones [VoiceStudio](https://github.com/debpalash/VoiceStudio.git) into `./VoiceStudio` (git-ignored) and syncs its Python 3.11 + CUDA PyTorch environment via `uv`:
 
-### Manual Clone & Startup (if not using setup.sh):
 ```bash
-# 1. Clone VoiceStudio into the workspace root
-git clone https://github.com/debpalash/VoiceStudio.git VoiceStudio
-
-# 2. Setup VoiceStudio environment
 cd VoiceStudio
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-# For NVIDIA GPU:
-pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# 3. Start the VoiceStudio server on port 3900
-python app.py
+.venv/bin/uvicorn main:app --app-dir backend --host 127.0.0.1 --port 3900
 ```
 
-The CreatorRadar voice client (`scripts/voice_studio_client.py`) will automatically connect to `http://localhost:3900` to synthesize speech using your enrolled voice profile.
+When VoiceStudio is online, `scripts/voice_studio_client.py` synthesizes with your enrolled voice profile (`assets/voices/creator_sample.wav`). When offline, it seamlessly falls back to local neural Edge-TTS with identical broadcast mastering.
 
 ---
 
-## 🖥️ Interactive Control Centers & Dashboards
+## 🖥️ Studio Control Center
 
-### 1. Mission Control Dashboard (Python Engine)
-Features in-browser microphone voice enrollment, one-click kinetic video rendering, and live pipeline logs:
-```bash
-python3 dashboard/app.py
-```
-Open **`http://localhost:8080`** in your browser.
-
-### 2. Next.js Studio Dashboard (React / TypeScript)
-Modern web interface for managing topics, reviewing metrics, and previewing exports:
-```bash
-cd dashboard-next
-npm install
-npm run dev
-```
-Open **`http://localhost:3000`** in your browser.
+- **Next.js Studio UI (`dashboard-next/`)**: Production wave launcher, live `ideas-queue.md` manager, 120-style visual catalog with color swatches, Exports & QA video reviewer with beat-frame filmstrip and Rule 4 sign-off, in-browser Voice Studio mic recorder, and live Hook Scorer / Title Linter tools.
+- **Python Studio API (`dashboard/app.py`)**: Serves `/api/*` and HTTP Range `/media/*` on `http://127.0.0.1:8080`.
+- **CLI Dashboard (`dashboard/radar.py`)**: Quick terminal overview (`python3 dashboard/radar.py [queue|monetization|facts|skills]`).
 
 ---
 
-## 🤖 Multi-Agent Autonomous Production
+## 🛠️ Integrated Production Skills (32 Skills)
 
-Run the end-to-end 7-agent production pipeline from a single CLI command:
-
-```bash
-python3 orchestration/multi_agent_studio.py "GTA VI Storage Requirements PS5"
-```
-
-### The Autonomous Wave:
-1. **Trend & Hook Analyst**: Formulates high-retention (0–3s) contrarian hooks.
-2. **GTA VI Fact & Source Researcher**: Verifies all factual claims against official Rockstar / PlayStation sources.
-3. **Script Architect**: Writes high-cadence vertical Shorts scripts with on-screen visual cues.
-4. **Style Selector**: Analyzes the topic across 120+ motion styles (Claude Video 2.0 & Lemo-Opuscar) and selects the ideal visual language.
-5. **Voice Studio Audio Engineer**: Synthesizes speech using the channel owner's voice profile via VoiceStudio API.
-6. **Motion Graphics Artist**: Builds dynamic HTML5/GSAP scenes with continuous micro-motion (Ken Burns, kinetic typography, neon accents).
-7. **Quality & Compliance Reviewer**: Inspects rendered frames, checks audio pacing, and ensures strict adherence to CreatorRadar studio rules.
-
----
-
-## 🛠️ Integrated Production Skills (19 Skills)
-
-All skills are available in `skills/<name>/SKILL.md` and symlinked to `.claude/skills/`:
-
-| Task | Skill | Description |
-| --- | --- | --- |
-| Find current video ideas | `trend-scout` | Unearths high-CTR gaming and tech topic angles |
-| Verify claims and sources | `source-researcher` | Cross-checks facts with primary documentation |
-| Write vertical video script | `shorts-scriptwriter` | High-cadence, retention-engineered Shorts scripts |
-| Plan shots and motion | `visual-director` | Formulates shot lists, kinetic typography, pacing |
-| Indian visual traditions | `indian-art-styles` | Contextual visual styling and aesthetics |
-| Clear third-party footage | `clip-rights-checker` | Fair-use and copyright risk mitigation |
-| Review rendered video | `video-quality-reviewer` | Evaluates MP4 composition, pacing, and audio |
-| Channel performance | `channel-analyst` | Interprets YouTube Studio retention analytics |
-| Code-generated styled films | `lemo-opuscar` | 100+ styled procedural visual aesthetics |
-| Authoritative GTA VI facts | `gta6-researcher` | Verified Rockstar / console hardware registry |
-| Tutorial scripts | `tutorial-scriptwriter` | Step-by-step guides with zero fluff |
-| Storyboarding & scene plans | `video-director` | Multi-scene layout and visual beat mapping |
-| HyperFrames AI animation | `ai-video-generator` | Procedural HTML5 video scenes |
-| Final FFmpeg assembly | `video-editor` | Hardware-accelerated muxing, filters, and audio |
-| Asset copyright clearance | `copyright-checker` | Validates licenses before publication |
-| YouTube SEO & packaging | `youtube-seo` | High-CTR titles, descriptions, tags, thumbnail prompts |
-| Full autonomous pipeline | `production-pipeline` | Orchestrates TOPIC → METADATA pipeline |
-| Voice cloning & speech | `voice-studio` | Clones channel owner voice via VoiceStudio API |
-| Dynamic visual style match | `style-selector` | Automatically routes script to optimal visual style |
+All **32 skills** live in `skills/<name>/SKILL.md` and are symlinked into `.claude/skills/` and routed via `AGENTS.md` / `CLAUDE.md`. Highlights include:
+- **Production & Direction:** `production-pipeline`, `codex-shorts-blueprint` (v2.0.0 — 2.5D motion presets, visual proof & `validate_plan.py`), `trend-scout`, `source-researcher`, `gta6-researcher`, `shorts-scriptwriter`, `tutorial-scriptwriter`, `visual-director`, `video-director`, `style-selector`, `ai-video-generator`, `video-editor`, `vox-explainer`, `lemo-opuscar`, `indian-art-styles`, `voice-studio`
+- **Review & Rights:** `video-quality-reviewer`, `copyright-checker`, `clip-rights-checker`
+- **YouTube Growth & CLI Tools:** `youtube-seo`, `channel-analyst`, `yt-script` (`hookscore.py`), `yt-package` (`title.py`), `yt-edit` (`deadair.py`), `yt-chapters` (`chapters.py`), `yt-retention` (`retention.py`), `yt-viral` (`swipe.py`), `yt-shorts`, `yt-seo`, `yt-plan`, `yt-comment`, `yt-audit`
 
 ---
 
 ## 🛡️ Studio Rules (Mandatory)
 
-1. **No first-hand gameplay claims**: Never fabricate personal play sessions; strictly cite verified documentation.
-2. **Zero fabricated mechanics**: All specifications, storage requirements, and dates must be backed by official sources in `config/gta6-sources.md`.
-3. **Mandatory voice cloning via VoiceStudio**: Always utilize the channel owner voice profile (`assets/voices/creator_sample.wav`) with punchy pacing (170–175 WPM).
-4. **Mandatory kinetic motion graphics**: Avoid static video cards. Always use continuous micro-motion, glowing callouts, visual cuts, and animated captions.
-5. **Mandatory AI disclosure**: Include the disclosure line in video descriptions:
-   > *"Graphics created with AI assistance. All facts sourced from official documentation."*
-6. **Human approval before upload**: Content in `exports/` requires a completed `checklist.md` before YouTube publishing.
+1. **No first-hand gameplay claims** — Never fabricate personal GTA VI play sessions.
+2. **No fabricated mechanics** — All GTA VI specs and dates must trace to `config/gta6-sources.md`.
+3. **Always cite official sources** — Link primary sources in scripts and YouTube descriptions.
+4. **Human approval before upload** — Agents prepare exports and checklists but never publish autonomously.
+5. **Mandatory AI disclosure** — Descriptions include: *"Graphics created with AI assistance. All facts sourced from official documentation."*
+6. **Mandatory voice cloning & broadcast audio** — VoiceStudio profile (`assets/voices/creator_sample.wav`) + `-14 LUFS` mastering.
+7. **Mandatory kinetic motion graphics** — Zero static frames; continuous micro-motion, cut punctuations, and kinetic captions.

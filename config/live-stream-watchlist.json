@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "default_game": "ALL",
+  "default_languages": ["EN", "HI"],
+  "max_parallel_default": 2,
+  "max_parallel_hard_cap": 4,
+  "poll_interval_sec": 120,
+  "twitch_watchlist": [
+    "ishowspeed",
+    "kaicenat",
+    "xqc",
+    "caseoh_",
+    "jynxzi",
+    "adinross",
+    "shroud",
+    "tarik",
+    "ludwig",
+    "plaqueboymax",
+    "jasontheween",
+    "fanum",
+    "agent00",
+    "summit1g",
+    "timthetatman",
+    "pokimane",
+    "lirik",
+    "hasanabi",
+    "esfandtv",
+    "rakazonegaming"
+  ],
+  "youtube_watchlist": [
+    {"handle": "@Mythpat", "name": "Mythpat", "lang": "HI"},
+    {"handle": "@LiveInsaan", "name": "Triggered Insaan", "lang": "HI"},
+    {"handle": "@TechnoGamerzOfficial", "name": "Techno Gamerz", "lang": "HI"},
+    {"handle": "@BeastBoyShub", "name": "BeastBoyShub", "lang": "HI"},
+    {"handle": "@GamerFleet", "name": "GamerFleet", "lang": "HI"},
+    {"handle": "@CarryisLive", "name": "CarryMinati", "lang": "HI"},
+    {"handle": "@IShowSpeed", "name": "IShowSpeed", "lang": "EN"}
+  ],
+  "preset_games": [
+    "Grand Theft Auto VI",
+    "ALL",
+    "Just Chatting",
+    "Grand Theft Auto V",
+    "VALORANT",
+    "Minecraft",
+    "Fortnite"
+  ]
+}

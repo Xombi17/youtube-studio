@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "dry_run": false,
+  "review_interval_sec": 300,
+  "peak_window": {
+    "start": "19:00",
+    "end": "22:00",
+    "timezone": "Asia/Kolkata"
+  },
+  "require_verdict": true,
+  "keep_local_after_publish": true,
+  "max_publish_per_run": 4,
+  "max_delete_per_run": 25,
+  "clean_orphans": true
+}

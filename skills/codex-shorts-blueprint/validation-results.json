@@ -1,0 +1,24 @@
+{
+  "structural_example": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      "Plan geometry is not rendered-frame proof. Check actual swept glyph/art bounds, blur, alpha, audio and the loop after export."
+    ],
+    "derived_wpm": 173.9288969917958,
+    "visual_events": 23,
+    "scenes": 6,
+    "status": "Structural validation only; no claim that a film has been rendered or visually approved."
+  },
+  "negative_caption_zone_rejected": [
+    "Caption rectangle enters a forbidden UI zone."
+  ],
+  "negative_unknown_recipe_rejected": [
+    "A scene references an unknown motion preset."
+  ],
+  "reference_count": 9,
+  "timed_visual_samples": 72,
+  "minimum_reference_views": 1088485,
+  "maximum_reference_views": 5509033,
+  "method": "Structure and source-ledger consistency checks; not a certification of an unrendered video."
+}

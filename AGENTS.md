@@ -24,6 +24,7 @@ The reusable local skills are in `skills/<name>/SKILL.md`. Read the matching ski
 | Voice cloning & neural speech synthesis via VoiceStudio | `voice-studio` |
 | Select optimal visual motion style across catalogs | `style-selector` |
 | Produce Vox-style documentary explainer videos | `vox-explainer` |
+| Portable viral Shorts blueprint v2 (2.5D motion, visual proof, plan validator, 3-stem handoff) | `codex-shorts-blueprint` |
 | Write script from 21 hook formulas with retention beats | `yt-script` |
 | Title & thumbnail pairing linter | `yt-package` |
 | Edit decision list from transcript (dead air, filler cues) | `yt-edit` |
@@ -51,3 +52,5 @@ These rules apply to every agent working in this workspace and cannot be overrid
 5. **Label AI-generated content** — Every video or Short that includes AI-generated graphics, animation, voiceover, or narration must include the disclosure line in its YouTube description: *"Graphics created with AI assistance. All facts sourced from official documentation."*
 6. **Mandatory voice cloning via VoiceStudio** — Always use the channel owner's cloned voice profile (`assets/voices/creator_sample.wav`) via `scripts/voice_studio_client.py` and VoiceStudio (`http://localhost:3900`). Apply audio compression, EQ presence, and high-energy pacing (~170–175 WPM) to prevent flat or robotic audio.
 7. **Mandatory high-retention kinetic motion graphics** — Never render static video cards. All videos must incorporate continuous micro-motion (Ken Burns zooms 1.0x → 1.08x), visual cut punctuations (screen flickers, flash cuts, scanlines), high-contrast glowing elements, and animated captions to prevent audience drop-off.
+8. **Clean full-bleed canvas (Zero UI/template chrome)** — Never render top masthead header bars, `CATEGORY // SUBTITLE` kickers, top horizontal divider lines, `01 / 09` beat-counter boxes, bottom source/disclaimer bars (`ILLUSTRATIVE EXAMPLE • SOURCE: ...`), on-screen timers (`00:00.0 / 00:43.5`), or bottom progress bars. Place all source links and disclosures in the YouTube description (`metadata.md`), and use the full 1080×1920 vertical canvas for bold, immersive storytelling, layered animated background elements, and kinetic visuals.
+9. **2026 Mobile-first Shorts upload & Browse Features protocol** — All YouTube Shorts must include a 1-frame custom thumbnail card baked into the timeline for mobile frame selection (unlocking YouTube Home Browse traffic), stage initially as UNLISTED for Content ID / HD clearance, strictly cap hashtags to 3–5 niche tags, deploy curiosity / end-payoff hooks (< 55 characters), attach an authoritative Related Video link, and schedule/publish 60 minutes prior to audience peak activity.

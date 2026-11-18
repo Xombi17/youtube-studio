@@ -1,0 +1,300 @@
+{
+  "title": "Rage bait \u2014 premium visual redesign example",
+  "status": "Authoring plan only; not a re-rendered movie. New scene art must be prepared before production.",
+  "canvas": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "duration_seconds": 36.56666666666667,
+  "script_word_count": 106,
+  "voice_onset_seconds": 0.011083333333333334,
+  "voice_tail_seconds": 0.01325,
+  "first_2_5s_spoken_words": 10,
+  "inter_beat_gaps_seconds": [
+    0.08337985148098892,
+    0.08337985148098959,
+    0.08337985148099047,
+    0.19618788583762026,
+    0.08337985148098603,
+    0.08337985148099136,
+    0.08337985148099492,
+    0.08337985148098426,
+    0.08337985148098426,
+    0.0833798514809807,
+    0.08337985148098426,
+    0.08337985148098426
+  ],
+  "rehook_times": [
+    10.703970178824413,
+    21.34716298551539,
+    32.02223632365494
+  ],
+  "clocks": {
+    "paper_poses": 12,
+    "camera_world": 30,
+    "type_captions": 30
+  },
+  "caption_rect": [
+    70,
+    1160,
+    900,
+    1340
+  ],
+  "template_chrome": false,
+  "loop": {
+    "bridge_text": "...and that's why \u2192 Your anger might be the point.",
+    "matched_anchor": "Same post, phone and cursor screen coordinates and scale at the last and first frames."
+  },
+  "audio_handoff": {
+    "sample_rate": 48000,
+    "bit_depth": 24,
+    "stems": [
+      "dialogue",
+      "music",
+      "sfx"
+    ]
+  },
+  "events": [
+    {
+      "time": 0,
+      "information_change": "The absurd post is already visible in its phone/desk world.",
+      "anchor": "post"
+    },
+    {
+      "time": 1.55,
+      "information_change": "A short camera push reveals the post is a deliberately ridiculous food hack.",
+      "anchor": "post"
+    },
+    {
+      "time": 3.1,
+      "information_change": "The scrolling surface stops against the same post; background continues briefly.",
+      "anchor": "post"
+    },
+    {
+      "time": 4.65,
+      "information_change": "A cursor returns to the same detail for a second look.",
+      "anchor": "post_detail"
+    },
+    {
+      "time": 6.15,
+      "information_change": "The viewer correction is typed on a real comment surface beneath the post.",
+      "anchor": "comment"
+    },
+    {
+      "time": 7.65,
+      "information_change": "A reply attaches to that correction with a visible thread connection.",
+      "anchor": "thread"
+    },
+    {
+      "time": 9.18,
+      "information_change": "Additional replies extend the thread; the camera follows it, preserving the post anchor.",
+      "anchor": "thread"
+    },
+    {
+      "time": 10.704,
+      "information_change": "A foreground phone surface opens to expose the attention incentive behind the argument.",
+      "anchor": "post_interior"
+    },
+    {
+      "time": 12.3,
+      "information_change": "The thread remains registered while its hidden purpose is highlighted.",
+      "anchor": "thread"
+    },
+    {
+      "time": 13.9,
+      "information_change": "The term rage bait attaches to the demonstrated interaction.",
+      "anchor": "thread"
+    },
+    {
+      "time": 15.15,
+      "information_change": "Reaction symbols move along that same connection, explaining engagement.",
+      "anchor": "thread"
+    },
+    {
+      "time": 16.57,
+      "information_change": "A matched comparison separates a reaction from a guaranteed recommendation outcome.",
+      "anchor": "comparison"
+    },
+    {
+      "time": 18.14,
+      "information_change": "Feedback is identified as one of several signals in the same comparison.",
+      "anchor": "comparison"
+    },
+    {
+      "time": 19.74,
+      "information_change": "Satisfaction is highlighted without inventing numeric weights.",
+      "anchor": "comparison"
+    },
+    {
+      "time": 21.347,
+      "information_change": "The frame returns to the actual attention being given to the post.",
+      "anchor": "post"
+    },
+    {
+      "time": 22.96,
+      "information_change": "A macro detail holds the viewer action responsible for that attention.",
+      "anchor": "cursor"
+    },
+    {
+      "time": 24.46,
+      "information_change": "An everyday correction is shown as the viewer reflection.",
+      "anchor": "comment"
+    },
+    {
+      "time": 26.16,
+      "information_change": "The attempted correction and desired fix appear on one side of a matched view.",
+      "anchor": "comment"
+    },
+    {
+      "time": 27.86,
+      "information_change": "The possible creator incentive appears on the other side, without alleging a real person.",
+      "anchor": "comparison"
+    },
+    {
+      "time": 29.56,
+      "information_change": "An illustrative exit/feedback choice opens within the same phone world.",
+      "anchor": "phone_menu"
+    },
+    {
+      "time": 31.26,
+      "information_change": "The cursor pauses before replying so the question is visible.",
+      "anchor": "cursor"
+    },
+    {
+      "time": 32.96,
+      "information_change": "The visual connects the proposed reply with who receives the attention.",
+      "anchor": "thread"
+    },
+    {
+      "time": 34.72,
+      "information_change": "The post, phone and cursor return to their registered Frame-0 positions.",
+      "anchor": "post"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "post_world",
+      "start": 0,
+      "end": 6.15,
+      "family": "world",
+      "anchor": "post",
+      "camera_intent": "Push from the absurd post into the detail that stops the scroll.",
+      "motion_presets": [
+        "evidence_push",
+        "attached_callout"
+      ],
+      "visual_proof": false,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    },
+    {
+      "id": "reply_macro",
+      "start": 6.15,
+      "end": 10.704,
+      "family": "macro",
+      "anchor": "thread",
+      "camera_intent": "Follow a correction into an attached reply thread.",
+      "motion_presets": [
+        "object_carry",
+        "evidence_push"
+      ],
+      "visual_proof": false,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    },
+    {
+      "id": "hidden_incentive",
+      "start": 10.704,
+      "end": 16.57,
+      "family": "mechanism",
+      "anchor": "post_interior",
+      "camera_intent": "Open the surface and expose the relation between argument and attention.",
+      "motion_presets": [
+        "occlusion_reveal",
+        "cross_section",
+        "attached_callout"
+      ],
+      "visual_proof": true,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    },
+    {
+      "id": "signals_comparison",
+      "start": 16.57,
+      "end": 23.476,
+      "family": "comparison",
+      "anchor": "comparison",
+      "camera_intent": "Compare a reaction with a recommendation outcome; highlight feedback/satisfaction.",
+      "motion_presets": [
+        "matched_comparison",
+        "focus_handoff"
+      ],
+      "visual_proof": true,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    },
+    {
+      "id": "viewer_choice",
+      "start": 23.476,
+      "end": 29.82,
+      "family": "consequence",
+      "anchor": "comment",
+      "camera_intent": "Show the viewer action and possible incentive in the same recognizable world.",
+      "motion_presets": [
+        "object_carry",
+        "attached_callout"
+      ],
+      "visual_proof": false,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    },
+    {
+      "id": "exit_and_loop",
+      "start": 29.82,
+      "end": 36.56666666666667,
+      "family": "payoff",
+      "anchor": "post",
+      "camera_intent": "Offer an exit, then return the opening anchors at the spoken bridge.",
+      "motion_presets": [
+        "object_carry",
+        "kinetic_emphasis"
+      ],
+      "visual_proof": false,
+      "critical_art_rect": [
+        80,
+        250,
+        880,
+        1130
+      ]
+    }
+  ],
+  "claims_ledger": "rage-bait-claims.md",
+  "render_qa_required": [
+    "actual swept text/art bounds",
+    "native-resolution alpha and missing-glyph check",
+    "normal-speed motion and mechanism review",
+    "two-cycle visual/audio loop",
+    "full decode and stem alignment"
+  ]
+}

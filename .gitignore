@@ -108,6 +108,15 @@ assets/voices/*.temp.*
 # ------------------------------------------------------------------------------
 /VoiceStudio/
 /youtube-agent-skill/
+/external/
+.claude/skills/claude-video-2
+.claude/skills/slop-monster
+.claude/skills/power-design
+.claude/skills/impeccable
+.claude/skills/taste-skill
+.claude/skills/hyperframes*
+.claude/skills/remotion-to-hyperframes
+.claude/skills/reverse-any-video
 
 # ------------------------------------------------------------------------------
 # Node.js & Web Build Outputs
@@ -152,6 +161,15 @@ htmlcov/
 .env*.local
 *.pem
 *.key
+client_secret*.json
+token*.json
+config/youtube_client_secret.json
+config/youtube_client_secret*.json
+config/youtube_token.json
+config/youtube_accounts.json
+config/client_secret*.json
+config/youtube_token*.json
+config/gmail_smtp.json
 
 # ------------------------------------------------------------------------------
 # Logs & Temp Files
