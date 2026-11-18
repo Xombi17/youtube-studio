@@ -45,85 +45,102 @@ export default function CreatorTools() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Hook Scorer */}
-      <section className="panel p-6 space-y-4">
-        <div>
-          <h2 className="text-lg font-bold text-white">Hook Scorer</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Powered by <code>skills/yt-script/hookscore.py</code> — weakest-link weighted 0–100 verdict
-          </p>
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      {/* Hook scorer */}
+      <section className="panel flex flex-col">
+        <div className="panel-head">
+          <div>
+            <h2 className="panel-title">Hook scorer</h2>
+            <p className="panel-sub">
+              Weakest-link weighted verdict from{" "}
+              <code className="font-mono text-[11px] text-[#a3a099]">skills/yt-script/hookscore.py</code>
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={runHookScore} className="space-y-3">
-          <textarea
-            rows={3}
-            value={hookText}
-            onChange={(e) => setHookText(e.target.value)}
-            className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] p-3 text-sm text-slate-100 focus:outline-none focus:border-[#E3A484]"
-          />
-          <button
-            type="submit"
-            disabled={hookLoading}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#E3A484] text-slate-950 hover:brightness-110 disabled:opacity-50 cursor-pointer"
-          >
-            {hookLoading ? "Scoring..." : "Score Hook"}
+        <form onSubmit={runHookScore} className="flex flex-1 flex-col gap-3 p-5">
+          <div className="field flex-1">
+            <label className="label" htmlFor="hook-text">
+              Opening line
+            </label>
+            <textarea
+              id="hook-text"
+              rows={4}
+              value={hookText}
+              onChange={(e) => setHookText(e.target.value)}
+              className="textarea"
+            />
+          </div>
+          <button type="submit" disabled={hookLoading} className="btn btn-sm btn-primary self-start">
+            {hookLoading ? "Scoring" : "Score hook"}
           </button>
-        </form>
 
-        {hookResult && (
-          <pre className="rounded-xl bg-[#0A0C10] border border-[#232934] p-4 text-xs font-mono text-emerald-300 overflow-x-auto max-h-80">
-            {JSON.stringify(hookResult, null, 2)}
-          </pre>
-        )}
+          {hookResult ? (
+            <pre className="code-block max-h-80 whitespace-pre-wrap text-[#a3a099]">
+              {JSON.stringify(hookResult, null, 2)}
+            </pre>
+          ) : (
+            <p className="rounded-xl border border-dashed border-[#222936] px-3.5 py-6 text-center text-[11.5px] leading-relaxed text-[#79776f]">
+              Score a hook to see its weakest signal and what to fix first.
+            </p>
+          )}
+        </form>
       </section>
 
-      {/* Title + Thumbnail Pairing Linter */}
-      <section className="panel p-6 space-y-4">
-        <div>
-          <h2 className="text-lg font-bold text-white">Title & Thumbnail Pairing Linter</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Powered by <code>skills/yt-package/title.py</code> — checks desktop/mobile truncation & redundancy
-          </p>
+      {/* Title and thumbnail linter */}
+      <section className="panel flex flex-col">
+        <div className="panel-head">
+          <div>
+            <h2 className="panel-title">Title and thumbnail linter</h2>
+            <p className="panel-sub">
+              Checks desktop and mobile truncation, plus redundancy, via{" "}
+              <code className="font-mono text-[11px] text-[#a3a099]">skills/yt-package/title.py</code>
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={runTitleLint} className="space-y-3">
-          <div>
-            <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-              YouTube Title ({titleText.length} chars)
-            </label>
+        <form onSubmit={runTitleLint} className="flex flex-1 flex-col gap-3 p-5">
+          <div className="field">
+            <div className="flex items-center justify-between gap-2">
+              <label className="label" htmlFor="lint-title">
+                YouTube title
+              </label>
+              <span className="font-mono text-[10px] text-[#79776f]">{titleText.length}/100</span>
+            </div>
             <input
+              id="lint-title"
               type="text"
               value={titleText}
               onChange={(e) => setTitleText(e.target.value)}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-[#8FB0CE]"
+              className="input"
             />
           </div>
-          <div>
-            <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-              Thumbnail Text Overlay
+          <div className="field">
+            <label className="label" htmlFor="lint-thumb">
+              Thumbnail text
             </label>
             <input
+              id="lint-thumb"
               type="text"
               value={thumbText}
               onChange={(e) => setThumbText(e.target.value)}
-              className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-[#8FB0CE]"
+              className="input"
             />
           </div>
-          <button
-            type="submit"
-            disabled={titleLoading}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#8FB0CE] text-slate-950 hover:brightness-110 disabled:opacity-50 cursor-pointer"
-          >
-            {titleLoading ? "Linting..." : "Lint Pairing"}
+          <button type="submit" disabled={titleLoading} className="btn btn-sm btn-primary self-start">
+            {titleLoading ? "Linting" : "Lint pairing"}
           </button>
-        </form>
 
-        {titleResult && (
-          <pre className="rounded-xl bg-[#0A0C10] border border-[#232934] p-4 text-xs font-mono text-sky-300 overflow-x-auto max-h-80">
-            {JSON.stringify(titleResult, null, 2)}
-          </pre>
-        )}
+          {titleResult ? (
+            <pre className="code-block max-h-80 whitespace-pre-wrap text-[#a3a099]">
+              {JSON.stringify(titleResult, null, 2)}
+            </pre>
+          ) : (
+            <p className="rounded-xl border border-dashed border-[#222936] px-3.5 py-6 text-center text-[11.5px] leading-relaxed text-[#79776f]">
+              Lint a pairing to catch duplicate wording and truncation before publishing.
+            </p>
+          )}
+        </form>
       </section>
     </div>
   );

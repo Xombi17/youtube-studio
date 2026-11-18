@@ -233,7 +233,10 @@ def _is_not_found(exc: Exception) -> bool:
 
 
 def _delete_on_youtube(video_id: str, profile: str) -> str:
-    """Delete a video, tolerating an already-removed upload. Returns a note."""
+    """Safely preserve videos on YouTube unless explicitly configured otherwise."""
+    cfg = load_publish_config()
+    if not cfg.get("delete_from_youtube", False):
+        return "preserved on YouTube (channel delete disabled)"
     try:
         delete_video(video_id, profile=profile)
         return "youtube delete ok"
@@ -246,16 +249,32 @@ def _delete_on_youtube(video_id: str, profile: str) -> str:
 
 
 def _remove_local_package(rec: dict[str, Any], dry_run: bool) -> dict[str, Any]:
+    """Purge clip export directory and intermediate buffer files to reclaim cloud storage."""
     clip_dir = local_clip_dir(rec)
-    if clip_dir is None:
-        return {"removed": False, "reason": "already gone"}
     if dry_run:
         return {"removed": False, "path": str(clip_dir), "dry_run": True}
-    try:
-        shutil.rmtree(clip_dir, ignore_errors=True)
-        return {"removed": not clip_dir.exists(), "path": str(clip_dir)}
-    except Exception as exc:
-        return {"removed": False, "path": str(clip_dir), "error": str(exc)}
+
+    removed = False
+    if clip_dir is not None and clip_dir.is_dir():
+        try:
+            shutil.rmtree(clip_dir, ignore_errors=True)
+            removed = not clip_dir.exists()
+        except Exception as exc:
+            return {"removed": False, "path": str(clip_dir), "error": str(exc)}
+
+    # Also clean up any raw recordings in live_buffer for this clip
+    source_id = str(rec.get("source_id") or "").strip()
+    if source_id:
+        for raw_f in (STUDIO_ROOT / "renders" / "live_buffer").glob(f"*{source_id}*"):
+            try:
+                if raw_f.is_file():
+                    raw_f.unlink(missing_ok=True)
+                elif raw_f.is_dir():
+                    shutil.rmtree(raw_f, ignore_errors=True)
+            except Exception:
+                pass
+
+    return {"removed": removed or (clip_dir is None), "path": str(clip_dir) if clip_dir else "none"}
 
 
 def run_publish_agent(
@@ -393,37 +412,24 @@ def run_publish_agent(
                 )
                 continue
 
-            # MAYBE / SKIP -> reject: delete from YouTube and drop the local package.
+            # MAYBE / SKIP -> unstage: remove local package and clear storage; preserve video on YouTube
             if rejected >= int(cfg.get("max_delete_per_run", 25)):
                 report["deferred"].append({"video_id": vid, "title": title, "note": "max_delete_per_run reached"})
                 continue
 
             if effective_dry:
-                log(f"  [DRY]   would DELETE {title[:58]} (verdict={verdict})")
+                log(f"  [DRY]   would UNSTAGE {title[:58]} (verdict={verdict})")
                 report["rejected"].append({"video_id": vid, "title": title, "verdict": verdict, "dry_run": True})
                 rejected += 1
                 continue
 
-            yt_note = "youtube delete ok"
-            try:
-                yt_note = _delete_on_youtube(vid, profile)
-            except YouTubeScopeError:
-                raise
-            except Exception as exc:
-                yt_note = f"youtube delete failed: {exc}"
-                report["errors"].append({"video_id": vid, "error": yt_note})
-                # Still drop the local package? No — keep it so the clip can be
-                # retried; a half-deleted state must not lose the evidence.
-                _patch_history(vid, publish_status="failed", publish_note=yt_note)
-                log(f"  [ERR]   {title[:58]} — {yt_note}")
-                continue
-
+            yt_note = _delete_on_youtube(vid, profile)
             local = _remove_local_package(rec, dry_run=False)
             rejected += 1
             _patch_history(
                 vid,
-                publish_status="deleted",
-                publish_note=f"verdict={verdict}",
+                publish_status="unstaged",
+                publish_note=f"verdict={verdict} ({yt_note})",
                 local_clip_deleted=bool(local.get("removed")),
                 human_review=rev,
             )
@@ -435,20 +441,22 @@ def run_publish_agent(
                     "human_score": (rev or {}).get("human_score"),
                     "gut_reaction": (rev or {}).get("gut_reaction"),
                     "local_removed": bool(local.get("removed")),
+                    "yt_note": yt_note,
                 }
             )
             _append_event(
                 {
                     "at": datetime.now(timezone.utc).isoformat(),
-                    "action": "delete",
+                    "action": "unstage",
                     "video_id": vid,
                     "title": title,
                     "verdict": verdict,
                     "human_score": (rev or {}).get("human_score"),
                 }
             )
-            log(f"  [DEL]   {title[:58]} — {verdict} "
-                f"({(rev or {}).get('human_score')}/100), local {'removed' if local.get('removed') else 'kept'}")
+            log(f"  [UNSTAGE] {title[:58]} — {verdict} "
+                f"({(rev or {}).get('human_score')}/100), storage {'cleared' if local.get('removed') else 'already gone'}, {yt_note}")
+            continue
 
         except YouTubeScopeError as exc:
             report["errors"].append({"video_id": vid, "error": str(exc)})
@@ -537,22 +545,22 @@ def manual_decision(
     local = _remove_local_package(rec, dry_run=False)
     _patch_history(
         video_id,
-        publish_status="deleted",
-        publish_note=f"manual delete ({yt_note})",
+        publish_status="unstaged",
+        publish_note=f"manual delete: storage cleared ({yt_note})",
         local_clip_deleted=bool(local.get("removed")),
     )
     _append_event(
         {
             "at": datetime.now(timezone.utc).isoformat(),
-            "action": "delete",
+            "action": "unstage",
             "video_id": video_id,
             "title": title,
             "manual": True,
             "note": yt_note,
         }
     )
-    log(f"[PublishAgent] manual DELETE {title[:58]} — {yt_note}")
-    return {"status": "OK", "action": "delete", "video_id": video_id, "note": yt_note}
+    log(f"[PublishAgent] manual DELETE/UNSTAGE {title[:58]} — storage cleared, {yt_note}")
+    return {"status": "OK", "action": "delete", "video_id": video_id, "note": f"storage cleared ({yt_note})"}
 
 
 def check_and_clean_disk(min_free_gb: float = 3.0, log=print) -> dict[str, Any]:

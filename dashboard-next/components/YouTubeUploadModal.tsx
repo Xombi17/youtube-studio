@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type {
   YouTubeMetadataPreview,
   YouTubeProfileKey,
@@ -52,6 +53,28 @@ export default function YouTubeUploadModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [job, setJob] = useState<YouTubeUploadJob | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent background scroll and track client mount for createPortal
+  useEffect(() => {
+    setMounted(true);
+    const origOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = origOverflow;
+    };
+  }, []);
+
+  // Close on Escape key
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !submitting) {
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, submitting]);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,21 +198,34 @@ export default function YouTubeUploadModal({
   const selectedSlot = ytStatus?.profiles?.[selectedProfile];
   const selectedConnected = Boolean(selectedSlot?.connected && selectedSlot.channel);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl bg-[#12151B] border border-[#343C4A] rounded-2xl shadow-2xl overflow-hidden my-6">
-        <div className="px-6 py-4 bg-[#0D1015] border-b border-[#232934] flex items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-rose-500" />
-              Upload to YouTube
-              {preview?.is_short && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E3A484]/20 text-[#E3A484] border border-[#E3A484]/40">
-                  SHORTS 9:16
-                </span>
-              )}
-            </h3>
-            <p className="text-xs text-slate-400 font-mono mt-0.5">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !submitting) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upload-modal-title"
+        className="relative flex flex-col w-full max-w-2xl max-h-[90vh] rounded-2xl border border-[#222936] bg-[#101319] shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)] overflow-hidden"
+      >
+        {/* Header - Fixed at top */}
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[#1a1f28] bg-[#0c0f14] px-5 py-4">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+              <h3 id="upload-modal-title" className="text-[15px] font-semibold tracking-[-0.01em] text-white">
+                Upload to YouTube
+              </h3>
+              {preview?.is_short && <span className="chip chip-accent">Shorts 9:16</span>}
+            </div>
+            <p className="mt-1 truncate font-mono text-[10.5px] text-[#79776f]">
               {preview
                 ? `${preview.video_size_mb} MB · ${preview.video_info.duration}s · ${preview.video_info.width}×${preview.video_info.height}`
                 : target}
@@ -198,64 +234,159 @@ export default function YouTubeUploadModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg bg-[#181C23] text-xs font-mono text-slate-300 hover:text-white cursor-pointer"
+            disabled={submitting}
+            className="btn btn-xs btn-ghost shrink-0 hover:bg-white/10"
+            aria-label="Close dialog"
           >
             Close
           </button>
         </div>
 
-        <div className="p-6 max-h-[80vh] overflow-y-auto space-y-4">
-          {loading ? (
-            <div className="py-12 text-center text-xs font-mono text-slate-400">
-              Generating SEO title, hashtags, tags &amp; checking YouTube channels...
+        {/* Content View */}
+        {loading ? (
+          <div className="flex flex-1 min-h-[240px] items-center justify-center p-8 text-center text-[12px] text-[#79776f]">
+            <div className="space-y-2.5">
+              <span className="pulse-dot inline-block h-3 w-3 rounded-full bg-[#e5a183]" />
+              <p>Generating SEO title, hashtags, and tags, and checking channel connections...</p>
             </div>
-          ) : (
-            <>
-              {/* Strict Channel Routing Lock: Clips -> ClipSurge only, Studio Videos -> Paper Trail only */}
+          </div>
+        ) : job ? (
+          <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+              <div className="panel-inset space-y-4 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[12.5px] font-medium text-white">
+                    {job.status === "UPLOADING"
+                      ? "Uploading to YouTube..."
+                      : job.status === "DONE"
+                        ? "✅ Upload complete!"
+                        : "Upload failed"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#e5a183]">{job.progress}%</span>
+                </div>
+
+                <div className="h-2 overflow-hidden rounded-full bg-[#151920]">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      job.status === "ERROR"
+                        ? "bg-[#e08a8a]"
+                        : job.status === "DONE"
+                          ? "bg-[#7fc8a3]"
+                          : "bg-[#e5a183]"
+                    }`}
+                    style={{ width: `${job.progress}%` }}
+                  />
+                </div>
+
+                {job.error && (
+                  <div className="rounded-lg border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3 py-2 font-mono text-[10.5px] leading-relaxed text-[#e9aaaa]">
+                    {job.error}
+                  </div>
+                )}
+
+                {job.receipt && (
+                  <div className="space-y-3 border-t border-[#1a1f28] pt-3">
+                    <dl className="space-y-1.5 text-[11.5px]">
+                      <div className="flex gap-2">
+                        <dt className="w-20 shrink-0 text-[#79776f]">Channel</dt>
+                        <dd className="min-w-0 font-medium text-[#9ed6b8]">{job.receipt.channel_title}</dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-20 shrink-0 text-[#79776f]">Title</dt>
+                        <dd className="min-w-0 text-[#d8d4cb]">{job.receipt.title}</dd>
+                      </div>
+                      <div className="flex gap-2">
+                        <dt className="w-20 shrink-0 text-[#79776f]">Visibility</dt>
+                        <dd className="font-mono uppercase text-[#dbb675]">{job.receipt.privacy_status}</dd>
+                      </div>
+                      {job.receipt.local_clip_deleted && (
+                        <div className="flex gap-2">
+                          <dt className="w-20 shrink-0 text-[#79776f]">Disk</dt>
+                          <dd className="font-mono text-[#9ed6b8]">
+                            ✓ Local clip removed, {job.receipt.freed_mb ?? 0} MB freed
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <a
+                        href={job.receipt.studio_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-primary"
+                      >
+                        Open in YouTube Studio ↗
+                      </a>
+                      <a
+                        href={job.receipt.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-secondary"
+                      >
+                        Watch link ↗
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[#1a1f28] bg-[#0c0f14] px-5 py-3.5">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn btn-sm btn-primary"
+              >
+                {job.status === "DONE" ? "Done" : "Close"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleUpload} className="flex flex-1 min-h-0 flex-col overflow-hidden">
+            {/* Scrollable Form Body */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+              {/* Channel Routing Lock info */}
               {selectedConnected && selectedSlot?.channel && (
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/35 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#7fc8a3]/25 bg-[#7fc8a3]/07 px-3.5 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
                     {selectedSlot.channel.thumbnail_url && (
                       <img
                         src={selectedSlot.channel.thumbnail_url}
                         alt={selectedSlot.channel.title}
-                        className="w-8 h-8 rounded-full border border-emerald-400/50"
+                        className="h-8 w-8 shrink-0 rounded-full border border-[#7fc8a3]/40"
                       />
                     )}
-                    <div>
-                      <div className="text-[10px] font-medium uppercase tracking-wider text-emerald-300/90">
+                    <div className="min-w-0">
+                      <p className="text-[9.5px] font-medium uppercase tracking-[0.12em] text-[#9ed6b8]">
                         {selectedProfile === "clipper"
-                          ? "🔒 Locked to Live Clipper Channel (Clips Only)"
-                          : "🔒 Locked to Main Studio Channel (Studio Videos Only)"}
-                      </div>
-                      <div className="text-sm font-bold text-white">
+                          ? "Locked to the live clipper channel"
+                          : "Locked to the studio channel"}
+                      </p>
+                      <p className="truncate text-[12.5px] font-medium text-white">
                         {selectedSlot.channel.title}{" "}
                         {selectedSlot.channel.custom_url && (
-                          <span className="text-xs font-mono font-normal text-slate-300">
+                          <span className="font-mono text-[10px] font-normal text-[#79776f]">
                             ({selectedSlot.channel.custom_url})
                           </span>
                         )}
-                      </div>
+                      </p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 font-mono text-[10px] font-bold text-emerald-300">
-                    ✓ OAuth Ready
-                  </span>
+                  <span className="chip chip-ok shrink-0">OAuth ready</span>
                 </div>
               )}
 
               {!selectedConnected && (
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div>
-                    <strong className="text-amber-300">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#dbb675]/28 bg-[#dbb675]/07 px-3.5 py-3 text-[11.5px]">
+                  <div className="min-w-0">
+                    <p className="font-medium text-[#e6c894]">
                       {selectedProfile === "clipper"
-                        ? "Live Clipper Channel (ClipSurge) not connected yet."
-                        : "Main Studio Channel (Paper Trail) not connected yet."}
-                    </strong>
-                    <p className="text-slate-300 mt-0.5">
+                        ? "The live clipper channel is not connected."
+                        : "The studio channel is not connected."}
+                    </p>
+                    <p className="mt-0.5 leading-relaxed text-[#a3a099]">
                       {selectedProfile === "clipper"
-                        ? "Live clips can ONLY upload to the dedicated Live Clipper channel (never Paper Trail)."
-                        : "Studio videos can ONLY upload to the Main Studio channel (never ClipSurge)."}
+                        ? "Clips can only upload to the dedicated clipper channel."
+                        : "Studio videos can only upload to the studio channel."}
                     </p>
                   </div>
                   {onOpenConnectTab && (
@@ -265,289 +396,239 @@ export default function YouTubeUploadModal({
                         onClose();
                         onOpenConnectTab();
                       }}
-                      className="px-3.5 py-2 rounded-lg bg-[#E3A484] text-slate-950 font-bold cursor-pointer"
+                      className="btn btn-xs btn-primary shrink-0"
                     >
-                      Connect Channel
+                      Connect channel
                     </button>
                   )}
                 </div>
               )}
 
-              {job ? (
-                <div className="rounded-2xl bg-[#0A0C10] border border-[#232934] p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-white">
-                      {job.status === "UPLOADING"
-                        ? "Uploading video to YouTube..."
-                        : job.status === "DONE"
-                          ? "✅ Upload Complete!"
-                          : "Upload Failed"}
-                    </span>
-                    <span className="font-mono text-xs text-[#E3A484] font-bold">{job.progress}%</span>
-                  </div>
-
-                  <div className="h-3 rounded-full panel overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        job.status === "ERROR"
-                          ? "bg-rose-500"
-                          : job.status === "DONE"
-                            ? "bg-emerald-400"
-                            : "bg-[#E3A484]"
-                      }`}
-                      style={{ width: `${job.progress}%` }}
-                    />
-                  </div>
-
-                  {job.error && (
-                    <div className="rounded-xl bg-rose-500/15 border border-rose-500/40 p-3 text-xs text-rose-200 font-mono">
-                      {job.error}
-                    </div>
-                  )}
-
-                  {job.receipt && (
-                    <div className="space-y-3 pt-2">
-                      <div className="text-xs text-slate-300">
-                        <div>
-                          <span className="text-slate-500">Channel:</span>{" "}
-                          <strong className="text-emerald-300">{job.receipt.channel_title}</strong>
-                        </div>
-                        <div className="mt-1">
-                          <span className="text-slate-500">Title:</span> {job.receipt.title}
-                        </div>
-                        <div className="mt-1">
-                          <span className="text-slate-500">Visibility:</span>{" "}
-                          <span className="uppercase font-mono text-amber-300">
-                            {job.receipt.privacy_status}
-                          </span>
-                        </div>
-                        {job.receipt.local_clip_deleted && (
-                          <div className="mt-1.5 text-[11px] font-mono text-emerald-300">
-                            ✓ Local clip deleted from disk (freed {job.receipt.freed_mb ?? 0} MB) · receipt saved to upload history
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <a
-                          href={job.receipt.studio_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-4 py-2 rounded-xl bg-[#E3A484] text-slate-950 text-xs font-bold"
-                        >
-                          Open in YouTube Studio ↗
-                        </a>
-                        <a
-                          href={job.receipt.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-4 py-2 rounded-xl bg-[#181C23] border border-[#343C4A] text-xs font-semibold text-sky-300"
-                        >
-                          Watch Link ↗
-                        </a>
-                      </div>
-                    </div>
-                  )}
+              {/* Title input */}
+              <div className="field">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="label" htmlFor="upload-title">
+                    Video title
+                  </label>
+                  <span
+                    className={`font-mono text-[10px] ${
+                      title.length > 100 ? "text-[#e9aaaa]" : "text-[#79776f]"
+                    }`}
+                  >
+                    {title.length}/100
+                  </span>
                 </div>
-              ) : (
-                <form onSubmit={handleUpload} className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-mono uppercase text-slate-400">
-                        Video Title
-                      </label>
-                      <span
-                        className={`text-[11px] font-mono ${
-                          title.length > 100 ? "text-rose-400" : "text-slate-400"
-                        }`}
-                      >
-                        {title.length}/100
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      maxLength={100}
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#E3A484]"
-                    />
-                    {preview?.title_options && preview.title_options.length > 1 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {preview.title_options.map((opt, idx) => {
-                          const active = title.trim() === opt.trim();
-                          return (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setTitle(opt)}
-                              className={`text-[11px] px-2.5 py-1 rounded-lg border transition-colors text-left cursor-pointer ${
-                                active
-                                  ? "bg-[#E3A484]/20 border-[#E3A484]/60 text-[#F6CDB8]"
-                                  : "bg-[#0D1015] border-[#343C4A] text-slate-300 hover:border-slate-500 hover:text-white"
-                              }`}
-                            >
-                              {idx + 1}. {opt}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
+                <input
+                  id="upload-title"
+                  type="text"
+                  required
+                  maxLength={100}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="input"
+                />
+                {preview?.title_options && preview.title_options.length > 1 && (
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {preview.title_options.map((opt, idx) => {
+                      const active = title.trim() === opt.trim();
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setTitle(opt)}
+                          aria-pressed={active}
+                          className={`max-w-full truncate rounded-lg border px-2.5 py-1 text-left text-[10.5px] transition-colors ${
+                            active
+                              ? "border-[#e5a183]/50 bg-[#e5a183]/10 text-[#f8d2bd]"
+                              : "border-[#222936] bg-[#0b0e13] text-[#a3a099] hover:border-[#333d4c] hover:text-white"
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
                   </div>
+                )}
+              </div>
 
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-                      Hashtags (auto-appended cleanly to description · sweet spot 3–6)
-                    </label>
-                    <input
-                      type="text"
-                      value={hashtagsText}
-                      onChange={(e) => setHashtagsText(e.target.value)}
-                      placeholder="#Shorts #GTAVI #GTA6 #Gaming #CreatorRadar"
-                      className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs font-mono text-sky-300 focus:outline-none focus:border-[#8FB0CE]"
-                    />
-                  </div>
+              {/* Hashtags */}
+              <div className="field">
+                <label className="label" htmlFor="upload-hashtags">
+                  Hashtags · three to six perform best
+                </label>
+                <input
+                  id="upload-hashtags"
+                  type="text"
+                  value={hashtagsText}
+                  onChange={(e) => setHashtagsText(e.target.value)}
+                  placeholder="#Shorts #GTAVI #GTA6 #Gaming"
+                  className="input font-mono text-[11px]"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-                      Description (includes Chapters, Sources &amp; Rule 5 AI Disclosure)
-                    </label>
-                    <textarea
-                      rows={6}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-[#8FB0CE]"
-                    />
-                  </div>
+              {/* Description */}
+              <div className="field">
+                <label className="label" htmlFor="upload-description">
+                  Description · includes chapters, sources, and the AI disclosure
+                </label>
+                <textarea
+                  id="upload-description"
+                  rows={5}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="textarea font-mono text-[10.5px]"
+                />
+              </div>
 
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-[11px] font-mono uppercase text-slate-400">
-                        YouTube Search Tags (comma-separated)
-                      </label>
-                      <span
-                        className={`text-[11px] font-mono ${
-                          tagCharCount > 480 ? "text-amber-400" : "text-slate-400"
-                        }`}
-                      >
-                        {parsedTags.length} tags · {tagCharCount}/500 chars
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      value={tagsText}
-                      onChange={(e) => setTagsText(e.target.value)}
-                      className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-[#8FB0CE]"
-                    />
-                  </div>
+              {/* Search tags */}
+              <div className="field">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="label" htmlFor="upload-tags">
+                    Search tags · comma separated
+                  </label>
+                  <span
+                    className={`font-mono text-[10px] ${
+                      tagCharCount > 480 ? "text-[#e6c894]" : "text-[#79776f]"
+                    }`}
+                  >
+                    {parsedTags.length} tags · {tagCharCount}/500
+                  </span>
+                </div>
+                <input
+                  id="upload-tags"
+                  type="text"
+                  value={tagsText}
+                  onChange={(e) => setTagsText(e.target.value)}
+                  className="input font-mono text-[11px]"
+                />
+              </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-                        Visibility
-                      </label>
-                      <select
-                        value={privacy}
-                        disabled={Boolean(publishAtLocal)}
-                        onChange={(e) =>
-                          setPrivacy(e.target.value as "private" | "unlisted" | "public")
-                        }
-                        className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-100 disabled:opacity-50"
-                      >
-                        <option value="private">Private (Studio Draft)</option>
-                        <option value="unlisted">Unlisted (Review Link)</option>
-                        <option value="public">Public (Go Live Now)</option>
-                      </select>
-                    </div>
+              {/* Visibility, Category & Schedule */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="field">
+                  <label className="label" htmlFor="upload-privacy">
+                    Visibility
+                  </label>
+                  <select
+                    id="upload-privacy"
+                    value={privacy}
+                    disabled={Boolean(publishAtLocal)}
+                    onChange={(e) =>
+                      setPrivacy(e.target.value as "private" | "unlisted" | "public")
+                    }
+                    className="select"
+                  >
+                    <option value="private">Private draft</option>
+                    <option value="unlisted">Unlisted review link</option>
+                    <option value="public">Public immediately</option>
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-                        Category
-                      </label>
-                      <select
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-3 py-2 text-xs text-slate-100"
-                      >
-                        {CATEGORIES.map(([id, label]) => (
-                          <option key={id} value={id}>
-                            {label} ({id})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                <div className="field">
+                  <label className="label" htmlFor="upload-category">
+                    Category
+                  </label>
+                  <select
+                    id="upload-category"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    className="select"
+                  >
+                    {CATEGORIES.map(([id, label]) => (
+                      <option key={id} value={id}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                    <div>
-                      <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
-                        Schedule Publish (Optional)
-                      </label>
-                      <input
-                        type="datetime-local"
-                        value={publishAtLocal}
-                        onChange={(e) => setPublishAtLocal(e.target.value)}
-                        className="w-full rounded-xl bg-[#0A0C10] border border-[#2A313D] px-2.5 py-2 text-xs text-slate-100 font-mono"
-                      />
-                    </div>
-                  </div>
+                <div className="field">
+                  <label className="label" htmlFor="upload-schedule">
+                    Schedule publish
+                  </label>
+                  <input
+                    id="upload-schedule"
+                    type="datetime-local"
+                    value={publishAtLocal}
+                    onChange={(e) => setPublishAtLocal(e.target.value)}
+                    className="input font-mono text-[11px]"
+                  />
+                </div>
+              </div>
 
-                  <div className="rounded-xl bg-[#0A0C10] border border-[#232934] p-3.5 space-y-2 text-xs">
-                    <label className="flex items-center gap-2.5 cursor-pointer text-slate-200">
-                      <input
-                        type="checkbox"
-                        checked={approveNow}
-                        onChange={(e) => setApproveNow(e.target.checked)}
-                        className="accent-[#E3A484]"
-                      />
-                      <span>
-                        <strong>Rule 4 Owner Sign-Off:</strong> I have reviewed this video, rights
-                        clearance, and metadata and approve uploading to{" "}
-                        <strong>{selectedSlot?.channel?.title || selectedProfile}</strong>.
-                      </span>
-                    </label>
-                    <label className="flex items-center gap-2.5 cursor-pointer text-slate-400">
-                      <input
-                        type="checkbox"
-                        checked={containsSynthetic}
-                        onChange={(e) => setContainsSynthetic(e.target.checked)}
-                        className="accent-[#8FB0CE]"
-                      />
-                      <span>
-                        Declare altered / synthetic AI media flag (YouTube altered-content policy)
-                      </span>
-                    </label>
-                  </div>
+              {/* Rule 4 sign-off and AI disclosure */}
+              <div className="panel-inset space-y-2.5 p-3.5">
+                <label className="flex cursor-pointer items-start gap-2.5 text-[11.5px] leading-relaxed text-[#d8d4cb]">
+                  <input
+                    type="checkbox"
+                    checked={approveNow}
+                    onChange={(e) => setApproveNow(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <strong className="font-medium text-white">Rule 4 sign-off.</strong> I reviewed
+                    this video, its rights clearance, and its metadata, and I approve uploading it to{" "}
+                    <strong className="font-medium text-white">
+                      {selectedSlot?.channel?.title || selectedProfile}
+                    </strong>
+                    .
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2.5 text-[11.5px] leading-relaxed text-[#a3a099]">
+                  <input
+                    type="checkbox"
+                    checked={containsSynthetic}
+                    onChange={(e) => setContainsSynthetic(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>Declare altered or synthetic media, per the YouTube policy.</span>
+                </label>
+              </div>
 
-                  {err && (
-                    <div className="rounded-xl bg-rose-500/15 border border-rose-500/40 px-3.5 py-2.5 text-xs text-rose-200">
-                      {err}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-4 py-2 rounded-xl bg-[#181C23] text-xs font-semibold text-slate-300 hover:text-white cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={submitting || !selectedConnected || !approveNow}
-                      className="px-5 py-2.5 rounded-xl bg-[#E3A484] text-slate-950 text-xs font-bold hover:brightness-110 disabled:opacity-40 cursor-pointer"
-                    >
-                      {submitting
-                        ? "Starting Upload..."
-                        : publishAtLocal
-                          ? "Schedule Upload to YouTube"
-                          : `Upload to ${selectedSlot?.channel?.title || selectedProfile} (${privacy.toUpperCase()})`}
-                    </button>
-                  </div>
-                </form>
+              {err && (
+                <div className="rounded-xl border border-[#e08a8a]/30 bg-[#e08a8a]/08 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-[#e9aaaa]">
+                  {err}
+                </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+
+            {/* Fixed Footer with Upload / Cancel Actions */}
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#1a1f28] bg-[#0c0f14] px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="truncate font-mono text-[10.5px] text-[#79776f]">
+                  {!approveNow
+                    ? "Rule 4 owner approval required to publish"
+                    : !selectedConnected
+                      ? "Channel connection required"
+                      : `Target: ${selectedSlot?.channel?.title || selectedProfile}`}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={submitting}
+                  className="btn btn-sm btn-ghost"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || !selectedConnected || !approveNow}
+                  className="btn btn-sm btn-primary"
+                >
+                  {submitting
+                    ? "Starting upload..."
+                    : publishAtLocal
+                      ? "Schedule upload"
+                      : `Upload ${privacy === "public" ? "publicly" : privacy === "unlisted" ? "as unlisted" : "as draft"}`}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
