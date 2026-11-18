@@ -33,6 +33,7 @@ services:
       - PYTHONUNBUFFERED=1
       - TZ=Asia/Kolkata
     # Autonomously polls watchlist, clips live streams, and auto-stages to private drafts (>= 80 score)
-    command: ["python", "scripts/autonomous_scout_daemon.py", "--min-score", "80.0", "--asr", "modal", "--privacy", "private"]
+    # Uses local CPU whistle + free Groq Whisper for clips (zero external GPU dependencies)
+    command: ["python", "scripts/autonomous_scout_daemon.py", "--min-score", "80.0", "--asr", "local", "--privacy", "private"]
     depends_on:
       - studio

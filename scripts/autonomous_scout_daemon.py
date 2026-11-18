@@ -68,12 +68,15 @@ def spawn_clipper_for_stream(
     LOGS_DIR.mkdir(parents=True, exist_ok=True)
     log_file = LOGS_DIR / f"daemon_{slug}_{int(time.time())}.log"
 
+    # Map generic 'local' to 'whistle' (CPU-safe 16.9MB model) so it never crashes if CUDA/Modal is absent
+    clipper_asr = "whistle" if asr in ("local", "cpu", "whistle") else asr
+
     cmd = [
         get_python_bin(),
         str(STUDIO_ROOT / "orchestration" / "live_clipper_agent.py"),
         "--url", url,
         "--name", slug,
-        "--asr", asr,
+        "--asr", clipper_asr,
         "--layout", layout,
         "--facecam-pos", facecam_pos,
         "--auto-upload",
