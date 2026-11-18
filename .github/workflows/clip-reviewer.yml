@@ -1,0 +1,279 @@
+name: 🎬 Clip Review & Publish Agent
+
+on:
+  # ── Scheduled runs ─────────────────────────────────────────────────────────
+  # Primary run: 19:00 IST (13:30 UTC) — start of the peak publish window
+  # Secondary run: 10:00 IST (04:30 UTC) — morning cleanup of overnight clips
+  schedule:
+    - cron: "30 13 * * *"   # 19:00 IST — peak window open, publish approved clips
+    - cron: "30 4  * * *"   # 10:00 IST — morning pass, review + delete rejects
+
+  # ── Manual trigger ─────────────────────────────────────────────────────────
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run only (report without touching YouTube)"
+        type: boolean
+        default: false
+      publish_now:
+        description: "Publish immediately, ignore peak window"
+        type: boolean
+        default: false
+      min_score_override:
+        description: "Override auto-upload min score (blank = use config)"
+        type: string
+        default: ""
+
+env:
+  PYTHON_VERSION: "3.11"
+  TZ: "Asia/Kolkata"
+
+jobs:
+  review-and-publish:
+    name: Review staged clips & publish/delete
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ── 2. Python ────────────────────────────────────────────────────────
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      # ── 3. Install deps ───────────────────────────────────────────────────
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install \
+            google-api-python-client \
+            google-auth-oauthlib \
+            google-auth-httplib2 \
+            openai \
+            python-dotenv \
+            requests \
+            zoneinfo 2>/dev/null || true
+
+      # ── 4. Restore secrets from GitHub Secrets ───────────────────────────
+      # These secrets must be set in Settings > Secrets & Variables > Actions.
+      # See README-GITHUB-ACTIONS.md for the full setup guide.
+      - name: Restore YouTube credentials
+        env:
+          YOUTUBE_TOKEN_CLIPPER: ${{ secrets.YOUTUBE_TOKEN_CLIPPER }}
+          YOUTUBE_CLIENT_SECRET_CLIPPER: ${{ secrets.YOUTUBE_CLIENT_SECRET_CLIPPER }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          APINEX_API_KEY: ${{ secrets.APINEX_API_KEY }}
+          UPLOAD_HISTORY_JSON: ${{ secrets.YOUTUBE_UPLOAD_HISTORY }}
+        run: |
+          mkdir -p config
+
+          # YouTube OAuth token for the clipper channel
+          if [ -n "$YOUTUBE_TOKEN_CLIPPER" ]; then
+            echo "$YOUTUBE_TOKEN_CLIPPER" > config/youtube_token_clipper.json
+            chmod 600 config/youtube_token_clipper.json
+            echo "✅ Clipper token restored"
+          else
+            echo "⚠️  YOUTUBE_TOKEN_CLIPPER secret not set — YouTube calls will fail"
+          fi
+
+          # OAuth client secret for the clipper channel
+          if [ -n "$YOUTUBE_CLIENT_SECRET_CLIPPER" ]; then
+            echo "$YOUTUBE_CLIENT_SECRET_CLIPPER" > config/youtube_client_secret_clipper.json
+            chmod 600 config/youtube_client_secret_clipper.json
+            echo "✅ Client secret restored"
+          fi
+
+          # Upload history (the agent reads this to find staged private clips)
+          if [ -n "$UPLOAD_HISTORY_JSON" ]; then
+            echo "$UPLOAD_HISTORY_JSON" > config/youtube_upload_history.json
+            echo "✅ Upload history restored ($(echo "$UPLOAD_HISTORY_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d),'entries')" 2>/dev/null || echo 'unknown size'))"
+          else
+            echo "[]" > config/youtube_upload_history.json
+            echo "⚠️  No upload history found — agent will find 0 staged clips"
+          fi
+
+          # Write Groq + APInex keys to .env for scripts that read it
+          {
+            [ -n "$GROQ_API_KEY" ]   && echo "GROQ_API_KEY=$GROQ_API_KEY"
+            [ -n "$APINEX_API_KEY" ] && echo "APINEX_API_KEY=$APINEX_API_KEY"
+          } > .env
+
+          echo "🔑 Credentials restored"
+
+      # ── 5. Restore publish config (optional override) ─────────────────────
+      - name: Configure publish agent
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          from pathlib import Path
+
+          cfg_path = Path("config/clipper-publish.json")
+          cfg = {
+              "enabled": True,
+              "dry_run": False,
+              "review_interval_sec": 3600,
+              "peak_window": {"start": "19:00", "end": "22:00", "timezone": "Asia/Kolkata"},
+              "require_verdict": True,
+              "keep_local_after_publish": True,
+              "max_publish_per_run": 4,
+              "max_delete_per_run": 25,
+          }
+          if cfg_path.exists():
+              try:
+                  stored = json.loads(cfg_path.read_text())
+                  if isinstance(stored, dict):
+                      cfg.update(stored)
+              except Exception:
+                  pass
+
+          # GitHub Actions inputs override
+          dry_run_input = os.environ.get("INPUT_DRY_RUN", "").lower()
+          if dry_run_input in ("true", "1"):
+              cfg["dry_run"] = True
+
+          cfg["dry_run"] = False  # always live unless explicitly set above
+          cfg_path.write_text(json.dumps(cfg, indent=2))
+          print("Publish config:", json.dumps(cfg, indent=2))
+          EOF
+
+      # ── 6. Run the publish agent ──────────────────────────────────────────
+      - name: Run publish agent
+        id: publish
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          PUBLISH_NOW: ${{ inputs.publish_now || 'false' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          ARGS=""
+          [ "$DRY_RUN" = "true" ]    && ARGS="$ARGS --dry-run"
+          [ "$PUBLISH_NOW" = "true" ] && ARGS="$ARGS --publish-now"
+
+          echo "▶️  Running: python scripts/publish_agent.py $ARGS"
+          python scripts/publish_agent.py $ARGS 2>&1 | tee /tmp/publish_agent_output.txt
+
+          # Extract counts for the job summary
+          python3 - <<'PYEOF'
+          import json
+          from pathlib import Path
+          report_path = Path("config/publish_agent_report.json")
+          if report_path.exists():
+              try:
+                  report = json.loads(report_path.read_text())
+                  counts = report.get("counts", {})
+                  with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a") as f:
+                      f.write(f"published={counts.get('published', 0)}\n")
+                      f.write(f"rejected={counts.get('rejected', 0)}\n")
+                      f.write(f"deferred={counts.get('deferred', 0)}\n")
+                      f.write(f"staged={counts.get('staged', 0)}\n")
+                      f.write(f"errors={counts.get('errors', 0)}\n")
+              except Exception as e:
+                  print(f"Could not parse report: {e}")
+          import os
+          PYEOF
+
+      # ── 7. Write job summary ──────────────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          report_path = Path("config/publish_agent_report.json")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY", "/dev/null")
+
+          now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+          lines = [f"# 🎬 Clip Review & Publish Report — {now}\n"]
+
+          if report_path.exists():
+              try:
+                  r = json.loads(report_path.read_text())
+                  c = r.get("counts", {})
+                  dry = " *(dry run)*" if r.get("dry_run") else ""
+                  peak = "✅ Open" if r.get("peak_window_open") else "⏳ Closed"
+
+                  lines += [
+                      f"| Metric | Value |",
+                      f"|--------|-------|",
+                      f"| Staged clips found | {c.get('staged', 0)} |",
+                      f"| ✅ Published | {c.get('published', 0)}{dry} |",
+                      f"| 🗑️ Rejected & deleted | {c.get('rejected', 0)} |",
+                      f"| ⏳ Deferred | {c.get('deferred', 0)} |",
+                      f"| 👻 Orphaned | {c.get('orphaned', 0)} |",
+                      f"| ❌ Errors | {c.get('errors', 0)} |",
+                      f"| Publish window | {peak} |",
+                      "",
+                  ]
+
+                  if r.get("published"):
+                      lines += ["## ✅ Published Clips", ""]
+                      for v in r["published"]:
+                          score = v.get("human_score", "?")
+                          gut = v.get("gut_reaction", "")
+                          vid = v.get("video_id", "")
+                          title = v.get("title", vid)
+                          lines.append(f"- **{title[:70]}** — score {score}/100  \n  *{gut}*  \n  [YouTube](https://youtube.com/watch?v={vid})")
+                      lines.append("")
+
+                  if r.get("rejected"):
+                      lines += ["## 🗑️ Rejected Clips", ""]
+                      for v in r["rejected"]:
+                          verdict = v.get("verdict", "?")
+                          score = v.get("human_score", "?")
+                          title = v.get("title", v.get("video_id", ""))
+                          lines.append(f"- **{title[:70]}** — {verdict}, score {score}/100")
+                      lines.append("")
+
+                  if r.get("errors"):
+                      lines += ["## ❌ Errors", ""]
+                      for e in r["errors"]:
+                          lines.append(f"- `{e.get('video_id', '')}` — {e.get('error', '')}")
+                      lines.append("")
+
+                  if r.get("note"):
+                      lines.append(f"> ⚠️ {r['note']}")
+              except Exception as e:
+                  lines.append(f"> Could not parse report: {e}")
+          else:
+              lines.append("> No report generated — agent may not have run.")
+
+          with open(summary_path, "w") as f:
+              f.write("\n".join(lines))
+          print("Job summary written.")
+          EOF
+
+      # ── 8. Update upload history secret ───────────────────────────────────
+      # Saves the mutated upload history back to GitHub Secrets so the next
+      # scheduled run sees the updated publish_status fields.
+      # Uses GitHub CLI (gh secret set) — requires ADMIN_TOKEN secret.
+      - name: Persist updated upload history
+        if: success() || failure()
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "⚠️  ADMIN_TOKEN not set — upload history will NOT be persisted."
+            echo "    Set ADMIN_TOKEN (a PAT with 'secrets' scope) to enable persistence."
+            exit 0
+          fi
+
+          HISTORY=$(cat config/youtube_upload_history.json 2>/dev/null || echo "[]")
+          echo "$HISTORY" | gh secret set YOUTUBE_UPLOAD_HISTORY --repo "$GITHUB_REPOSITORY"
+          echo "✅ Upload history persisted back to GitHub Secrets"
+
+      # ── 9. Notify on failure ──────────────────────────────────────────────
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Clip review/publish agent failed. Check the logs above."
+          echo "::warning::If the error is 'token missing force-ssl scope', re-run:"
+          echo "::warning::  python scripts/youtube_uploader.py --auth --profile clipper"
+          echo "::warning::Then update the YOUTUBE_TOKEN_CLIPPER secret."
