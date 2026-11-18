@@ -838,22 +838,29 @@ def _sanitize_public_source_url(source_url: str, streamer: str = "", channel_slu
     return ""
 
 
-_STREAM_LINK_RE = re.compile(
-    r"https?://(?:www\.)?(?:twitch\.tv|youtube\.com|youtu\.be)/[^\s]+",
+_ANY_URL_RE = re.compile(
+    r"https?://[^\s]+|www\.[^\s]+",
+    flags=re.I,
+)
+
+_LINK_LINE_RE = re.compile(
+    r"^\s*(?:watch\s+full\s+stream|watch\s+stream|full\s+stream|source\s+stream|source\s+link|source|stream\s+link|channel\s+link|stream\s+url|link|watch|file|path)\s*:.*$",
     flags=re.I,
 )
 
 
 def _scrub_local_paths(text: str) -> str:
-    """Defense-in-depth scrub ensuring no local machine paths or external stream links leak into YouTube descriptions."""
+    """Defense-in-depth scrub ensuring no local machine paths, external links, or stream URLs leak into YouTube descriptions."""
     cleaned_lines: list[str] = []
-    for line in (text or "").splitlines():
-        if _LOCAL_PATH_RE.search(line) or _STREAM_LINK_RE.search(line):
-            # Drop lines like 'Watch full stream: ...' entirely rather than leaving a broken label
-            if re.match(r"^\s*(?:watch\s+full\s+stream|source\s+stream|file|path)\s*:", line, flags=re.I):
-                continue
+    for raw_line in (text or "").splitlines():
+        line = raw_line.strip()
+        # Drop lines like 'Watch full stream: ...' or source links entirely
+        if _LINK_LINE_RE.match(line):
+            continue
+        # Remove any local filesystem paths or external URLs embedded in prose
+        if _LOCAL_PATH_RE.search(line) or _ANY_URL_RE.search(line):
             line = _LOCAL_PATH_RE.sub("", line)
-            line = _STREAM_LINK_RE.sub("", line).strip()
+            line = _ANY_URL_RE.sub("", line).strip()
         cleaned_lines.append(line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(cleaned_lines)).strip()
 
