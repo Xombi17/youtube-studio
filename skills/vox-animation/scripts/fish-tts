@@ -1,0 +1,187 @@
+#!/usr/bin/env node
+/**
+ * fish-tts — turn a script.json into a per-line Fish Audio voiceover plus timings.
+ *
+ *   fish-tts <script.json> [--out audio] [--force] [--dry-run]
+ *
+ * One MP3 per line, so re-voicing a single line never re-renders the rest.
+ * Writes timings.json (real measured durations) which the composition reads,
+ * so the visuals follow the audio instead of a guessed timeline.
+ *
+ * Auth: FISH_AUDIO_KEY env var, or ~/.fish-audio-key (chmod 600).
+ * Get one at https://fish.audio/go-api/  -> API Keys.
+ */
+'use strict';
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execFileSync } = require('child_process');
+
+const API = 'https://api.fish.audio/v1/tts';
+
+function die(msg, code = 1) { console.error(msg); process.exit(code); }
+
+function loadKey() {
+  if (process.env.FISH_AUDIO_KEY) return process.env.FISH_AUDIO_KEY.trim();
+  const f = path.join(os.homedir(), '.fish-audio-key');
+  if (fs.existsSync(f)) {
+    const k = fs.readFileSync(f, 'utf8').trim();
+    if (k) return k;
+  }
+  die([
+    'No Fish Audio API key.',
+    '',
+    '  1. Open https://fish.audio/go-api/ and create an API key',
+    '  2. printf %s "<the-key>" > ~/.fish-audio-key && chmod 600 ~/.fish-audio-key',
+    '',
+    'Then re-run. Nothing else in this pipeline needs configuring.',
+  ].join('\n'));
+}
+
+function durationMs(file) {
+  const out = execFileSync('ffprobe', [
+    '-v', 'error', '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1', file,
+  ], { encoding: 'utf8' }).trim();
+  const secs = Number(out);
+  if (!Number.isFinite(secs) || secs <= 0) die(`ffprobe could not measure ${file} (got "${out}")`);
+  return Math.round(secs * 1000);
+}
+
+async function synth(key, text, model, referenceId, dest, speed) {
+  const body = { text };
+  if (referenceId) body.reference_id = referenceId;
+  // Fish Audio reads slower than a human presenter. prosody.speed is native (0.5-2.0),
+  // so pace is set at synthesis rather than time-stretched afterwards.
+  if (speed && speed !== 1) body.prosody = { speed };
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'model': model,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    die(`Fish Audio HTTP ${res.status} on "${text.slice(0, 48)}..."\n${detail.slice(0, 500)}`);
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length < 512) die(`Fish Audio returned ${buf.length} bytes for "${text.slice(0, 48)}..." — that is not audio.`);
+  fs.writeFileSync(dest, buf);
+  return buf.length;
+}
+
+(async () => {
+  const args = process.argv.slice(2);
+  const scriptPath = args.find(a => !a.startsWith('--'));
+  if (!scriptPath) die('usage: fish-tts <script.json> [--out audio] [--force] [--dry-run]');
+
+  const outIdx = args.indexOf('--out');
+  const force = args.includes('--force');
+  const dry = args.includes('--dry-run');
+
+  const root = path.dirname(path.resolve(scriptPath));
+  const outDir = path.resolve(root, outIdx > -1 ? args[outIdx + 1] : 'audio');
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const script = JSON.parse(fs.readFileSync(scriptPath, 'utf8'));
+  const model = (script.voice && script.voice.model) || 's2.1-pro';
+  const referenceId = (script.voice && script.voice.reference_id) || null;
+  const speed = Number((script.voice && script.voice.speed) || 1);
+  const gap = Number(script.gap_ms || 140);
+
+  const key = dry ? 'DRY' : loadKey();
+
+  console.log(`fish-tts  model=${model}  voice=${referenceId || 'default'}  speed=${speed}  lines=${script.lines.length}`);
+
+  const timings = [];
+  let cursor = 0;
+
+  for (const line of script.lines) {
+    const dest = path.join(outDir, `${line.id}.mp3`);
+    const cached = fs.existsSync(dest) && !force;
+
+    if (dry) {
+      // Estimate at 2.7 words/sec so the composition is previewable before a single API call.
+      const words = line.say.trim().split(/\s+/).length;
+      const est = Math.max(900, Math.round((words / 2.7) * 1000));
+      console.log(`  ${line.id.padEnd(8)} ~${(est / 1000).toFixed(2)}s EST  ${line.say.slice(0, 52)}`);
+      timings.push({ id: line.id, start_ms: cursor, dur_ms: est, file: path.basename(dest), estimated: true });
+      cursor += est + gap;
+      continue;
+    }
+
+    if (!cached) {
+      const bytes = await synth(key, line.say, model, referenceId, dest, speed);
+      console.log(`  ${line.id.padEnd(8)} ${String(bytes).padStart(7)}B  ${line.say.slice(0, 56)}`);
+    } else {
+      console.log(`  ${line.id.padEnd(8)} cached   ${line.say.slice(0, 56)}`);
+    }
+
+    const dur = durationMs(dest);
+    timings.push({ id: line.id, start_ms: cursor, dur_ms: dur, file: path.basename(dest) });
+    cursor += dur + gap;
+  }
+
+  const total = Math.max(0, cursor - gap);
+  const manifest = {
+    slug: script.slug,
+    model,
+    reference_id: referenceId,
+    gap_ms: gap,
+    total_ms: total,
+    generated_at: new Date().toISOString(),
+    lines: timings,
+  };
+  fs.writeFileSync(path.join(root, 'timings.json'), JSON.stringify(manifest, null, 2) + '\n');
+  // A plain script file too, because a file:// page cannot fetch() a sibling JSON.
+  fs.writeFileSync(
+    path.join(root, 'timings.js'),
+    'window.TIMINGS = ' + JSON.stringify(manifest, null, 2) + ';\n'
+  );
+  fs.writeFileSync(
+    path.join(root, 'script.js'),
+    'window.SCRIPT = ' + JSON.stringify(script, null, 2) + ';\n'
+  );
+
+  if (dry) {
+    console.log('\nDRY RUN — no audio written, no timings measured.');
+    return;
+  }
+
+  // Concat with the inter-line gap baked in, so vo.mp3 matches timings.json exactly.
+  const listFile = path.join(outDir, '_concat.txt');
+  const silence = path.join(outDir, '_gap.mp3');
+  execFileSync('ffmpeg', [
+    '-y', '-loglevel', 'error', '-f', 'lavfi',
+    '-i', `anullsrc=r=44100:cl=mono:d=${(gap / 1000).toFixed(3)}`,
+    '-c:a', 'libmp3lame', '-b:a', '128k', silence,
+  ]);
+  const parts = [];
+  timings.forEach((t, i) => {
+    parts.push(`file '${path.join(outDir, t.file)}'`);
+    if (i < timings.length - 1) parts.push(`file '${silence}'`);
+  });
+  fs.writeFileSync(listFile, parts.join('\n') + '\n');
+  const vo = path.join(outDir, 'vo.mp3');
+  execFileSync('ffmpeg', [
+    '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0',
+    '-i', listFile, '-c:a', 'libmp3lame', '-b:a', '192k', vo,
+  ]);
+
+  const realTotal = durationMs(vo);
+  const drift = Math.abs(realTotal - total);
+  console.log(`\n  vo.mp3        ${(realTotal / 1000).toFixed(2)}s  (timings say ${(total / 1000).toFixed(2)}s, drift ${drift}ms)`);
+  console.log(`  timings.json  ${timings.length} lines`);
+  if (drift > 400) {
+    console.error(`\n  DRIFT ${drift}ms between vo.mp3 and timings.json — visuals will slip. Do not render.`);
+    process.exit(2);
+  }
+  // Charlie's range is 30s to a minute, and longer is allowed when the content earns it
+  // (he shipped a 1m50 build reel). So under 30s is a real problem; over is a heads-up.
+  const secs = total / 1000;
+  if (secs < 30) console.error(`\n  WARNING: ${secs.toFixed(1)}s is under the 30s floor.`);
+  else if (secs > 60) console.error(`\n  NOTE: ${secs.toFixed(1)}s is over a minute. Allowed, but the content has to earn it.`);
+})();

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Claude gains senses — one world</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="script.js"></script>
+<script src="timings.js"></script>
+<style>
+  @font-face{
+    font-family:'Space Grotesk';
+    src:url('assets/fonts/SpaceGrotesk.woff2') format('woff2');
+    font-weight:300 700; font-display:block;
+  }
+  :root{
+    --navy:#202531; --navy-deep:#14171F;
+    --cream:#F0E9DC; --terra:#D97557; --sky:#8FC4E8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1080px;height:1920px;overflow:hidden;background:var(--navy)}
+  body{font-family:'Space Grotesk',-apple-system,sans-serif;color:var(--cream)}
+  #stage{position:absolute;inset:0;overflow:hidden;background:var(--navy)}
+
+  /* THE WORLD — full bleed. The generated scene is the frame, not a panel inside it. */
+  #world{position:absolute;inset:0;overflow:hidden}
+  #world video{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:1080px;height:1920px;object-fit:cover;opacity:0;will-change:opacity}
+  /* just enough shading top and bottom for type to sit on, never a heavy scrim */
+  #shade{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(to bottom, rgba(14,27,49,.62) 0%, transparent 22%,
+               transparent 66%, rgba(14,27,49,.42) 86%, rgba(14,27,49,.62) 100%)}
+
+  /* THE LABEL — a cut-paper card pasted INTO the scene, not a band under it. */
+  #label{position:absolute;left:0;right:0;top:170px;text-align:center;will-change:transform}
+  .card{display:inline-block;position:relative;background:#fff;color:#111;
+    padding:24px 42px 30px;border-radius:16px;box-shadow:0 22px 46px rgba(0,0,0,.55);max-width:960px;
+    text-align:center}
+  .sense{display:block;font-size:152px;font-weight:700;line-height:.90;letter-spacing:-.045em}
+  .tools{display:block;margin-top:14px;font-size:38px;font-weight:700;color:var(--terra);letter-spacing:-.01em}
+  .tag{position:absolute;right:-18px;top:-24px;background:var(--terra);color:#fff;
+    font-size:38px;font-weight:700;padding:11px 21px;border-radius:5px;
+    box-shadow:0 8px 18px rgba(6,14,28,.45);transform:rotate(4deg)}
+
+  /* the two hook beats and the close use the same card, bigger and without a tag */
+  .big{display:block;font-size:114px;font-weight:700;line-height:1.02;letter-spacing:-.045em;
+    white-space:pre-line;max-width:880px}
+
+  /* PROOF — real screenshots of the actual repos, pinned in as paper photos */
+  #proof{position:absolute;left:0;right:0;top:900px;height:700px;pointer-events:none}
+  .shot{position:absolute;background:var(--cream);padding:12px 12px 40px;border-radius:3px;
+    box-shadow:0 22px 44px rgba(6,14,28,.55);opacity:0;will-change:transform,opacity}
+  .shot img{display:block;width:100%;height:auto;border-radius:2px}
+
+  /* THE ELEVEN — cut-paper chips that land on the payoff scene */
+  #chips{position:absolute;left:70px;right:70px;top:640px;display:flex;flex-wrap:wrap;
+    gap:14px;justify-content:center;opacity:0}
+  .chip{background:var(--cream);color:var(--navy-deep);font-size:32px;font-weight:600;
+    padding:12px 20px;border-radius:5px;box-shadow:0 10px 20px rgba(6,14,28,.42);opacity:0}
+
+  /* SUBTITLE — one line, short chunk, plain. Charlie's rule: never wrap, never colour a word. */
+  #cap{position:absolute;left:0;right:0;bottom:214px;text-align:center;
+    font-size:54px;font-weight:700;letter-spacing:-.015em;white-space:nowrap;
+    text-shadow:0 5px 22px rgba(6,14,28,.85);opacity:0}
+
+  /* The real Claude starburst, composited from the brand file — never generated. */
+  /* His device, from the Fish Audio reel: a rounded tile carrying the starburst, joined by a
+     terracotta line to the thing it acts on. Integrated, never a corner watermark. */
+  #mark{position:absolute;left:0;right:0;top:600px;height:150px;opacity:0;
+    display:flex;align-items:center;justify-content:center;gap:0}
+  #mark .tile{width:132px;height:132px;border-radius:26px;background:#F3EFE7;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px rgba(0,0,0,.5)}
+  #mark .tile img{width:78px;height:78px;display:block}
+  #mark .link{width:78px;height:5px;background:var(--terra);border-radius:3px}
+  #mark .dot{width:132px;height:132px;border-radius:26px;background:#F3EFE7;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px rgba(0,0,0,.5);
+    font-size:46px;font-weight:700;color:#111;font-variant-numeric:tabular-nums}
+  #bigmark{position:absolute;left:0;right:0;top:1010px;text-align:center;opacity:0}
+  #bigmark img{width:250px;height:250px;display:inline-block;
+    filter:drop-shadow(0 18px 34px rgba(6,14,28,.55))}
+
+  .grain{position:absolute;inset:-40px;opacity:.06;pointer-events:none;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="world"></div>
+  <div id="bigmark"><img src="assets/logos/claude-starburst.svg" alt=""></div>
+  <div id="shade"></div>
+  <div id="proof"></div>
+  <div id="chips"></div>
+  <div id="label"></div>
+  <div class="grain" id="grain"></div>
+  <div id="mark">
+    <div class="tile"><img src="assets/logos/claude-starburst.svg" alt=""></div>
+    <div class="link"></div>
+    <div class="dot" id="markglyph">+</div>
+  </div>
+  <div id="cap"></div>
+</div>
+
+<script>
+(function(){
+  var S=window.SCRIPT, T=window.TIMINGS;
+  if(!S||!T){document.body.innerHTML='<p style="padding:80px;font-size:40px">Run fish-tts first.</p>';return;}
+
+  var byId={}; T.lines.forEach(function(l){byId[l.id]=l;});
+  var world=document.getElementById('world');
+  var label=document.getElementById('label');
+  var chips=document.getElementById('chips');
+  var cap=document.getElementById('cap');
+
+  var ELEVEN=['yt-dlp','mlx-whisper','ffmpeg','Puppeteer','sharp','HyperFrames',
+              'Notion MCP','Gmail MCP','Playwright MCP','Context7 MCP','Claude Design'];
+
+  /* One generated scene per beat. Seeked, never played — the renderer steps frames. */
+  var VIDS={};
+  S.lines.forEach(function(l){
+    var v=document.createElement('video');
+    var SCENE={setup:'hook-a', proof:'payoff'};
+    v.id='v-'+l.id; v.src='world/'+(SCENE[l.id]||l.id)+'.mp4';
+    v.muted=true; v.playsInline=true; v.preload='auto';
+    world.appendChild(v); VIDS[l.id]=v;
+  });
+
+  /* Which real page belongs to which beat. Captured today with Puppeteer, every URL 200. */
+  var SHOTS={
+    g1:[['eyes',-8,{left:'70px',top:'40px',width:'380px'}],['play',6,{right:'70px',top:'250px',width:'380px'}]],
+    g2:[['ears',7,{right:'66px',top:'30px',width:'380px'}],['ytdlp',-6,{left:'66px',top:'260px',width:'380px'}]],
+    g3:[['hands',-7,{left:'70px',top:'36px',width:'380px'}],['sharp',5,{right:'66px',top:'256px',width:'380px'}]],
+    g4:[['reach',6,{right:'70px',top:'34px',width:'380px'}],['ctx7',-5,{left:'66px',top:'262px',width:'380px'}]],
+    proof:[['ytdlp',-6,{left:'56px',top:'20px',width:'380px'}],['eyes',5,{right:'56px',top:'60px',width:'380px'}],
+           ['hands',-4,{left:'86px',top:'330px',width:'370px'}],['reach',7,{right:'86px',top:'370px',width:'370px'}]]
+  };
+  var proofBox=document.getElementById('proof');
+  Object.keys(SHOTS).forEach(function(bid){
+    SHOTS[bid].forEach(function(sh,i){
+      var d=document.createElement('div'); d.className='shot'; d.id='shot-'+bid+'-'+i;
+      Object.keys(sh[2]).forEach(function(k){ d.style[k]=sh[2][k]; });
+      d.style.transform='rotate('+sh[1]+'deg)';
+      d.innerHTML='<img src="proof/'+sh[0]+'.png" alt="">';
+      proofBox.appendChild(d);
+    });
+  });
+
+  ELEVEN.forEach(function(n,i){
+    var c=document.createElement('div'); c.className='chip'; c.id='chip-'+i; c.textContent=n;
+    chips.appendChild(c);
+  });
+
+  /* the pasted label card, one per beat */
+  S.lines.forEach(function(l){
+    var el=document.createElement('div'); el.id='L-'+l.id;
+    el.style.cssText='position:absolute;left:0;right:0;top:0;text-align:center;opacity:0;will-change:transform,opacity';
+    if(l.kind==='tool'){
+      el.innerHTML='<div class="card"><span class="tag">'+l.n+'</span>'+
+        '<span class="sense">'+l.tool+'</span>'+
+        '<span class="tools">'+l.sense+'</span></div>';
+    } else {
+      el.innerHTML='<div class="card"><span class="big">'+(l.card||'')+'</span></div>';
+    }
+    label.appendChild(el);
+  });
+
+  /* SUBTITLES — the spoken line split into short chunks that never wrap.
+     Built up front so the renderer can seek to any frame and land exactly. */
+  function chunk(text){
+    var w=text.split(/\s+/), out=[], cur=[];
+    w.forEach(function(x){
+      cur.push(x);
+      var joined=cur.join(' ');
+      if(cur.length>=3 || /[.,]$/.test(x) || joined.length>22){ out.push(joined); cur=[]; }
+    });
+    if(cur.length) out.push(cur.join(' '));
+    return out;
+  }
+  var CAPS={};
+  S.lines.forEach(function(l){
+    var box=document.createElement('div');
+    box.style.cssText='position:absolute;left:0;right:0;bottom:0';
+    var els=chunk(l.say).map(function(t){
+      var s=document.createElement('div');
+      s.style.cssText='position:absolute;left:0;right:0;bottom:0;opacity:0';
+      s.textContent=t; box.appendChild(s); return s;
+    });
+    cap.appendChild(box);
+    CAPS[l.id]={els:els};
+  });
+
+  var tl=gsap.timeline({paused:true});
+  var DUR=T.total_ms/1000;
+  var WIN=[];
+
+  tl.to('#grain',{backgroundPosition:'160px 160px',duration:.5,ease:'steps(6)',repeat:Math.ceil(DUR/.5)},0);
+  tl.fromTo('#cap',{opacity:0},{opacity:1,duration:.2},0);
+  /* the mark is on screen for the whole reel — the instant "this is Claude" read */
+  /* the pair sits under the title all reel; the right tile shows which sense is live */
+  document.getElementById('markglyph').textContent='11';
+  tl.fromTo('#mark',{opacity:0,y:22},{opacity:1,y:0,duration:.5,ease:'back.out(1.6)'},.2);
+  tl.fromTo('#mark .link',{scaleX:0},{scaleX:1,duration:.4,ease:'power2.out'},.45);
+
+  S.lines.forEach(function(l,li){
+    var t=byId[l.id]; if(!t) return;
+    var at=t.start_ms/1000, dur=t.dur_ms/1000;
+    var out=at+dur+(T.gap_ms/1000)*0.5;
+    WIN.push({id:l.id,start:at,end:out});
+
+    /* the world cross-dissolves rather than cutting, so it reads as one continuous place */
+    var v=VIDS[l.id];
+    tl.fromTo(v,{opacity:0},{opacity:1,duration:(li===0?.3:.45),ease:'power1.inOut'},at-(li===0?0:.25));
+    if(li < S.lines.length-1) tl.to(v,{opacity:0,duration:.45,ease:'power1.inOut'},out-.2);
+
+    /* the right tile carries the live sense, so the pair is doing work not decorating */
+    if(l.kind==='tool'){
+      tl.call(function(){ document.getElementById('markglyph').textContent=l.n; },null,at);
+      tl.fromTo('#mark .dot',{scale:.86},{scale:1,duration:.34,ease:'back.out(2)'},at);
+    }
+
+    /* the label is pasted on, holds, then lifts off */
+    var L='#L-'+l.id;
+    tl.fromTo(L,{opacity:0,y:26,rotate:-3,scale:.94},
+                {opacity:1,y:0,rotate:0,scale:1,duration:.4,ease:'back.out(1.6)'},at+.06);
+    if(l.kind!=='cta') tl.to(L,{opacity:0,y:-22,duration:.26,ease:'power2.in'},out-.16);
+    /* nothing is ever still: the card drifts for the whole beat it is on screen */
+    tl.fromTo(L,{x:18,scale:1.0},{x:-30,scale:1.035,duration:Math.max(dur,1)+.4,ease:'none'},at);
+
+    if(l.id==='hook-a'){
+      tl.fromTo('#bigmark',{opacity:0,scale:.55,rotate:-60},
+                           {opacity:1,scale:1,rotate:0,duration:.62,ease:'back.out(1.7)'},at+.18)
+        .to('#bigmark',{scale:1.06,duration:Math.max(dur,1),ease:'none'},at+.8)
+        .to('#bigmark',{opacity:0,scale:.8,duration:.3,ease:'power2.in'},out-.2);
+    }
+
+    if(SHOTS[l.id]){
+      SHOTS[l.id].forEach(function(sh,i){
+        var el='#shot-'+l.id+'-'+i, rot=sh[1];
+        tl.fromTo(el,{opacity:0,y:40,scale:.9,rotate:rot*2},
+                     {opacity:1,y:0,scale:1,rotate:rot,duration:.42,ease:'back.out(1.5)'},at+.30+i*.18);
+        tl.to(el,{y:-16,duration:Math.max(dur,1),ease:'none'},at+.7);
+        tl.to(el,{opacity:0,y:-46,duration:.26,ease:'power2.in'},out-.18);
+      });
+    }
+
+    if(l.id==='payoff'){
+      /* the eleven names are the frame here, so the mark pair clears out */
+      tl.to('#mark',{opacity:0,duration:.25},at);
+      tl.to('#chips',{opacity:1,duration:.2},at+.25);
+      ELEVEN.forEach(function(_,i){
+        tl.fromTo('#chip-'+i,{opacity:0,y:16,scale:.9},
+          {opacity:1,y:0,scale:1,duration:.24,ease:'back.out(2)'},at+.30+i*.055);
+      });
+    }
+    if(l.id==='cta'){ tl.to('#chips',{opacity:0,duration:.3},at);
+      tl.to('#mark',{opacity:1,duration:.3},at+.25); }
+
+    /* subtitle chunks, spread across the real length of the spoken line */
+    var C=CAPS[l.id], n=C.els.length;
+    var per=dur/Math.max(n,1);
+    C.els.forEach(function(el,i){
+      tl.set(el,{opacity:0},at);
+      tl.to(el,{opacity:1,duration:.09},at+i*per)
+        .to(el,{opacity:0,duration:.09},at+(i+1)*per-.04);
+    });
+  });
+
+  tl.pause(0);
+
+  window.seek=function(ms){
+    tl.pause(); tl.time(Math.min(ms/1000, tl.duration()));
+    var s=ms/1000, live=[];
+    WIN.forEach(function(w){ if(s>=w.start-0.6 && s<=w.end+0.3) live.push(w); });
+    if(!live.length) return Promise.resolve();
+    return Promise.all(live.map(function(w){
+      var v=VIDS[w.id];
+      var span=Math.max(0.2,(v.duration||5)-0.1);
+      var raw=Math.max(0, s-w.start+0.3);
+      var cyc=raw % (span*2);
+      var want=cyc<=span ? cyc : (span*2-cyc);
+      if(!isFinite(want) || Math.abs(v.currentTime-want)<0.008) return Promise.resolve();
+      return new Promise(function(res){
+        var done=false;
+        var fin=function(){ if(done)return; done=true; v.removeEventListener('seeked',fin); res(); };
+        v.addEventListener('seeked',fin); v.currentTime=want; setTimeout(fin,220);
+      });
+    }));
+  };
+  window.tl=tl;
+  window.DURATION_MS=T.total_ms;
+  window.READY=Promise.all(S.lines.map(function(l){
+    var v=VIDS[l.id];
+    return new Promise(function(res){
+      if(v.readyState>=2) return res();
+      v.addEventListener('loadeddata',res,{once:true});
+      v.addEventListener('error',res,{once:true});
+      setTimeout(res,8000);
+    });
+  }));
+})();
+</script>
+</body>
+</html>

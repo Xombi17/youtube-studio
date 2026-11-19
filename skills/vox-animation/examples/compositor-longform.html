@@ -1,0 +1,329 @@
+<title>Vox compositor</title>
+<style>
+  html,body{margin:0;background:#0d0d0d;overflow:hidden}
+  canvas{display:block}
+</style>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="timings.js"></script>
+<script src="script.js"></script>
+<script>
+/* Vox compositor — a PURE FUNCTION OF TIME.
+   render(t) draws the complete frame for time t in seconds.
+   No timeline library, no animation loop during render, so frame-stepping is
+   exact and reproducible. window.seek(ms) is what the renderer calls. */
+
+const C = document.getElementById('c');
+let X = C.getContext('2d');
+const OFF = document.createElement('canvas');
+OFF.width = 1920; OFF.height = 1080;
+const OFFX = OFF.getContext('2d');
+const XREF = {};
+function swapCtx(c){ X = c; }
+const W = 1920, H = 1080;
+
+const PAL = {
+  cream:  '#F2EAD8',
+  red:    '#C7302B',
+  navy:   '#1B2A41',
+  ink:    '#141414',
+  yellow: '#F5C518',
+  grey:   '#8C8C8C',
+};
+
+/* ---------- easing ---------- */
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+const ease  = t => t<0?0 : t>1?1 : 1-Math.pow(1-t,3);        // outCubic
+const easeIO= t => t<0?0 : t>1?1 : (t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2);
+
+/* ---------- assets ---------- */
+const IMG = {};
+const NEEDED = {
+  rosenblatt: 'assets/rosenblatt.jpg',
+  markI:      'assets/markI.png',
+  minsky:     'assets/minsky.jpg',
+  hinton:     'assets/hinton.jpg',
+  diagram:    'assets/perceptron-diagram.png',
+};
+window.READY = (async () => {
+  await Promise.all(Object.entries(NEEDED).map(([k,src]) => new Promise(res => {
+    const i = new Image();
+    i.onload = () => { IMG[k] = i; res(); };
+    i.onerror = () => { IMG[k] = null; res(); };   // missing asset must not hang the render
+    i.src = src;
+  })));
+})();
+
+/* ---------- grain, drawn once into a tile ---------- */
+const GRAIN = (() => {
+  const g = document.createElement('canvas'); g.width = g.height = 220;
+  const gx = g.getContext('2d'), d = gx.createImageData(220,220);
+  for (let i=0;i<d.data.length;i+=4){
+    const v = 118 + Math.random()*34;
+    d.data[i]=d.data[i+1]=d.data[i+2]=v; d.data[i+3]=15;
+  }
+  gx.putImageData(d,0,0); return g;
+})();
+
+/* ---------- helpers ---------- */
+function coverRect(img, x, y, w, h, zoom=1, panx=0, pany=0){
+  if (!img) { X.fillStyle = PAL.grey; X.fillRect(x,y,w,h); return; }
+  const s = Math.max(w/img.width, h/img.height) * zoom;
+  const dw = img.width*s, dh = img.height*s;
+  X.save(); X.beginPath(); X.rect(x,y,w,h); X.clip();
+  X.drawImage(img, x + (w-dw)/2 + panx, y + (h-dh)/2 + pany, dw, dh);
+  X.restore();
+}
+function halftone(x,y,w,h,alpha=0.16,step=6){
+  X.save(); X.globalAlpha = alpha; X.fillStyle = '#000';
+  for (let yy=y; yy<y+h; yy+=step)
+    for (let xx=x; xx<x+w; xx+=step){
+      X.beginPath(); X.arc(xx,yy,1.05,0,7); X.fill();
+    }
+  X.restore();
+}
+function torn(x,y,w,h,seed=1){            // rough scissor edge behind a cut-out
+  X.save(); X.fillStyle = PAL.cream; X.beginPath();
+  const j = 9, r = (n)=> (Math.sin(seed*99 + n*12.9898)*43758.5453 % 1 + 1) % 1;
+  X.moveTo(x,y);
+  for (let i=0;i<=10;i++) X.lineTo(x + w*i/10, y - j + r(i)*j*2);
+  for (let i=0;i<=10;i++) X.lineTo(x + w + j - r(i+20)*j*2, y + h*i/10);
+  for (let i=10;i>=0;i--) X.lineTo(x + w*i/10, y + h + j - r(i+40)*j*2);
+  for (let i=10;i>=0;i--) X.lineTo(x - j + r(i+60)*j*2, y + h*i/10);
+  X.closePath(); X.fill(); X.restore();
+}
+function shadow(on, blur=26, oy=16){
+  X.shadowColor = on ? 'rgba(0,0,0,.45)' : 'transparent';
+  X.shadowBlur = on ? blur : 0; X.shadowOffsetY = on ? oy : 0;
+}
+
+/* ---------- devices. every one is (p, line) where p is 0..1 through the beat ---------- */
+
+function devPhoto(p, L){
+  X.fillStyle = PAL.ink; X.fillRect(0,0,W,H);
+  const img = IMG[L.img || 'rosenblatt'];
+  // slow ken burns, direction alternates by line index so it never feels mechanical
+  const dir = (L._i % 2) ? -1 : 1;
+  coverRect(img, 0, 0, W, H, 1.05 + p*0.20, dir*p*105, -p*58);
+  const g = X.createLinearGradient(0,H*0.45,0,H);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,.72)');
+  X.fillStyle = g; X.fillRect(0,H*0.45,W,H*0.55);
+  halftone(0,0,W,H,0.10,7);
+}
+
+function devAnnotate(p, L){
+  devPhoto(Math.min(p,1), L);
+  X.save();
+  X.strokeStyle = PAL.yellow; X.lineCap = 'round'; X.lineJoin = 'round';
+  X.lineWidth = 13;
+  // 1. circle draws on
+  const a = ease(clamp(p/0.42,0,1));
+  if (a > 0){
+    X.beginPath();
+    const cx = W*0.33, cy = H*0.46, rx = 210, ry = 168;
+    for (let i=0;i<=90;i++){
+      const th = (i/90) * a * Math.PI*2 - Math.PI/2;
+      const wob = 1 + Math.sin(th*3)*0.035;
+      const px = cx + Math.cos(th)*rx*wob, py = cy + Math.sin(th)*ry*wob;
+      i ? X.lineTo(px,py) : X.moveTo(px,py);
+    }
+    X.stroke();
+  }
+  // 2. arrow sweeps in
+  const b = ease(clamp((p-0.44)/0.4,0,1));
+  if (b > 0){
+    const x0 = W*0.50, y0 = H*0.62, x1 = W*0.50 + 330*b, y1 = H*0.62 - 250*b;
+    X.beginPath(); X.moveTo(x0,y0);
+    X.quadraticCurveTo(x0+150*b, y0-40*b, x1, y1); X.stroke();
+    if (b > 0.75){
+      const h = (b-0.75)/0.25*46;
+      X.beginPath(); X.moveTo(x1,y1);
+      X.lineTo(x1-h*0.95, y1+h*0.25); X.moveTo(x1,y1); X.lineTo(x1-h*0.2, y1+h);
+      X.stroke();
+    }
+  }
+  X.restore();
+}
+
+function devCollage(p, L){
+  X.fillStyle = PAL.red; X.fillRect(0,0,W,H);
+  X.fillStyle = PAL.cream;
+  X.beginPath(); X.moveTo(0,H); X.lineTo(W*0.62,H); X.lineTo(0,H*0.42); X.closePath(); X.fill();
+  const keys = L.imgs && L.imgs.length ? L.imgs : ['markI','rosenblatt','minsky'];
+  const slots = [
+    {x:170, y:250, w:520, h:600, rot:-0.035},
+    {x:700, y:150, w:470, h:560, rot: 0.028},
+    {x:1265,y:330, w:540, h:600, rot:-0.018},
+  ];
+  keys.slice(0,3).forEach((k,i) => {
+    const s = slots[i];
+    const t = ease(clamp((p - i*0.13)/0.42, 0, 1));     // stagger in
+    if (t <= 0) return;
+    const off = (1-t) * (i%2 ? 520 : -520);
+    X.save();
+    const drift = p * (i===0 ? -30 : i===1 ? 8 : 34);
+    X.translate(s.x + s.w/2 + off + drift, s.y + s.h/2 - p*20);
+    X.rotate(s.rot * t + p*0.012*(i%2?1:-1));
+    X.globalAlpha = t;
+    shadow(true, 30, 20);
+    torn(-s.w/2-16, -s.h/2-16, s.w+32, s.h+32, i+1);
+    shadow(false);
+    // desaturate to period black and white
+    X.filter = 'grayscale(1) contrast(1.12)';
+    coverRect(IMG[k], -s.w/2, -s.h/2, s.w, s.h, 1.02, 0, 0);
+    X.filter = 'none';
+    X.restore();
+  });
+  halftone(0,0,W,H,0.13,6);
+}
+
+function devChart(p, L){
+  X.fillStyle = PAL.cream; X.fillRect(0,0,W,H);
+  X.save(); X.translate(W/2, H/2); X.scale(1+p*0.045, 1+p*0.045); X.translate(-W/2, -H/2);
+  const x0=280, y0=H-230, x1=W-280, y1=250;
+  X.strokeStyle = 'rgba(27,42,65,.22)'; X.lineWidth = 2;
+  for (let i=0;i<=5;i++){
+    const y = y1 + (y0-y1)*i/5;
+    X.beginPath(); X.moveTo(x0,y); X.lineTo(x1,y); X.stroke();
+  }
+  X.strokeStyle = PAL.navy; X.lineWidth = 5;
+  X.beginPath(); X.moveTo(x0,y0); X.lineTo(x1,y0); X.stroke();
+  // the series: default is a steep climb, or L.series if given
+  const pts = L.series || [0.06,0.10,0.15,0.20,0.30,0.46,0.70,1.0];
+  const a = easeIO(clamp(p/0.50,0,1));
+  X.strokeStyle = PAL.red; X.lineWidth = 11; X.lineJoin='round'; X.lineCap='round';
+  X.beginPath();
+  const N = pts.length, upto = a*(N-1);
+  for (let i=0;i<N;i++){
+    if (i > upto) break;
+    const fx = x0 + (x1-x0)*i/(N-1), fy = y0 - (y0-y1)*pts[i];
+    i ? X.lineTo(fx,fy) : X.moveTo(fx,fy);
+  }
+  // partial final segment so the line grows smoothly
+  const i0 = Math.floor(upto), frac = upto - i0;
+  if (i0 < N-1){
+    const ax = x0+(x1-x0)*i0/(N-1), ay = y0-(y0-y1)*pts[i0];
+    const bx = x0+(x1-x0)*(i0+1)/(N-1), by = y0-(y0-y1)*pts[i0+1];
+    X.lineTo(ax+(bx-ax)*frac, ay+(by-ay)*frac);
+  }
+  X.stroke();
+  // travelling head marker so the beat never sits still after the line lands
+  const hx = x0+(x1-x0)*Math.min(upto,N-1)/(N-1);
+  const hy = y0-(y0-y1)*pts[Math.min(Math.round(upto),N-1)];
+  X.fillStyle = PAL.red; X.beginPath();
+  X.arc(hx, hy, 15 + Math.sin(p*Math.PI*6)*5, 0, 7); X.fill();
+  X.restore();
+  halftone(0,0,W,H,0.09,7);
+}
+
+function devDiagram(p, L){
+  X.fillStyle = PAL.navy; X.fillRect(0,0,W,H);
+  const kind = L.diagram || 'layers';
+  X.save();
+  X.translate(W/2, H/2); X.scale(1+p*0.075, 1+p*0.075); X.translate(-W/2, -H/2);
+  if (kind === 'xor'){
+    // four points in a cross, then a line that fails to separate them
+    const cx=W/2, cy=H/2, d=300;
+    const P = [[-d,-d,'red'],[d,d,'red'],[-d,d,'cream'],[d,-d,'cream']];
+    P.forEach((q,i)=>{
+      const t = ease(clamp((p - i*0.09)/0.4,0,1)); if (t<=0) return;
+      X.globalAlpha = t;
+      X.fillStyle = q[2]==='red' ? PAL.red : PAL.cream;
+      X.beginPath(); X.arc(cx+q[0], cy+q[1], 58*t, 0, 7); X.fill();
+    });
+    X.globalAlpha = 1;
+    const s = ease(clamp((p-0.55)/0.42,0,1));
+    if (s>0){
+      const ang = -0.6 + s*1.9;                 // sweeps, never separates them
+      X.strokeStyle = PAL.yellow; X.lineWidth = 9; X.setLineDash([26,18]);
+      X.beginPath();
+      X.moveTo(cx - Math.cos(ang)*760, cy - Math.sin(ang)*760);
+      X.lineTo(cx + Math.cos(ang)*760, cy + Math.sin(ang)*760);
+      X.stroke(); X.setLineDash([]);
+    }
+  } else {
+    // stacked layers with connections lighting up left to right
+    const cols = [3,5,5,2], gap = 420, x0 = W/2 - (cols.length-1)*gap/2;
+    const pos = cols.map((n,ci)=>Array.from({length:n},(_,ri)=>[
+      x0+ci*gap, H/2 + (ri-(n-1)/2)*165
+    ]));
+    for (let ci=0; ci<pos.length-1; ci++){
+      const t = ease(clamp((p - ci*0.2)/0.5,0,1)); if (t<=0) continue;
+      X.strokeStyle = `rgba(242,234,216,${0.34*t})`; X.lineWidth = 3.5;
+      pos[ci].forEach(a=>pos[ci+1].forEach(b=>{
+        X.beginPath(); X.moveTo(a[0],a[1]);
+        X.lineTo(a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t); X.stroke();
+      }));
+    }
+    pos.forEach((col,ci)=>col.forEach(q=>{
+      const t = ease(clamp((p - ci*0.12)/0.34,0,1)); if (t<=0) return;
+      X.fillStyle = ci===pos.length-1 ? PAL.red : PAL.cream;
+      X.globalAlpha = t;
+      const br = 32*t + Math.sin(p*Math.PI*5 + ci*1.3)*4;
+      X.beginPath(); X.arc(q[0],q[1],br,0,7); X.fill();
+    }));
+    X.globalAlpha = 1;
+  }
+  X.restore();
+  halftone(0,0,W,H,0.08,8);
+}
+
+const DEV = { photo:devPhoto, annotate:devAnnotate, collage:devCollage, chart:devChart, diagram:devDiagram };
+
+/* ---------- assign real assets per beat ---------- */
+const IMGFOR = {
+  hook:['markI','rosenblatt','minsky'], perceptron:['rosenblatt','markI','diagram'],
+  hype:['markI','rosenblatt','minsky'], minsky:['minsky','markI','rosenblatt'],
+  winter:['minsky','markI','rosenblatt'], backprop:['hinton','diagram','markI'],
+  quiet:['hinton','minsky','markI'], alexnet:['hinton','diagram','markI'],
+  transformer:['hinton','diagram','markI'], end:['rosenblatt','markI','hinton'],
+};
+const PRIMARY = { hook:'markI', perceptron:'rosenblatt', hype:'markI', minsky:'minsky',
+  winter:'minsky', backprop:'hinton', quiet:'hinton', alexnet:'hinton',
+  transformer:'hinton', end:'rosenblatt' };
+
+const LINES = ((window.SCRIPT && window.SCRIPT.lines) || []).map((l,i) => {
+  const T = ((window.TIMINGS && window.TIMINGS.lines) || []).find(t => t.id === l.id) || {};
+  return Object.assign({}, l, {
+    _i: i,
+    start: (T.start_ms || 0)/1000,
+    dur:   (T.dur_ms   || 3000)/1000,
+    img:   PRIMARY[l.beat] || 'rosenblatt',
+    imgs:  IMGFOR[l.beat] || ['markI','rosenblatt','minsky'],
+    diagram: (l.beat === 'minsky' && ['m4','m5','m6'].includes(l.id)) ? 'xor' : 'layers',
+  });
+});
+const TOTAL = LINES.length ? LINES[LINES.length-1].start + LINES[LINES.length-1].dur + 1.2 : 10;
+
+/* ---------- the render ---------- */
+function render(t){
+  X.clearRect(0,0,W,H);
+  X.fillStyle = PAL.ink; X.fillRect(0,0,W,H);
+  let cur = LINES[0], idx = 0;
+  for (let i=0;i<LINES.length;i++){
+    if (t >= LINES[i].start) { cur = LINES[i]; idx = i; }
+  }
+  if (!cur) return;
+  const p = clamp((t - cur.start) / Math.max(cur.dur, 0.4), 0, 1);
+  (DEV[cur.device] || devPhoto)(p, cur);
+
+  // cross-fade the first 0.25s of each beat so cuts are not hard
+  const into = t - cur.start;
+  if (into < 0.25 && idx > 0){
+    const prev = LINES[idx-1];
+    OFF.width = W; OFF.height = H;
+    const realX = X; XREF.ctx = OFFX;
+    swapCtx(OFFX);
+    (DEV[prev.device] || devPhoto)(1, prev);
+    swapCtx(realX);
+    X.save(); X.globalAlpha = 1 - into/0.25;
+    X.drawImage(OFF, 0, 0); X.restore();
+  }
+  // grain over everything
+  const pat = X.createPattern(GRAIN,'repeat');
+  X.save(); X.globalAlpha = 0.5; X.fillStyle = pat; X.fillRect(0,0,W,H); X.restore();
+}
+
+window.TOTAL_SECONDS = TOTAL;
+window.seek = async function(ms){ await window.READY; render(ms/1000); };
+window.READY.then(() => render(0));
+</script>

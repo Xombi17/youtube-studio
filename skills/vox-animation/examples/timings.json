@@ -1,0 +1,58 @@
+{
+  "slug": "senses-v4",
+  "model": "s2.1-pro-free",
+  "reference_id": "YOUR_FISH_AUDIO_VOICE_ID",
+  "gap_ms": 90,
+  "total_ms": 34040,
+  "generated_at": "2026-08-29T15:37:49.194Z",
+  "lines": [
+    {
+      "id": "hook",
+      "start_ms": 0,
+      "dur_ms": 3370,
+      "file": "hook.mp3"
+    },
+    {
+      "id": "eyes",
+      "start_ms": 3460,
+      "dur_ms": 4232,
+      "file": "eyes.mp3"
+    },
+    {
+      "id": "ears",
+      "start_ms": 7782,
+      "dur_ms": 5224,
+      "file": "ears.mp3"
+    },
+    {
+      "id": "hands",
+      "start_ms": 13096,
+      "dur_ms": 5224,
+      "file": "hands.mp3"
+    },
+    {
+      "id": "make",
+      "start_ms": 18410,
+      "dur_ms": 5669,
+      "file": "make.mp3"
+    },
+    {
+      "id": "reach",
+      "start_ms": 24169,
+      "dur_ms": 5198,
+      "file": "reach.mp3"
+    },
+    {
+      "id": "payoff",
+      "start_ms": 29457,
+      "dur_ms": 2508,
+      "file": "payoff.mp3"
+    },
+    {
+      "id": "cta",
+      "start_ms": 32055,
+      "dur_ms": 1985,
+      "file": "cta.mp3"
+    }
+  ]
+}
